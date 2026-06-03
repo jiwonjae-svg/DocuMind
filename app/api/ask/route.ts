@@ -74,60 +74,53 @@ export async function POST(request: NextRequest) {
       question,
     });
 
-    const persisted = await prisma.$transaction(async (transaction) => {
-      const questionRecord = await transaction.question.create({
-        data: {
-          documentId: result.primaryDocumentId,
-          ownerId: session.user.id,
-          text: question,
-        },
-        select: {
-          id: true,
-        },
-      });
-      const answerRecord = await transaction.answer.create({
-        data: {
-          documentId: result.primaryDocumentId,
-          ownerId: session.user.id,
-          questionId: questionRecord.id,
-          text: result.answer,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      await transaction.auditLog.create({
-        data: {
-          action: "question_ask",
-          actorId: session.user.id,
-          ipAddress: readIpAddress(request),
-          metadata: {
-            answerId: answerRecord.id,
-            citationCount: result.citations.length,
-            insufficientInformation: result.insufficientInformation,
-            matchedSnippetCount: result.matchedSnippets.length,
-            model: result.model,
-          },
-          resourceId: questionRecord.id,
-          resourceType: "Question",
-          userAgent: readUserAgent(request),
-        },
-      });
-
-      return {
-        answerId: answerRecord.id,
+    const questionRecord = await prisma.question.create({
+      data: {
+        documentId: result.primaryDocumentId,
+        ownerId: session.user.id,
+        text: question,
+      },
+      select: {
+        id: true,
+      },
+    });
+    const answerRecord = await prisma.answer.create({
+      data: {
+        documentId: result.primaryDocumentId,
+        ownerId: session.user.id,
         questionId: questionRecord.id,
-      };
+        text: result.answer,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        action: "question_ask",
+        actorId: session.user.id,
+        ipAddress: readIpAddress(request),
+        metadata: {
+          answerId: answerRecord.id,
+          citationCount: result.citations.length,
+          insufficientInformation: result.insufficientInformation,
+          matchedSnippetCount: result.matchedSnippets.length,
+          model: result.model,
+        },
+        resourceId: questionRecord.id,
+        resourceType: "Question",
+        userAgent: readUserAgent(request),
+      },
     });
 
     return NextResponse.json({
       answer: result.answer,
-      answerId: persisted.answerId,
+      answerId: answerRecord.id,
       citations: result.citations,
       insufficientInformation: result.insufficientInformation,
       matchedSnippets: result.matchedSnippets,
-      questionId: persisted.questionId,
+      questionId: questionRecord.id,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Ask request failed.";

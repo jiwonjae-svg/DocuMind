@@ -4,6 +4,8 @@ DocuMind is an agent-ready internal knowledge search system for Japanese/Korean 
 
 This repository currently contains the MVP application scaffold with authentication, document upload and processing, OpenAI embeddings, owner-scoped semantic search, and grounded question answering.
 
+Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
+
 ## English Summary
 
 DocuMind lets authenticated users upload internal `.txt`, `.md`, and `.pdf` files, process them into searchable chunks, store embeddings in PostgreSQL with pgvector, and ask grounded questions with source citations. It is designed as a clean full-stack MVP that demonstrates secure AI integration, document processing, access control, testing, Docker-backed local infrastructure, and Japan-ready product thinking.
