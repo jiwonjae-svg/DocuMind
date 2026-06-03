@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon, IconTile, ui } from "@/components/ui";
 import { FormEvent, useState } from "react";
 
 type Citation = {
@@ -87,11 +88,11 @@ export function AskForm() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className={`${ui.card} p-6`}>
         <form onSubmit={handleSubmit}>
           <label
             htmlFor="question"
-            className="text-sm font-semibold text-slate-950"
+            className={ui.label}
           >
             Question
           </label>
@@ -101,7 +102,7 @@ export function AskForm() {
             onChange={(event) => setQuestion(event.target.value)}
             maxLength={1000}
             rows={7}
-            className="mt-2 block w-full resize-y rounded-md border border-slate-300 bg-white px-3 py-2 text-sm leading-6 text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-100"
+            className={`mt-2 block min-h-44 resize-y leading-6 ${ui.input}`}
             placeholder="What does the onboarding guide say about approval steps?"
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -109,32 +110,33 @@ export function AskForm() {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className={ui.primaryButton}
             >
+              <Icon name="question" className="h-4 w-4" />
               {isPending ? "Asking..." : "Ask"}
             </button>
           </div>
         </form>
 
         {error ? (
-          <div className="mt-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
           </div>
         ) : null}
 
         {result ? (
-          <section className="mt-6 border-t border-slate-200 pt-5">
+          <section className={`${ui.subtleCard} mt-6 p-5`}>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base font-semibold text-slate-950">
+              <h2 className="text-base font-semibold text-[#0b1535]">
                 Answer
               </h2>
               {result.insufficientInformation ? (
-                <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
+                <span className="rounded-md bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
                   Insufficient information
                 </span>
               ) : null}
             </div>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+            <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-700">
               {result.answer}
             </p>
           </section>
@@ -142,19 +144,27 @@ export function AskForm() {
       </div>
 
       <aside className="grid content-start gap-4">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-950">Citations</h2>
+        <section className={`${ui.card} p-5`}>
+          <div className="flex items-center gap-3">
+            <IconTile accent="blue" icon="document" className="h-10 w-10" />
+            <div>
+              <p className={ui.eyebrow}>Sources</p>
+              <h2 className="mt-1 text-base font-semibold text-[#0b1535]">
+                Citations
+              </h2>
+            </div>
+          </div>
           {result?.citations.length ? (
             <div className="mt-4 grid gap-3">
               {result.citations.map((citation, index) => (
                 <div
                   key={`${citation.documentTitle}-${citation.chunkIndex}-${index}`}
-                  className="rounded-md border border-slate-200 p-3"
+                  className="rounded-xl border border-slate-200 bg-white p-4"
                 >
-                  <p className="text-sm font-semibold text-slate-950">
+                  <p className="text-sm font-semibold text-[#0b1535]">
                     {citation.documentTitle}
                   </p>
-                  <p className="mt-1 text-xs font-medium text-cyan-700">
+                  <p className="mt-1 text-xs font-semibold text-blue-700">
                     Chunk {citation.chunkIndex}
                   </p>
                   <p className="mt-2 text-xs leading-5 text-slate-600">
@@ -164,31 +174,39 @@ export function AskForm() {
               ))}
             </div>
           ) : (
-            <p className="mt-3 text-sm text-slate-500">No citations yet.</p>
+            <p className="mt-4 text-sm leading-6 text-slate-500">
+              No citations yet.
+            </p>
           )}
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-950">
-            Matched snippets
-          </h2>
+        <section className={`${ui.card} p-5`}>
+          <div className="flex items-center gap-3">
+            <IconTile accent="emerald" icon="search" className="h-10 w-10" />
+            <div>
+              <p className={ui.eyebrow}>Retrieval</p>
+              <h2 className="mt-1 text-base font-semibold text-[#0b1535]">
+                Matched snippets
+              </h2>
+            </div>
+          </div>
           {result?.matchedSnippets.length ? (
             <div className="mt-4 grid gap-3">
               {result.matchedSnippets.map((snippet, index) => (
                 <div
                   key={`${snippet.documentTitle}-${snippet.chunkIndex}-${index}`}
-                  className="rounded-md border border-slate-200 p-3"
+                  className="rounded-xl border border-slate-200 bg-white p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-950">
+                      <p className="text-sm font-semibold text-[#0b1535]">
                         {snippet.documentTitle}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-cyan-700">
+                      <p className="mt-1 text-xs font-semibold text-blue-700">
                         Chunk {snippet.chunkIndex}
                       </p>
                     </div>
-                    <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                    <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
                       {formatScore(snippet.similarityScore)}
                     </span>
                   </div>
@@ -199,7 +217,9 @@ export function AskForm() {
               ))}
             </div>
           ) : (
-            <p className="mt-3 text-sm text-slate-500">No matches yet.</p>
+            <p className="mt-4 text-sm leading-6 text-slate-500">
+              No matches yet.
+            </p>
           )}
         </section>
       </aside>

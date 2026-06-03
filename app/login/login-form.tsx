@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon, ui } from "@/components/ui";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -40,11 +41,11 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <form onSubmit={handleSubmit} className="mt-7 space-y-5">
       <div>
         <label
           htmlFor="email"
-          className="text-sm font-medium text-slate-800"
+          className={ui.label}
         >
           Email
         </label>
@@ -55,13 +56,13 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           autoComplete="email"
           defaultValue="demo@documind.local"
           required
-          className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-700 focus:ring-2 focus:ring-cyan-100"
+          className={`mt-2 ${ui.input}`}
         />
       </div>
       <div>
         <label
           htmlFor="password"
-          className="text-sm font-medium text-slate-800"
+          className={ui.label}
         >
           Password
         </label>
@@ -72,19 +73,20 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           autoComplete="current-password"
           defaultValue="DocuMindDemo123!"
           required
-          className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-700 focus:ring-2 focus:ring-cyan-100"
+          className={`mt-2 ${ui.input}`}
         />
       </div>
       {error ? (
-        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {error}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className={`${ui.primaryButton} w-full`}
       >
+        <Icon name="lock" className="h-4 w-4" />
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
     </form>

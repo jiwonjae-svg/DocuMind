@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon, ui } from "@/components/ui";
 import { signOut } from "next-auth/react";
 
 export function LogoutButton() {
@@ -7,8 +8,9 @@ export function LogoutButton() {
     <button
       type="button"
       onClick={() => signOut({ callbackUrl: "/" })}
-      className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-950"
+      className={`${ui.secondaryButton} h-10 px-3`}
     >
+      <Icon name="lock" className="h-4 w-4 text-blue-700" />
       Sign out
     </button>
   );

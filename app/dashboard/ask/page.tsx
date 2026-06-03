@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
+import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AskForm } from "./ask-form";
@@ -14,42 +15,54 @@ export default async function AskPage() {
   const displayName = session.user.name ?? session.user.email ?? "User";
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="text-lg font-semibold text-slate-950">
-            DocuMind
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="max-w-40 truncate text-sm text-slate-600 sm:max-w-none">
-              {displayName}
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+    <main className={ui.page}>
+      <AppHeader userName={displayName}>
+        <LogoutButton />
+      </AppHeader>
 
-      <section className="mx-auto max-w-6xl px-5 py-10 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+      <section className={ui.gradientBand}>
+        <div className={`${ui.container} py-10 sm:py-14`}>
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href="/dashboard"
-              className="text-sm font-medium text-cyan-700 hover:text-cyan-900"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-900"
             >
+              <Icon name="arrow" className="h-4 w-4 rotate-180" />
               Back to dashboard
             </Link>
-            <h1 className="mt-3 text-3xl font-semibold text-slate-950">
-              Ask
-            </h1>
+            <Link href="/dashboard/documents" className={ui.secondaryButton}>
+              <Icon name="document" className="h-4 w-4 text-blue-700" />
+              Documents
+            </Link>
           </div>
-          <Link
-            href="/dashboard/documents"
-            className="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-white"
-          >
-            Documents
-          </Link>
-        </div>
 
+          <div className={`${ui.card} grid gap-8 p-7 lg:grid-cols-[1fr_360px]`}>
+            <div>
+              <p className={ui.eyebrow}>Grounded QA</p>
+              <h1 className="mt-4 text-4xl font-semibold tracking-normal text-[#080f2f]">
+                Ask with source citations
+              </h1>
+              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-700">
+                Questions are embedded on the server, matched against your own
+                document chunks, and answered only from retrieved context.
+              </p>
+            </div>
+
+            <div className={`${ui.subtleCard} p-5`}>
+              <IconTile accent="emerald" icon="shield" />
+              <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
+                Retrieval guardrail
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Unsupported questions return an insufficient-information answer
+                instead of invented facts.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${ui.container} py-10`}>
         <AskForm />
       </section>
     </main>
