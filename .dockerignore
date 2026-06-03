@@ -1,0 +1,13 @@
+.env
+.env.*
+.git
+.github
+.next
+.next-dev.err.log
+.next-dev.out.log
+.next-dev.pid
+.next-dev.port
+Dockerfile
+node_modules
+npm-debug.log
+uploads

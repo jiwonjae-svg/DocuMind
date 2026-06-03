@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  documents Document[]      @relation("DocumentOwner")
+  chunks    DocumentChunk[] @relation("DocumentChunkOwner")
+  questions Question[]      @relation("QuestionOwner")
+  answers   Answer[]        @relation("AnswerOwner")
+  auditLogs AuditLog[]      @relation("AuditLogActor")
+
+  @@map("users")
+}
+
+model Document {
+  id                 String         @id @default(cuid())
+  ownerId            String
+  title              String
+  originalName       String         @default("")
+  storedName         String         @default("")
+  storagePath        String         @default("")
+  mimeType           String         @default("application/octet-stream")
+  sizeBytes          Int            @default(0)
+  sourceType         String         @default("upload")
+  status             DocumentStatus @default(UPLOADED)
+  processingError    String?
+  extractedCharCount Int      @default(0)
+  locale             String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  owner     User            @relation("DocumentOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  chunks    DocumentChunk[]
+  questions Question[]
+  answers   Answer[]
+
+  @@index([ownerId])
+  @@map("documents")
+}
+
+model DocumentChunk {
+  id             String                    @id @default(cuid())
+  documentId     String
+  ownerId        String
+  chunkIndex     Int
+  content        String                    @db.Text
+  tokenCount     Int?
+  metadata       Json?
+  embedding      Unsupported("vector(1536)")?
+  embeddingModel String?
+  embeddedAt     DateTime?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  owner    User     @relation("DocumentChunkOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, chunkIndex])
+  @@index([ownerId])
+  @@index([documentId])
+  @@map("document_chunks")
+}
+
+model Question {
+  id         String   @id @default(cuid())
+  ownerId    String
+  documentId String?
+  text       String   @db.Text
+  locale     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  owner    User      @relation("QuestionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  answers  Answer[]
+
+  @@index([ownerId])
+  @@index([documentId])
+  @@map("questions")
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  ownerId    String
+  questionId String
+  documentId String?
+  text       String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  owner    User      @relation("AnswerOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  question Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([ownerId])
+  @@index([questionId])
+  @@index([documentId])
+  @@map("answers")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorId      String?
+  action       String
+  resourceType String
+  resourceId   String?
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  actor User? @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([resourceType, resourceId])
+  @@map("audit_logs")
+}
