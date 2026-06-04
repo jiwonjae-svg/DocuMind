@@ -75,3 +75,13 @@ Before considering work complete:
 
 If a command is unavailable or cannot be run, document the reason in the final response.
 
+
+## Commit/Push Automation
+
+- After implementing user-requested changes in this repository and passing verification, automatically commit and push unless the user explicitly asks not to.
+- Use `scripts/codex-commit-push.ps1` for automated commits. Provide an explicit commit message and explicit file list whenever possible.
+- Do not stage unrelated files. Never stage `.env`, `.env*.local`, `.vercel`, `.next`, `node_modules`, `repomix-output.xml`, build outputs, or ignored/generated output.
+- Prefer a `codex/` branch for new work. If the user is already working on `main` and explicitly wants direct deployment or push, use `-AllowMain`.
+- Use `-AllowAssets` only when the requested change intentionally adds or updates binary assets such as screenshots.
+- If lint, test, or build checks fail, fix the failure before committing. If the failure is unrelated and cannot be fixed safely, report it and do not hide it.
+- GitHub CLI is available as `gh`; if `gh auth status` reports logged out, run `gh auth login` before GitHub API, issue, PR, or release operations.
