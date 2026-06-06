@@ -126,8 +126,10 @@ foreach ($file in $stagedFiles) {
   }
 }
 
-$assetAdditions = Get-GitLines -Arguments @("diff", "--cached", "--name-only", "--diff-filter=A") |
-  Where-Object { (Normalize-RepoPath $_) -match "\.(png|jpe?g|gif|webp|svg|ico|mp4|mov|zip|pdf)$" }
+$assetAdditions = @(
+  Get-GitLines -Arguments @("diff", "--cached", "--name-only", "--diff-filter=A") |
+    Where-Object { (Normalize-RepoPath $_) -match "\.(png|jpe?g|gif|webp|svg|ico|mp4|mov|zip|pdf)$" }
+)
 
 if ($assetAdditions.Count -gt 0 -and -not $AllowAssets) {
   throw "Asset additions require -AllowAssets: $($assetAdditions -join ', ')"

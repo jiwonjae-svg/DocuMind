@@ -24,61 +24,108 @@ const previewResults = [
 
 const implementedFeatures = [
   {
-    title: "Secure document ingestion",
-    body: "Authenticated users can upload .txt, .md, and .pdf files with server-side file validation and owner-scoped metadata.",
-    icon: "upload",
+    title: "Protected dashboard routes",
+    body: "Server-side session checks redirect unauthenticated visitors before protected dashboard content is rendered.",
+    icon: "lock",
     accent: "blue",
   },
   {
-    title: "Document processing pipeline",
-    body: "Uploaded files are parsed, chunked, stored locally for development, and tracked with UPLOADED, PROCESSING, READY, or FAILED status.",
-    icon: "document",
+    title: "Demo authentication",
+    body: "Auth.js credentials authentication provides a prefilled reviewer account while keeping session handling on the server.",
+    icon: "team",
     accent: "emerald",
   },
   {
-    title: "pgvector semantic search",
-    body: "Document chunks store OpenAI embeddings in PostgreSQL with pgvector and are searched only inside the current user's documents.",
-    icon: "search",
+    title: "Document management",
+    body: "Authenticated users can upload, process, list, and delete validated .txt, .md, and .pdf documents.",
+    icon: "document",
     accent: "violet",
+  },
+  {
+    title: "Owner-scoped data access",
+    body: "Document reads, deletes, chunks, retrieval, and tool calls filter against the authenticated user's owner ID.",
+    icon: "shield",
+    accent: "blue",
+  },
+  {
+    title: "Semantic search",
+    body: "OpenAI embeddings and PostgreSQL pgvector rank relevant chunks only inside the current user's ready documents.",
+    icon: "search",
+    accent: "emerald",
   },
   {
     title: "Grounded answers with citations",
-    body: "Questions retrieve matching chunks, build a source-bounded prompt, and return answers with citations, snippets, and matched scores.",
+    body: "Retrieved chunks bound the answer prompt and the UI returns source titles, chunk indexes, snippets, and scores.",
     icon: "question",
+    accent: "violet",
+  },
+  {
+    title: "Audit logging",
+    body: "Login, upload, processing, delete, ask, and agent-tool actions create server-side audit records.",
+    icon: "check",
     accent: "blue",
   },
   {
-    title: "Agent-ready tool endpoints",
-    body: "Scoped /api/tools endpoints expose search, ask-with-citations, and summarize-document without bypassing auth or ownership checks.",
+    title: "Agent-ready API endpoint structure",
+    body: "Authenticated tool routes expose search, cited answers, and document summaries without bypassing application rules.",
     icon: "network",
     accent: "emerald",
-  },
-  {
-    title: "Auditability and access control",
-    body: "Upload, delete, ask, processing, and agent tool actions write audit records while protected routes enforce session checks.",
-    icon: "shield",
-    accent: "violet",
   },
 ] as const;
 
 const architectureFlow = [
-  "Upload",
-  "Parse",
-  "Chunk",
-  "Embed",
-  "Store",
-  "Search",
-  "Answer",
-  "Cite",
-  "Audit",
+  {
+    title: "Upload",
+    body: "Validate type, size, and file bytes before saving metadata.",
+  },
+  {
+    title: "Parse",
+    body: "Extract text server-side from TXT, Markdown, or PDF files.",
+  },
+  {
+    title: "Chunk",
+    body: "Split normalized text into bounded, indexed retrieval units.",
+  },
+  {
+    title: "Embed",
+    body: "Generate missing chunk vectors through the server-side OpenAI client.",
+  },
+  {
+    title: "Store",
+    body: "Persist documents, chunks, status, and vectors in PostgreSQL.",
+  },
+  {
+    title: "Search",
+    body: "Rank ready chunks with pgvector under the current owner ID.",
+  },
+  {
+    title: "Answer",
+    body: "Build a prompt constrained to the retrieved document context.",
+  },
+  {
+    title: "Cite",
+    body: "Return supporting titles, chunk indexes, and matched snippets.",
+  },
+  {
+    title: "Audit",
+    body: "Record security-relevant user and agent-tool actions.",
+  },
+] as const;
+
+const plannedFeatures = [
+  "Enterprise SSO and team/workspace RBAC",
+  "Durable object storage and background processing",
+  "Admin UI for audit-log review",
+  "Full EN/KO/JA route-level localization",
+  "MCP wrapper around the existing tool endpoints",
 ] as const;
 
 const demoSteps = [
   "Sign in with the prefilled demo account",
-  "Review sample documents, or upload a short .txt/.md file if the demo database is empty",
+  "Review sample documents; if none are present, upload a short .txt or .md file",
   "Ask a question",
   "Check citations and matched snippets",
-  "Review audit logs or access behavior",
+  "Review owner-scoped access behavior",
 ] as const;
 
 export default function Home() {
@@ -98,7 +145,7 @@ export default function Home() {
       <section className={ui.gradientBand}>
         <div className="absolute bottom-8 left-0 hidden h-36 w-40 bg-[radial-gradient(#c7d9ef_1.1px,transparent_1.1px)] [background-size:18px_18px] md:block" />
         <div
-          className={`${ui.container} grid gap-12 py-14 sm:py-18 lg:grid-cols-[0.95fr_1.05fr] lg:py-20`}
+          className={`${ui.container} grid min-w-0 grid-cols-1 gap-12 py-14 sm:py-18 lg:grid-cols-[0.95fr_1.05fr] lg:py-20`}
         >
           <div className="flex flex-col justify-center">
             <p className={ui.eyebrow}>Agent-ready knowledge search</p>
@@ -113,13 +160,19 @@ export default function Home() {
             </p>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-slate-700">
               日本・韓国チーム向けの社内ナレッジ検索システムです。認証、
-              文書処理、意味検索、引用付き回答を安全に扱うための
+              文書処理、セマンティック検索、引用付き回答を安全に扱うための
               バックエンド重視のMVPです。
             </p>
-            <p className="mt-5 max-w-2xl rounded-xl border border-blue-100 bg-white/80 px-4 py-3 text-sm font-semibold leading-6 text-[#10204b] shadow-sm">
-              Built with Next.js, TypeScript, PostgreSQL, Prisma, pgvector,
-              Auth.js, OpenAI API, and Vercel.
-            </p>
+            <div className="mt-5 max-w-2xl border-l-4 border-blue-600 bg-white/80 px-5 py-4 shadow-sm">
+              <p className="text-sm font-semibold leading-6 text-[#10204b]">
+                Built with Next.js, TypeScript, PostgreSQL, Prisma, pgvector,
+                Auth.js, OpenAI API, and Vercel.
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Next.js / TypeScript / PostgreSQL / pgvector / OpenAI API
+                を使用。
+              </p>
+            </div>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
               <Link
                 href="/dashboard"
@@ -137,7 +190,7 @@ export default function Home() {
             </div>
           </div>
 
-          <aside className={`${ui.card} p-7`}>
+          <aside className={`${ui.card} min-w-0 p-7`}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">
@@ -204,7 +257,7 @@ export default function Home() {
             search, grounded answers, and auditable tool APIs.
           </p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {implementedFeatures.map((feature) => (
             <article key={feature.title} className={`${ui.subtleCard} p-6`}>
               <IconTile accent={feature.accent} icon={feature.icon} />
@@ -220,44 +273,70 @@ export default function Home() {
       </section>
 
       <section className="border-y border-slate-200/80 bg-white/70">
-        <div className={`${ui.container} py-12 sm:py-14`}>
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-            <div>
-              <p className={ui.eyebrow}>Architecture</p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
-                Document-to-answer flow
-              </h2>
-              <p className="mt-4 text-sm leading-6 text-slate-600">
-                DocuMind keeps the critical authorization boundary in the
-                backend before documents are embedded, searched, summarized, or
-                answered.
-              </p>
-            </div>
-            <div className={`${ui.card} p-6`}>
-              <div className="flex flex-wrap items-center gap-3">
-                {architectureFlow.map((stage, index) => (
-                  <div key={stage} className="flex items-center gap-3">
-                    <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[#10204b] shadow-sm">
-                      {stage}
-                    </span>
-                    {index < architectureFlow.length - 1 ? (
-                      <span className="text-sm font-semibold text-blue-700">
-                        →
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-              <p className="mt-5 text-sm leading-6 text-slate-600">
-                Upload → Parse → Chunk → Embed → Store → Search → Answer → Cite
-                → Audit
-              </p>
-            </div>
+        <div
+          className={`${ui.container} grid gap-8 py-10 lg:grid-cols-[0.65fr_1.35fr] lg:items-start`}
+        >
+          <div>
+            <p className={ui.eyebrow}>Planned / Future improvements</p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-normal text-[#080f2f]">
+              Intentionally outside the current MVP
+            </h2>
           </div>
+          <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+            {plannedFeatures.map((feature) => (
+              <li
+                key={feature}
+                className="flex items-start gap-3 border-b border-slate-200 pb-3 text-sm leading-6 text-slate-600"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-2 h-2 w-2 shrink-0 rounded-full bg-slate-400"
+                />
+                {feature}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      <section className={`${ui.container} py-12 sm:py-14`}>
+      <section>
+        <div className={`${ui.container} py-12 sm:py-14`}>
+          <div className="max-w-3xl">
+            <p className={ui.eyebrow}>Architecture</p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
+              Upload → Parse → Chunk → Embed → Store → Search → Answer → Cite →
+              Audit
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-slate-600">
+              Authorization stays in the backend before documents are
+              processed, embedded, searched, summarized, or used for answers.
+            </p>
+          </div>
+          <ol className="mt-8 grid border-l border-t border-slate-200 bg-white sm:grid-cols-2 lg:grid-cols-3">
+            {architectureFlow.map((stage, index) => (
+              <li
+                key={stage.title}
+                className="min-h-40 border-b border-r border-slate-200 p-6"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-xs font-semibold text-blue-700">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="text-base font-semibold text-[#0b1535]">
+                    {stage.title}
+                  </h3>
+                </div>
+                <p className="mt-4 text-sm leading-6 text-slate-600">
+                  {stage.body}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="border-t border-slate-200/80 bg-white/70">
+        <div className={`${ui.container} py-12 sm:py-14`}>
         <div className="grid gap-6 lg:grid-cols-2">
           <article className={`${ui.card} p-7`}>
             <IconTile accent="emerald" icon="network" />
@@ -266,16 +345,16 @@ export default function Home() {
               A controlled knowledge layer for humans and agents
             </h2>
             <p className="mt-4 text-sm leading-6 text-slate-600">
-              Agent-ready matters because future assistants need reliable tools,
-              not unrestricted database access. DocuMind is a controlled
-              knowledge layer for both human users and future AI agents: the
-              same authentication, owner-scoped retrieval, citations, and audit
-              logging apply to UI actions and API tool calls.
+              DocuMind is not just a chat UI. It is a controlled knowledge layer
+              for human users and future AI agents. Agents should reach
+              internal knowledge through authenticated, owner-scoped, auditable
+              API boundaries instead of bypassing application logic or reading
+              the database directly.
             </p>
             <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
-              DocuMindは、人間のユーザーと将来のAIエージェントが同じ認証、
-              所有者スコープ、引用、監査ログの下で社内文書を扱うための、
-              制御されたナレッジレイヤーです。
+              DocuMindは単なるチャットUIではありません。人と将来のAI
+              エージェントが、認証・所有者スコープ・監査可能なAPI境界を
+              通じて社内ナレッジへアクセスするための制御レイヤーです。
             </p>
           </article>
 
@@ -296,11 +375,19 @@ export default function Home() {
               ))}
             </ol>
             <p className="mt-5 text-sm leading-6 text-slate-500">
-              Audit logs are stored server-side; from the UI, reviewers can
-              verify protected access behavior by signing out and revisiting
-              dashboard routes.
+              Audit records are stored server-side. The current MVP does not
+              expose an admin audit viewer, so reviewers can verify protected
+              access by signing out and revisiting dashboard routes.
             </p>
+            <Link
+              href="/login?callbackUrl=/dashboard/documents"
+              className={`${ui.primaryButton} mt-6 w-full sm:w-auto`}
+            >
+              <Icon name="compass" className="h-4 w-4" />
+              Start demo
+            </Link>
           </article>
+        </div>
         </div>
       </section>
     </main>
