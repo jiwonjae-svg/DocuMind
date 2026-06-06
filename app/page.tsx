@@ -160,7 +160,7 @@ export default function Home() {
             </p>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-slate-700">
               日本・韓国チーム向けの社内ナレッジ検索システムです。認証、
-              文書処理、セマンティック検索、引用付き回答を安全に扱うための
+              文書処理、セマンティック検索、出典付き回答を安全に扱うための
               バックエンド重視のMVPです。
             </p>
             <div className="mt-5 max-w-2xl border-l-4 border-blue-600 bg-white/80 px-5 py-4 shadow-sm">
@@ -183,7 +183,12 @@ export default function Home() {
                 </span>
                 Open dashboard
               </Link>
-              <a href="#implemented" className={`${ui.secondaryButton} w-full sm:w-auto`}>
+              <a
+                href="https://github.com/jiwonjae-svg/DocuMind#readme"
+                target="_blank"
+                rel="noreferrer"
+                className={`${ui.secondaryButton} w-full sm:w-auto`}
+              >
                 <Icon name="view" className="h-5 w-5 text-blue-700" />
                 View implementation
               </a>
@@ -247,7 +252,7 @@ export default function Home() {
 
       <section id="implemented" className={`${ui.container} py-12 sm:py-14`}>
         <div className="mb-7 max-w-3xl">
-          <p className={ui.eyebrow}>Implemented features</p>
+          <p className={ui.eyebrow}>Implemented / Available now</p>
           <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
             Concrete backend and full-stack evidence
           </h2>
@@ -277,10 +282,13 @@ export default function Home() {
           className={`${ui.container} grid gap-8 py-10 lg:grid-cols-[0.65fr_1.35fr] lg:items-start`}
         >
           <div>
-            <p className={ui.eyebrow}>Planned / Future improvements</p>
+            <p className={ui.eyebrow}>Future / Not implemented yet</p>
             <h2 className="mt-4 text-2xl font-semibold tracking-normal text-[#080f2f]">
               Intentionally outside the current MVP
             </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              These items are planned and are not part of the current demo.
+            </p>
           </div>
           <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
             {plannedFeatures.map((feature) => (
@@ -364,7 +372,7 @@ export default function Home() {
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
               What reviewers should test
             </h2>
-            <ol className="mt-5 grid gap-3">
+            <ol className="mt-5 grid list-none gap-3">
               {demoSteps.map((step, index) => (
                 <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">

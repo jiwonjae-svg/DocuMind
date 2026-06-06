@@ -26,7 +26,7 @@ DocuMind is a secure internal knowledge search MVP for Japanese and Korean teams
 
 Japanese:
 
-DocuMind は、日本・韓国チーム向けの安全な社内ナレッジ検索 MVP です。認証、文書アップロード、文書処理、PostgreSQL/Prisma、pgvector によるセマンティック検索、OpenAI を使った引用付き回答、監査ログ、Docker、CI、エージェント向け API を一つの実用的なプロダクトとしてまとめています。社内文書から根拠のある回答を返し、API キーやアクセス権限を安全に扱うことを重視しています。
+DocuMind は、日本・韓国チーム向けの安全な社内ナレッジ検索 MVP です。認証、文書アップロード、文書処理、PostgreSQL/Prisma、pgvector によるセマンティック検索、OpenAI を使った出典付き回答、監査ログ、Docker、CI、エージェント向け API を一つの実用的なプロダクトとしてまとめています。社内文書から根拠のある回答を返し、API キーやアクセス権限を安全に扱うことを重視しています。
 
 ## Why This Matters In Agentic Workflows
 
