@@ -4,10 +4,8 @@ import {
   createGroundedAnswer,
   INSUFFICIENT_INFORMATION_ANSWER,
 } from "@/lib/ai/answers";
-import {
-  normalizeSearchQuery,
-  retrieveRelevantDocumentChunks,
-} from "@/lib/search/semantic";
+import { retrieveRelevantDocumentChunks } from "@/lib/search/semantic";
+import { normalizeSearchQuery } from "@/lib/search/validation";
 
 const DEFAULT_ASK_RETRIEVAL_LIMIT = 5;
 

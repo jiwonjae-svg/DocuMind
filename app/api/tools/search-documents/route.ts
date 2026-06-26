@@ -1,10 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import {
-  normalizeSearchLimit,
-  normalizeSearchQuery,
-  searchDocumentChunks,
-} from "@/lib/search/semantic";
+import { searchDocumentChunks } from "@/lib/search/semantic";
+import { normalizeSearchLimit, normalizeSearchQuery } from "@/lib/search/validation";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
 

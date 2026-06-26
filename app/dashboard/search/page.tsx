@@ -3,13 +3,13 @@ import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AskForm } from "./ask-form";
+import { SearchForm } from "./search-form";
 
-export default async function AskPage() {
+export default async function SearchPage() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect("/login?callbackUrl=/dashboard/ask");
+    redirect("/login?callbackUrl=/dashboard/search");
   }
 
   const displayName = session.user.name ?? session.user.email ?? "User";
@@ -35,9 +35,9 @@ export default async function AskPage() {
                 <Icon name="document" className="h-4 w-4 text-blue-700" />
                 Documents
               </Link>
-              <Link href="/dashboard/search" className={ui.secondaryButton}>
-                <Icon name="search" className="h-4 w-4 text-blue-700" />
-                Search
+              <Link href="/dashboard/ask" className={ui.secondaryButton}>
+                <Icon name="question" className="h-4 w-4 text-blue-700" />
+                Ask questions
               </Link>
               <Link href="/dashboard/audit-logs" className={ui.secondaryButton}>
                 <Icon name="shield" className="h-4 w-4 text-blue-700" />
@@ -48,24 +48,25 @@ export default async function AskPage() {
 
           <div className={`${ui.card} grid gap-8 p-7 lg:grid-cols-[1fr_360px]`}>
             <div>
-              <p className={ui.eyebrow}>Grounded QA</p>
+              <p className={ui.eyebrow}>Semantic search</p>
               <h1 className="mt-4 text-4xl font-semibold tracking-normal text-[#080f2f]">
-                Ask with source citations
+                Search your ready document chunks
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-700">
-                Questions are embedded on the server, matched against your own
-                document chunks, and answered only from retrieved context.
+                Enter a natural-language query to retrieve the most relevant
+                chunks from your own READY documents. OpenAI calls stay inside
+                the server route.
               </p>
             </div>
 
             <div className={`${ui.subtleCard} p-5`}>
-              <IconTile accent="emerald" icon="shield" />
+              <IconTile accent="emerald" icon="search" />
               <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
-                Retrieval guardrail
+                Retrieval preview
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Unsupported questions return an insufficient-information answer
-                instead of invented facts.
+                Results include document title, chunk index, snippet, and a
+                similarity score for fast reviewer validation.
               </p>
             </div>
           </div>
@@ -73,7 +74,7 @@ export default async function AskPage() {
       </section>
 
       <section className={`${ui.container} py-10`}>
-        <AskForm />
+        <SearchForm />
       </section>
     </main>
   );

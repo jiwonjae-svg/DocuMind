@@ -4,11 +4,8 @@ import { Prisma } from "@prisma/client";
 import { createEmbedding, toPgVector } from "@/lib/ai/embeddings";
 import { embedMissingDocumentChunks } from "@/lib/documents/embeddings";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_SEARCH_LIMIT } from "@/lib/search/validation";
 import { createSnippet } from "@/lib/text/snippet";
-
-const DEFAULT_SEARCH_LIMIT = 5;
-const MAX_SEARCH_LIMIT = 10;
-const MAX_QUERY_LENGTH = 1000;
 
 type SearchRow = {
   chunkId: string;
@@ -33,34 +30,6 @@ export type PublicSemanticSearchResult = Pick<
   SemanticSearchResult,
   "chunkIndex" | "documentTitle" | "similarityScore" | "snippet"
 >;
-
-export function normalizeSearchQuery(query: unknown) {
-  if (typeof query !== "string") {
-    return null;
-  }
-
-  const normalizedQuery = query.replace(/\s+/g, " ").trim();
-
-  if (!normalizedQuery || normalizedQuery.length > MAX_QUERY_LENGTH) {
-    return null;
-  }
-
-  return normalizedQuery;
-}
-
-export function normalizeSearchLimit(limit: unknown) {
-  if (limit === undefined || limit === null) {
-    return DEFAULT_SEARCH_LIMIT;
-  }
-
-  const parsedLimit = Number(limit);
-
-  if (!Number.isInteger(parsedLimit)) {
-    return DEFAULT_SEARCH_LIMIT;
-  }
-
-  return Math.min(Math.max(parsedLimit, 1), MAX_SEARCH_LIMIT);
-}
 
 export async function retrieveRelevantDocumentChunks({
   limit = DEFAULT_SEARCH_LIMIT,

@@ -119,6 +119,10 @@ export default async function DocumentsPage({
               Back to dashboard
             </Link>
             <div className="flex flex-col gap-3 sm:flex-row">
+              <Link href="/dashboard/search" className={ui.secondaryButton}>
+                <Icon name="search" className="h-4 w-4 text-blue-700" />
+                Search
+              </Link>
               <Link href="/dashboard/ask" className={ui.secondaryButton}>
                 <Icon name="question" className="h-4 w-4 text-blue-700" />
                 Ask questions

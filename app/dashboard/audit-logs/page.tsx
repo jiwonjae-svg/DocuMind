@@ -11,6 +11,7 @@ const auditActionLabels: Record<string, string> = {
   agent_tool_search_documents: "Agent document search",
   agent_tool_summarize_document: "Agent document summary",
   demo_user_seeded: "Demo user seeded",
+  document_search: "Document search",
   document_delete: "Document deleted",
   document_process_failed: "Document processing failed",
   document_process_ready: "Document processing ready",
@@ -113,6 +114,10 @@ export default async function AuditLogsPage() {
               <Link href="/dashboard/documents" className={ui.secondaryButton}>
                 <Icon name="document" className="h-4 w-4 text-blue-700" />
                 Documents
+              </Link>
+              <Link href="/dashboard/search" className={ui.secondaryButton}>
+                <Icon name="search" className="h-4 w-4 text-blue-700" />
+                Search
               </Link>
               <Link href="/dashboard/ask" className={ui.secondaryButton}>
                 <Icon name="question" className="h-4 w-4 text-blue-700" />

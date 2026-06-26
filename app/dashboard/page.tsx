@@ -14,12 +14,20 @@ const workspaceCards = [
     accent: "blue",
   },
   {
+    title: "Semantic search",
+    body: "Search ready chunks directly and inspect similarity-scored snippets.",
+    href: "/dashboard/search",
+    action: "Search documents",
+    icon: "search",
+    accent: "emerald",
+  },
+  {
     title: "Grounded question answering",
     body: "Ask questions over retrieved chunks and review source citations.",
     href: "/dashboard/ask",
     action: "Ask questions",
     icon: "question",
-    accent: "emerald",
+    accent: "violet",
   },
   {
     title: "Audit log review",
@@ -27,7 +35,7 @@ const workspaceCards = [
     href: "/dashboard/audit-logs",
     action: "Review audit logs",
     icon: "shield",
-    accent: "violet",
+    accent: "amber",
   },
 ] as const;
 
@@ -75,10 +83,14 @@ export default async function DashboardPage() {
                 workspace.
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[540px]">
+            <div className="grid gap-3 sm:grid-cols-2">
               <Link href="/dashboard/documents" className={ui.primaryButton}>
                 <Icon name="document" className="h-4 w-4" />
                 Manage documents
+              </Link>
+              <Link href="/dashboard/search" className={ui.secondaryButton}>
+                <Icon name="search" className="h-4 w-4 text-blue-700" />
+                Search
               </Link>
               <Link href="/dashboard/ask" className={ui.secondaryButton}>
                 <Icon name="question" className="h-4 w-4 text-blue-700" />
@@ -94,7 +106,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className={`${ui.container} py-10`}>
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {workspaceCards.map((card) => (
             <article key={card.title} className={`${ui.subtleCard} p-6`}>
               <div className="flex items-start gap-5">

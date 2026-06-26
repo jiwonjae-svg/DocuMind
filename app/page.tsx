@@ -49,7 +49,7 @@ const implementedFeatures = [
   },
   {
     title: "Semantic search",
-    body: "OpenAI embeddings and PostgreSQL pgvector rank relevant chunks inside the current user's ready documents through authenticated server routes.",
+    body: "OpenAI embeddings and PostgreSQL pgvector rank relevant chunks through authenticated server routes and a dashboard search UI.",
     icon: "search",
     accent: "emerald",
   },
@@ -123,6 +123,7 @@ const plannedFeatures = [
 const demoSteps = [
   "Sign in with the prefilled demo account",
   "Open Documents and review existing files; upload a short .txt or .md file if the list is empty",
+  "Run a semantic search to inspect top matching chunks and scores",
   "Ask a grounded question from the Ask page",
   "Check the answer, citations, matched snippets, and confidence boundaries",
   "Review owner-scoped audit log entries for your activity",

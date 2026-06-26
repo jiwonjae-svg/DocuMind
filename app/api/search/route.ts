@@ -1,9 +1,8 @@
 import { auth } from "@/auth";
-import {
-  normalizeSearchLimit,
-  normalizeSearchQuery,
-  searchDocumentChunks,
-} from "@/lib/search/semantic";
+import { prisma } from "@/lib/prisma";
+import { searchDocumentChunks } from "@/lib/search/semantic";
+import { normalizeSearchLimit, normalizeSearchQuery } from "@/lib/search/validation";
+import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -45,6 +44,21 @@ export async function POST(request: NextRequest) {
       limit,
       ownerId: session.user.id,
       query,
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        action: "document_search",
+        actorId: session.user.id,
+        ipAddress: readIpAddress(request),
+        metadata: {
+          limit,
+          queryLength: query.length,
+          resultCount: results.length,
+        },
+        resourceType: "Search",
+        userAgent: readUserAgent(request),
+      },
     });
 
     return NextResponse.json({ results });

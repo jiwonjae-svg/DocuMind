@@ -43,9 +43,9 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
-- Owner-scoped semantic search over ready document chunks.
+- Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Source-cited grounded question answering.
-- Audit logs for document upload/delete, question ask, and agent tool usage.
+- Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
@@ -96,10 +96,12 @@ flowchart LR
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
 - OpenAI embeddings for document chunks
 - Authenticated semantic search endpoint at `POST /api/search`
+- Dashboard semantic search UI at `/dashboard/search`
 - Grounded question answering endpoint at `POST /api/ask`
 - Agent-ready tool endpoints under `/api/tools/*`
 - Source-cited ask UI at `/dashboard/ask`
 - Document upload/delete audit logs
+- Semantic search audit logs
 - Question ask audit logs
 - Agent tool usage audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
@@ -115,6 +117,7 @@ Screenshots should be added when the portfolio is published:
 
 - Landing page with Japanese-facing product copy
 - Documents dashboard showing upload, status, chunks, and delete action
+- Search page showing owner-scoped semantic matches with similarity scores
 - Ask page showing a grounded answer with citations and matched snippets
 - Audit log page showing owner-scoped user activity
 - Example agent tool API response
@@ -255,6 +258,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
+- `tests/search-validation.test.ts`: semantic search query and limit validation.
 
 Run the suite with:
 
@@ -265,8 +269,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  9 passed (9)
-Tests       29 passed (29)
+Test Files  10 passed (10)
+Tests       32 passed (32)
 ```
 
 ## Useful Commands
@@ -293,7 +297,7 @@ Password: DocuMindDemo123!
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
-For a quick reviewer pass, sign in, open Documents, upload or review a small `.txt` or `.md` file, ask a grounded question from the Ask page, then confirm citations and your owner-scoped audit log entries.
+For a quick reviewer pass, sign in, open Documents, upload or review a small `.txt` or `.md` file, run a semantic search from the Search page, ask a grounded question from the Ask page, then confirm citations and your owner-scoped audit log entries.
 
 ## Audit Logs
 
@@ -341,7 +345,7 @@ After upload, documents are processed server-side:
 
 ## Semantic Search
 
-Signed-in users can search their own ready document chunks with:
+Signed-in users can search their own ready document chunks at [http://localhost:3000/dashboard/search](http://localhost:3000/dashboard/search) or with:
 
 ```http
 POST /api/search
@@ -371,7 +375,7 @@ The endpoint returns top matching chunks for the authenticated user only:
 }
 ```
 
-Search generates the query embedding server-side and filters by `ownerId` before returning results.
+Search generates the query embedding server-side and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count.
 
 ## Grounded Question Answering
 
