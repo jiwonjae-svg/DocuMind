@@ -49,7 +49,7 @@ const implementedFeatures = [
   },
   {
     title: "Semantic search",
-    body: "OpenAI embeddings and PostgreSQL pgvector rank relevant chunks only inside the current user's ready documents.",
+    body: "OpenAI embeddings and PostgreSQL pgvector rank relevant chunks inside the current user's ready documents through authenticated server routes.",
     icon: "search",
     accent: "emerald",
   },
@@ -122,11 +122,13 @@ const plannedFeatures = [
 
 const demoSteps = [
   "Sign in with the prefilled demo account",
-  "Review sample documents; if none are present, upload a short .txt or .md file",
-  "Ask a question",
-  "Check citations and matched snippets",
-  "Review your owner-scoped audit log entries",
+  "Open Documents and review existing files; upload a short .txt or .md file if the list is empty",
+  "Ask a grounded question from the Ask page",
+  "Check the answer, citations, matched snippets, and confidence boundaries",
+  "Review owner-scoped audit log entries for your activity",
 ] as const;
+
+const implementationUrl = "https://github.com/jiwonjae-svg/DocuMind#readme";
 
 export default function Home() {
   return (
@@ -184,9 +186,10 @@ export default function Home() {
                 Open dashboard
               </Link>
               <a
-                href="https://github.com/jiwonjae-svg/DocuMind#readme"
+                href={implementationUrl}
                 target="_blank"
                 rel="noreferrer"
+                aria-label="View the DocuMind implementation README on GitHub"
                 className={`${ui.secondaryButton} w-full sm:w-auto`}
               >
                 <Icon name="view" className="h-5 w-5 text-blue-700" />
@@ -259,7 +262,8 @@ export default function Home() {
           <p className="mt-4 text-sm leading-6 text-slate-600">
             The MVP focuses on secure retrieval-augmented document workflows:
             authentication, ownership checks, document processing, vector
-            search, grounded answers, and auditable tool APIs.
+            search, grounded answers, and auditable tool APIs. Everything in
+            this section is available in the current demo.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -372,7 +376,7 @@ export default function Home() {
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
               What reviewers should test
             </h2>
-            <ol className="mt-5 grid list-none gap-3">
+            <ul aria-label="Try the demo steps" className="mt-5 grid gap-3">
               {demoSteps.map((step, index) => (
                 <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">
@@ -381,7 +385,7 @@ export default function Home() {
                   <span>{step}</span>
                 </li>
               ))}
-            </ol>
+            </ul>
             <p className="mt-5 text-sm leading-6 text-slate-500">
               The dashboard now includes an owner-scoped audit log view for
               the signed-in user. Organization-wide admin audit review remains

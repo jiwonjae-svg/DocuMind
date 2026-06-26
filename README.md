@@ -34,7 +34,7 @@ Agentic systems need reliable tools, not just chat UI. DocuMind prepares the cor
 
 ## Implemented vs Future Scope
 
-DocuMind is presented as an MVP portfolio project. The distinction below is intentional so reviewers can clearly see what is already implemented and what is planned for production hardening.
+DocuMind is presented as an MVP portfolio project. The distinction below is intentional so reviewers can clearly see what is already implemented and what is planned for production hardening. Items under Future are not advertised as working demo features.
 
 ### Implemented
 
@@ -292,6 +292,8 @@ Password: DocuMindDemo123!
 ```
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
+
+For a quick reviewer pass, sign in, open Documents, upload or review a small `.txt` or `.md` file, ask a grounded question from the Ask page, then confirm citations and your owner-scoped audit log entries.
 
 ## Audit Logs
 
