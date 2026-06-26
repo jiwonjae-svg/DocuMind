@@ -12,6 +12,7 @@ import {
 } from "@/lib/documents/validation";
 import { processDocument } from "@/lib/documents/processing";
 import { prisma } from "@/lib/prisma";
+import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -104,6 +105,7 @@ export async function POST(request: NextRequest) {
         data: {
           actorId: session.user.id,
           action: "document_upload",
+          ipAddress: readIpAddress(request),
           resourceType: "Document",
           resourceId: documentId,
           metadata: {
@@ -111,6 +113,7 @@ export async function POST(request: NextRequest) {
             sizeBytes: file.size,
             mimeType: validation.mimeType,
           },
+          userAgent: readUserAgent(request),
         },
       }),
     ]);

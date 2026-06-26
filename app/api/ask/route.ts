@@ -5,24 +5,13 @@ import {
 } from "@/lib/qa/grounded-answer";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 const ASK_RATE_LIMIT = 10;
 const ASK_RATE_LIMIT_WINDOW_MS = 60_000;
-
-function readIpAddress(request: NextRequest) {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip")?.trim() ||
-    null
-  );
-}
-
-function readUserAgent(request: NextRequest) {
-  return request.headers.get("user-agent")?.trim() || null;
-}
 
 export async function POST(request: NextRequest) {
   const session = await auth();

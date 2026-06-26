@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { isDocumentOwner } from "@/lib/documents/access";
 import { resolveStoragePath } from "@/lib/documents/storage";
 import { prisma } from "@/lib/prisma";
+import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -55,11 +56,13 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
       data: {
         actorId: session.user.id,
         action: "document_delete",
+        ipAddress: readIpAddress(request),
         resourceType: "Document",
         resourceId: document.id,
         metadata: {
           originalName: document.originalName,
         },
+        userAgent: readUserAgent(request),
       },
     }),
   ]);

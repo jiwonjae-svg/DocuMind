@@ -134,8 +134,9 @@ export default async function AuditLogsPage() {
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-700">
                 This view shows only audit records created by the signed-in
-                user. It helps reviewers verify that document, ask, and agent
-                tool actions are recorded without exposing logs from other users.
+                user. It helps reviewers verify that document, search, ask, and
+                agent tool actions are recorded without exposing logs from other
+                users.
               </p>
             </div>
 
@@ -174,8 +175,8 @@ export default async function AuditLogsPage() {
                 No audit events yet
               </h3>
               <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
-                Upload a document, ask a question, or use an agent-ready tool
-                endpoint to create owner-scoped audit records.
+                Upload a document, run a search, ask a question, or use an
+                agent-ready tool endpoint to create owner-scoped audit records.
               </p>
             </div>
           ) : (
