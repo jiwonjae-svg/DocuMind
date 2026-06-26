@@ -30,10 +30,16 @@ export default async function AskPage() {
               <Icon name="arrow" className="h-4 w-4 rotate-180" />
               Back to dashboard
             </Link>
-            <Link href="/dashboard/documents" className={ui.secondaryButton}>
-              <Icon name="document" className="h-4 w-4 text-blue-700" />
-              Documents
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link href="/dashboard/documents" className={ui.secondaryButton}>
+                <Icon name="document" className="h-4 w-4 text-blue-700" />
+                Documents
+              </Link>
+              <Link href="/dashboard/audit-logs" className={ui.secondaryButton}>
+                <Icon name="shield" className="h-4 w-4 text-blue-700" />
+                Audit logs
+              </Link>
+            </div>
           </div>
 
           <div className={`${ui.card} grid gap-8 p-7 lg:grid-cols-[1fr_360px]`}>

@@ -60,8 +60,8 @@ const implementedFeatures = [
     accent: "violet",
   },
   {
-    title: "Audit logging",
-    body: "Login, upload, processing, delete, ask, and agent-tool actions create server-side audit records.",
+    title: "Audit logging and review",
+    body: "Login, upload, processing, delete, ask, and agent-tool actions create owner-scoped audit records visible in the dashboard.",
     icon: "check",
     accent: "blue",
   },
@@ -115,7 +115,7 @@ const architectureFlow = [
 const plannedFeatures = [
   "Enterprise SSO and team/workspace RBAC",
   "Durable object storage and background processing",
-  "Admin UI for audit-log review",
+  "Organization-wide admin audit review",
   "Full EN/KO/JA route-level localization",
   "MCP wrapper around the existing tool endpoints",
 ] as const;
@@ -125,7 +125,7 @@ const demoSteps = [
   "Review sample documents; if none are present, upload a short .txt or .md file",
   "Ask a question",
   "Check citations and matched snippets",
-  "Review owner-scoped access behavior",
+  "Review your owner-scoped audit log entries",
 ] as const;
 
 export default function Home() {
@@ -383,12 +383,12 @@ export default function Home() {
               ))}
             </ol>
             <p className="mt-5 text-sm leading-6 text-slate-500">
-              Audit records are stored server-side. The current MVP does not
-              expose an admin audit viewer, so reviewers can verify protected
-              access by signing out and revisiting dashboard routes.
+              The dashboard now includes an owner-scoped audit log view for
+              the signed-in user. Organization-wide admin audit review remains
+              a future production-hardening feature.
             </p>
             <Link
-              href="/login?callbackUrl=/dashboard/documents"
+              href="/login?callbackUrl=/dashboard/audit-logs"
               className={`${ui.primaryButton} mt-6 w-full sm:w-auto`}
             >
               <Icon name="compass" className="h-4 w-4" />

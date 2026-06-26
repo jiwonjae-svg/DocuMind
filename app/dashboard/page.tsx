@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 const workspaceCards = [
   {
@@ -19,6 +20,14 @@ const workspaceCards = [
     action: "Ask questions",
     icon: "question",
     accent: "emerald",
+  },
+  {
+    title: "Audit log review",
+    body: "Review owner-scoped records for uploads, processing, questions, and agent tool usage.",
+    href: "/dashboard/audit-logs",
+    action: "Review audit logs",
+    icon: "shield",
+    accent: "violet",
   },
 ] as const;
 
@@ -39,6 +48,11 @@ const roadmap = [
 
 export default async function DashboardPage() {
   const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/dashboard");
+  }
+
   const displayName = session?.user?.name ?? session?.user?.email ?? "User";
 
   return (
@@ -61,7 +75,7 @@ export default async function DashboardPage() {
                 workspace.
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[360px]">
+            <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[540px]">
               <Link href="/dashboard/documents" className={ui.primaryButton}>
                 <Icon name="document" className="h-4 w-4" />
                 Manage documents
@@ -70,13 +84,17 @@ export default async function DashboardPage() {
                 <Icon name="question" className="h-4 w-4 text-blue-700" />
                 Ask questions
               </Link>
+              <Link href="/dashboard/audit-logs" className={ui.secondaryButton}>
+                <Icon name="shield" className="h-4 w-4 text-blue-700" />
+                Audit logs
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       <section className={`${ui.container} py-10`}>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           {workspaceCards.map((card) => (
             <article key={card.title} className={`${ui.subtleCard} p-6`}>
               <div className="flex items-start gap-5">

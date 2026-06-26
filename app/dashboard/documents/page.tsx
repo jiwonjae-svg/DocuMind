@@ -118,10 +118,16 @@ export default async function DocumentsPage({
               <Icon name="arrow" className="h-4 w-4 rotate-180" />
               Back to dashboard
             </Link>
-            <Link href="/dashboard/ask" className={ui.secondaryButton}>
-              <Icon name="question" className="h-4 w-4 text-blue-700" />
-              Ask questions
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link href="/dashboard/ask" className={ui.secondaryButton}>
+                <Icon name="question" className="h-4 w-4 text-blue-700" />
+                Ask questions
+              </Link>
+              <Link href="/dashboard/audit-logs" className={ui.secondaryButton}>
+                <Icon name="shield" className="h-4 w-4 text-blue-700" />
+                Audit logs
+              </Link>
+            </div>
           </div>
 
           <div className={`${ui.card} grid gap-8 p-7 lg:grid-cols-[1fr_380px]`}>
