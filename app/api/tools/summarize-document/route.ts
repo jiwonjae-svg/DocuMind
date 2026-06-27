@@ -33,15 +33,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  const rateLimit = checkAiAnswerRateLimit(session.user.id);
-
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: AI_ANSWER_RATE_LIMIT_ERROR },
-      buildAiAnswerRateLimitResponseInit(rateLimit),
-    );
-  }
-
   let body: unknown;
 
   try {
@@ -92,6 +83,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Document must be READY before summarization." },
         { status: 400 },
+      );
+    }
+
+    const rateLimit = checkAiAnswerRateLimit(session.user.id);
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: AI_ANSWER_RATE_LIMIT_ERROR },
+        buildAiAnswerRateLimitResponseInit(rateLimit),
       );
     }
 

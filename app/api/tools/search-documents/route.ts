@@ -32,15 +32,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  const rateLimit = checkAiSearchRateLimit(session.user.id);
-
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: AI_SEARCH_RATE_LIMIT_ERROR },
-      buildAiSearchRateLimitResponseInit(rateLimit),
-    );
-  }
-
   let body: unknown;
 
   try {
@@ -65,6 +56,15 @@ export async function POST(request: NextRequest) {
     typeof body === "object" && body !== null && "limit" in body
       ? normalizeSearchLimit(body.limit)
       : normalizeSearchLimit(undefined);
+
+  const rateLimit = checkAiSearchRateLimit(session.user.id);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: AI_SEARCH_RATE_LIMIT_ERROR },
+      buildAiSearchRateLimitResponseInit(rateLimit),
+    );
+  }
 
   try {
     const results = await searchDocumentChunks({

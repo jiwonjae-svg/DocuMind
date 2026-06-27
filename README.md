@@ -52,6 +52,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Grounded question answering with source citations.
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
 - Shared per-user in-memory rate limiting for AI search and answer generation across app and agent tool endpoints.
+- AI rate limits are applied after request validation and immediately before AI-backed work.
 - Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
 - Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
@@ -415,7 +416,7 @@ The endpoint returns top matching chunks for the authenticated user only:
 }
 ```
 
-Search applies a shared per-user in-memory rate limit, generates the query embedding server-side, and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
+Search validates the request, applies a shared per-user in-memory rate limit immediately before AI-backed work, generates the query embedding server-side, and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
 
 If ready chunks are missing embeddings, search backfills only a bounded batch per request. Full document processing still embeds all chunks for the uploaded document.
 If no ready chunks have embeddings after that bounded backfill, search returns an empty result set without generating a query embedding.
@@ -438,7 +439,7 @@ Request body:
 
 The RAG flow is:
 
-- The API authenticates the user and applies a shared per-user in-memory rate limit for answer-generating routes.
+- The API authenticates the user, validates the request, and applies a shared per-user in-memory rate limit immediately before answer generation.
 - The question is embedded server-side with `OPENAI_EMBEDDING_MODEL`.
 - The app retrieves top matching `READY` chunks where both `DocumentChunk.ownerId` and `Document.ownerId` match the signed-in user.
 - Retrieved chunks are passed as the only allowed context to the answer model, packaged as JSON Lines so source text cannot spoof citation boundaries.
@@ -470,7 +471,7 @@ Response shape:
 }
 ```
 
-The ask UI and API never call OpenAI from client components. The shared answer-generation rate limiter is process-local and intended for development/MVP use. AI configuration and provider failures are normalized before they are returned to the client.
+The ask UI and API never call OpenAI from client components. The shared answer-generation rate limiter is process-local, applied after request validation, and intended for development/MVP use. AI configuration and provider failures are normalized before they are returned to the client.
 
 ## Agent Tool API
 
