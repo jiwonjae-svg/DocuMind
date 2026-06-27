@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH,
   MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH,
   MAX_DOCUMENT_UPLOAD_BYTES,
   validateDocumentBytes,
@@ -17,6 +18,7 @@ describe("document upload validation", () => {
 
     expect(result).toEqual({
       ok: true,
+      displayName: "team-notes.txt",
       extension: ".txt",
       safeFileName: "team-notes.txt",
       mimeType: "text/plain",
@@ -47,6 +49,26 @@ describe("document upload validation", () => {
         MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH,
       );
       expect(result.safeFileName.endsWith(".md")).toBe(true);
+    }
+  });
+
+  it("bounds display names while preserving localized basenames", () => {
+    const result = validateDocumentUpload({
+      name: `../../${"日本語_".repeat(80)}メモ.md`,
+      size: 128,
+      type: "text/markdown",
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (result.ok) {
+      expect(result.displayName).toHaveLength(
+        MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH,
+      );
+      expect(result.displayName).toContain("日本語");
+      expect(result.displayName).not.toContain("/");
+      expect(result.displayName).not.toContain("\\");
+      expect(result.displayName.endsWith(".md")).toBe(true);
     }
   });
 

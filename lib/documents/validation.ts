@@ -1,5 +1,6 @@
 export const MAX_DOCUMENT_UPLOAD_BYTES = 10 * 1024 * 1024;
 export const MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH = 180;
+export const MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH = 255;
 
 const allowedMimeTypesByExtension = {
   ".txt": new Set(["", "text/plain", "application/octet-stream"]),
@@ -24,6 +25,7 @@ export type UploadCandidate = {
 export type UploadValidationResult =
   | {
       ok: true;
+      displayName: string;
       extension: AllowedDocumentExtension;
       safeFileName: string;
       mimeType: string;
@@ -67,6 +69,19 @@ function truncateSafeStem(stem: string, extension: string) {
   return truncatedStem || "document";
 }
 
+function truncateFileName(fileName: string, maxLength: number) {
+  if (fileName.length <= maxLength) {
+    return fileName;
+  }
+
+  const extension = getExtension(fileName);
+  const maxStemLength = Math.max(1, maxLength - extension.length);
+  const stem = extension ? fileName.slice(0, -extension.length) : fileName;
+  const truncatedStem = stem.slice(0, maxStemLength).trim();
+
+  return `${truncatedStem || "document"}${extension}`;
+}
+
 export function sanitizeDocumentFileName(fileName: string) {
   const basename = getBasename(fileName).trim();
   const extension = getExtension(basename);
@@ -74,6 +89,19 @@ export function sanitizeDocumentFileName(fileName: string) {
   const safeStem = truncateSafeStem(sanitizeStem(stem), extension);
 
   return `${safeStem}${extension}`;
+}
+
+export function sanitizeDocumentDisplayName(fileName: string) {
+  const basename = getBasename(fileName)
+    .trim()
+    .normalize("NFC")
+    .replace(/[\u0000-\u001f\u007f]+/g, "")
+    .trim();
+
+  return truncateFileName(
+    basename || "document",
+    MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH,
+  );
 }
 
 export function validateDocumentUpload(
@@ -118,6 +146,7 @@ export function validateDocumentUpload(
 
   return {
     ok: true,
+    displayName: sanitizeDocumentDisplayName(originalName),
     extension: extension as AllowedDocumentExtension,
     safeFileName: sanitizeDocumentFileName(originalName),
     mimeType: mimeType || fallbackMimeType(extension as AllowedDocumentExtension),

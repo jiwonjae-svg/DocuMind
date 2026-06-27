@@ -41,6 +41,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Auth.js credentials authentication and protected dashboard routes.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
+- Bounded display filenames that remove path components while preserving Japanese/Korean names.
 - Same-origin checks for authenticated mutating POST routes.
 - Baseline security headers and `no-store` caching for API responses.
 - Text extraction and chunking with overlap metadata.
@@ -262,7 +263,7 @@ Unit tests use mocked `fetch` implementations for OpenAI helpers and do not requ
 The test suite is designed to cover the reliability and safety concerns that matter for AI-enabled internal tools:
 
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
-- `tests/document-validation.test.ts`: file extension, MIME type, size, safe filename, and upload validation.
+- `tests/document-validation.test.ts`: file extension, MIME type, size, safe storage/display filename, and upload validation.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, prompt boundary construction, insufficient-information behavior, and citation handling.
@@ -292,7 +293,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  20 passed (20)
-Tests       71 passed (71)
+Tests       72 passed (72)
 ```
 
 ## Useful Commands
@@ -360,7 +361,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, size, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal. Users can only list and delete documents where `ownerId` matches their authenticated user ID.
+The app validates file extension, MIME type, size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID.
 
 After upload, documents are processed server-side:
 

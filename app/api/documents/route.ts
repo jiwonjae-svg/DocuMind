@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
         data: {
           id: documentId,
           ownerId: session.user.id,
-          title: getTitleFromFileName(validation.safeFileName),
-          originalName: file.name,
+          title: getTitleFromFileName(validation.displayName),
+          originalName: validation.displayName,
           storedName: validation.safeFileName,
           storagePath: relativeStoragePath,
           mimeType: validation.mimeType,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
           resourceType: "Document",
           resourceId: documentId,
           metadata: {
-            originalName: file.name,
+            originalName: validation.displayName,
             sizeBytes: file.size,
             mimeType: validation.mimeType,
           },
