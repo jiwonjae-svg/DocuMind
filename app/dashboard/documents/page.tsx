@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
+import { getDocumentOperationNotice } from "@/lib/documents/notices";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -16,10 +17,6 @@ const statusStyles = {
   FAILED: "bg-red-50 text-red-700",
 };
 
-function readParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
 function formatBytes(bytes: number) {
   if (bytes < 1024) {
     return `${bytes} B`;
@@ -32,39 +29,6 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function getNotice(params: Record<string, string | string[] | undefined>) {
-  if (readParam(params.uploaded)) {
-    if (readParam(params.processed) === "failed") {
-      return {
-        tone: "error",
-        text: "Document uploaded, but text extraction failed.",
-      };
-    }
-
-    return { tone: "success", text: "Document uploaded and processed." };
-  }
-
-  if (readParam(params.deleted)) {
-    return { tone: "success", text: "Document deleted." };
-  }
-
-  const error = readParam(params.error);
-
-  if (error === "missing-file") {
-    return { tone: "error", text: "Choose a file before uploading." };
-  }
-
-  if (error === "not-found") {
-    return { tone: "error", text: "Document not found." };
-  }
-
-  if (error) {
-    return { tone: "error", text: error };
-  }
-
-  return null;
-}
-
 export default async function DocumentsPage({
   searchParams,
 }: DocumentsPageProps) {
@@ -75,7 +39,7 @@ export default async function DocumentsPage({
   }
 
   const params = searchParams ? await searchParams : {};
-  const notice = getNotice(params);
+  const notice = getDocumentOperationNotice(params);
   const documents = await prisma.document.findMany({
     where: {
       ownerId: session.user.id,

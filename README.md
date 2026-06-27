@@ -101,6 +101,7 @@ flowchart LR
 - Browser-origin checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Security headers for browser hardening and `Cache-Control: no-store` on API routes
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
+- Bounded document operation notices for upload/delete redirects
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
 - OpenAI embeddings for document chunks
 - Authenticated semantic search endpoint at `POST /api/search`
@@ -262,6 +263,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
 - `tests/document-validation.test.ts`: file extension, MIME type, size, safe filename, and upload validation.
+- `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, prompt boundary construction, insufficient-information behavior, and citation handling.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
@@ -289,8 +291,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  19 passed (19)
-Tests       66 passed (66)
+Test Files  20 passed (20)
+Tests       71 passed (71)
 ```
 
 ## Useful Commands
