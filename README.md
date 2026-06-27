@@ -300,7 +300,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
-- `tests/auth-callback-url.test.ts`: login redirects reject external callback URLs.
+- `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
 
 Run the suite with:
