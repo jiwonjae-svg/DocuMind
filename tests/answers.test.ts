@@ -135,6 +135,35 @@ describe("grounded answer generation", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
+  it("retries timed-out answer API requests", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockRejectedValueOnce(new DOMException("aborted", "AbortError"))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            output_text: JSON.stringify({
+              answer: "Manager review is required before publishing.",
+              citationIndexes: [1],
+              insufficientInformation: false,
+            }),
+          }),
+          { status: 200 },
+        ),
+      ) as unknown as typeof fetch;
+
+    const result = await createGroundedAnswer({
+      apiKey: "test-key",
+      fetchImpl,
+      question: "What approval step is required?",
+      retryBaseDelayMs: 0,
+      sources,
+    });
+
+    expect(result.answer).toBe("Manager review is required before publishing.");
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
   it("returns insufficient information without calling OpenAI when no sources exist", async () => {
     const fetchImpl = vi.fn() as unknown as typeof fetch;
 

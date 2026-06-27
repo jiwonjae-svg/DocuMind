@@ -1,5 +1,10 @@
 import "server-only";
 
+import {
+  createOpenAiRequestTimeout,
+  isAbortError,
+} from "./request-timeout";
+
 export const DEFAULT_ANSWER_MODEL = "gpt-5-mini";
 export const INSUFFICIENT_INFORMATION_ANSWER =
   "I don't have enough information in the retrieved documents to answer that.";
@@ -23,6 +28,7 @@ export type GroundedAnswerOptions = {
   maxRetries?: number;
   model?: string;
   question: string;
+  requestTimeoutMs?: number;
   retryBaseDelayMs?: number;
   sources: AnswerSource[];
 };
@@ -298,6 +304,7 @@ export async function createGroundedAnswer({
   maxRetries = 3,
   model,
   question,
+  requestTimeoutMs,
   retryBaseDelayMs = 300,
   sources,
 }: GroundedAnswerOptions): Promise<GroundedAnswerResult> {
@@ -321,6 +328,8 @@ export async function createGroundedAnswer({
   let attempt = 0;
 
   while (true) {
+    const timeout = createOpenAiRequestTimeout(requestTimeoutMs);
+
     try {
       const response = await fetchImpl(OPENAI_RESPONSES_URL, {
         body: JSON.stringify(
@@ -335,6 +344,7 @@ export async function createGroundedAnswer({
           "Content-Type": "application/json",
         },
         method: "POST",
+        signal: timeout.signal,
       });
 
       if (!response.ok) {
@@ -358,6 +368,8 @@ export async function createGroundedAnswer({
         model: answerModel,
       };
     } catch (error) {
+      const requestTimedOut = timeout.timedOut() || isAbortError(error);
+
       if (
         error instanceof AnswerApiError ||
         error instanceof AnswerConfigurationError
@@ -371,7 +383,13 @@ export async function createGroundedAnswer({
         continue;
       }
 
-      throw new AnswerApiError("OpenAI answer request failed.");
+      throw new AnswerApiError(
+        requestTimedOut
+          ? "OpenAI answer request timed out."
+          : "OpenAI answer request failed.",
+      );
+    } finally {
+      timeout.clear();
     }
   }
 }

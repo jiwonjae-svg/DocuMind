@@ -1,5 +1,10 @@
 import "server-only";
 
+import {
+  createOpenAiRequestTimeout,
+  isAbortError,
+} from "./request-timeout";
+
 export const EMBEDDING_DIMENSIONS = 1536;
 export const DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
 
@@ -13,6 +18,7 @@ export type EmbeddingOptions = {
   fetchImpl?: FetchLike;
   maxRetries?: number;
   model?: string;
+  requestTimeoutMs?: number;
   retryBaseDelayMs?: number;
 };
 
@@ -108,10 +114,13 @@ export async function createEmbedding(
   const model = getEmbeddingModel(options.model);
   const fetchImpl = options.fetchImpl ?? fetch;
   const maxRetries = options.maxRetries ?? 3;
+  const requestTimeoutMs = options.requestTimeoutMs;
   const retryBaseDelayMs = options.retryBaseDelayMs ?? 300;
   let attempt = 0;
 
   while (true) {
+    const timeout = createOpenAiRequestTimeout(requestTimeoutMs);
+
     try {
       const response = await fetchImpl(OPENAI_EMBEDDINGS_URL, {
         body: JSON.stringify({
@@ -124,6 +133,7 @@ export async function createEmbedding(
           "Content-Type": "application/json",
         },
         method: "POST",
+        signal: timeout.signal,
       });
 
       if (!response.ok) {
@@ -145,6 +155,8 @@ export async function createEmbedding(
         model,
       };
     } catch (error) {
+      const requestTimedOut = timeout.timedOut() || isAbortError(error);
+
       if (
         error instanceof EmbeddingApiError ||
         error instanceof EmbeddingConfigurationError
@@ -158,7 +170,13 @@ export async function createEmbedding(
         continue;
       }
 
-      throw new EmbeddingApiError("OpenAI embedding request failed.");
+      throw new EmbeddingApiError(
+        requestTimedOut
+          ? "OpenAI embedding request timed out."
+          : "OpenAI embedding request failed.",
+      );
+    } finally {
+      timeout.clear();
     }
   }
 }
