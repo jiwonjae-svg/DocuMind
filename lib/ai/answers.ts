@@ -311,6 +311,16 @@ export function extractResponseText(body: ResponsesApiBody) {
   throw new AnswerApiError("OpenAI answer response did not include text.");
 }
 
+async function parseAnswerResponse(response: Response) {
+  try {
+    return (await response.json()) as ResponsesApiBody;
+  } catch {
+    throw new AnswerApiError(
+      "OpenAI answer response did not contain valid JSON.",
+    );
+  }
+}
+
 export async function createGroundedAnswer({
   apiKey,
   fetchImpl = fetch,
@@ -372,7 +382,7 @@ export async function createGroundedAnswer({
         throw new AnswerApiError(message, response.status);
       }
 
-      const body = (await response.json()) as ResponsesApiBody;
+      const body = await parseAnswerResponse(response);
       const text = extractResponseText(body);
       const parsed = parseGroundedAnswerPayload(text, sources.length);
 

@@ -282,9 +282,9 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, and upload validation.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
-- `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, malformed answer payload handling, and timed-out answer retries.
+- `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, malformed answer payload/response handling, and timed-out answer retries.
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
-- `tests/embeddings.test.ts`: OpenAI embedding helper behavior, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
+- `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
@@ -313,7 +313,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  24 passed (24)
-Tests       111 passed (111)
+Tests       113 passed (113)
 ```
 
 ## Useful Commands

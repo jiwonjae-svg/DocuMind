@@ -100,6 +100,16 @@ async function parseErrorMessage(response: Response) {
   return response.statusText || "OpenAI embedding request failed.";
 }
 
+async function parseEmbeddingResponse(response: Response) {
+  try {
+    return (await response.json()) as EmbeddingsResponse;
+  } catch {
+    throw new EmbeddingApiError(
+      "OpenAI embedding response did not contain valid JSON.",
+    );
+  }
+}
+
 export async function createEmbedding(
   input: string,
   options: EmbeddingOptions = {},
@@ -148,7 +158,7 @@ export async function createEmbedding(
         throw new EmbeddingApiError(message, response.status);
       }
 
-      const body = (await response.json()) as EmbeddingsResponse;
+      const body = await parseEmbeddingResponse(response);
 
       return {
         embedding: validateEmbedding(body.data?.[0]?.embedding),

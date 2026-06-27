@@ -5,6 +5,7 @@ vi.mock("server-only", () => ({}));
 import {
   createEmbedding,
   EMBEDDING_DIMENSIONS,
+  EmbeddingApiError,
   toPgVector,
 } from "../lib/ai/embeddings";
 import { createOpenAiRequestTimeout } from "../lib/ai/request-timeout";
@@ -59,6 +60,27 @@ describe("OpenAI embeddings", () => {
         retryBaseDelayMs: 0,
       }),
     ).rejects.toMatchObject({ status: 400 });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry malformed successful embedding responses", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response("not-json", {
+        status: 200,
+      }),
+    ) as unknown as typeof fetch;
+
+    const result = createEmbedding("hello", {
+      apiKey: "test-key",
+      fetchImpl,
+      retryBaseDelayMs: 0,
+    });
+
+    await expect(result).rejects.toThrow(EmbeddingApiError);
+    await expect(result).rejects.toThrow(
+      "OpenAI embedding response did not contain valid JSON.",
+    );
+
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 

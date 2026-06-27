@@ -197,6 +197,28 @@ describe("grounded answer generation", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
+  it("does not retry non-JSON successful answer responses", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response("not-json", {
+        status: 200,
+      }),
+    ) as unknown as typeof fetch;
+
+    const result = createGroundedAnswer({
+      apiKey: "test-key",
+      fetchImpl,
+      question: "What approval step is required?",
+      retryBaseDelayMs: 0,
+      sources,
+    });
+
+    await expect(result).rejects.toThrow(AnswerApiError);
+    await expect(result).rejects.toThrow(
+      "OpenAI answer response did not contain valid JSON.",
+    );
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
   it("returns insufficient information without calling OpenAI when no sources exist", async () => {
     const fetchImpl = vi.fn() as unknown as typeof fetch;
 
