@@ -1,13 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import {
+  normalizeEmailCredential,
+  normalizePasswordCredential,
+} from "@/lib/auth/credentials";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
-
-function readCredential(value: unknown) {
-  return typeof value === "string" && value.trim().length > 0
-    ? value.trim()
-    : null;
-}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
@@ -27,8 +25,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = readCredential(credentials?.email)?.toLowerCase();
-        const password = readCredential(credentials?.password);
+        const email = normalizeEmailCredential(credentials?.email);
+        const password = normalizePasswordCredential(credentials?.password);
 
         if (!email || !password) {
           return null;
