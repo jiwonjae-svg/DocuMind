@@ -54,6 +54,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
+- Question, answer, and ask audit records are persisted in a single database transaction.
 - OpenAI embedding and answer requests use bounded timeouts with retry handling for transient failures.
 - Shared per-user in-memory rate limiting for AI search and answer generation across app and agent tool endpoints.
 - AI rate limits are applied after request validation and immediately before AI-backed work.
@@ -282,6 +283,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, and timed-out answer retries.
+- `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
@@ -457,6 +459,7 @@ The RAG flow is:
 - The model must return insufficient information when the retrieved chunks do not directly support an answer.
 - The response includes the answer, citations, and matched snippets.
 - The app stores `Question` and `Answer` records and writes a `question_ask` audit log.
+- The question, answer, and ask audit log are saved in one transaction to avoid partial persistence.
 
 Response shape:
 

@@ -16,11 +16,14 @@ import {
   JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR,
   readBoundedJsonBody,
 } from "@/lib/api/json-body";
-import { buildAnswerAuditMetadata } from "@/lib/audit/metadata";
 import {
   answerGroundedQuestion,
   normalizeQuestion,
 } from "@/lib/qa/grounded-answer";
+import {
+  type GroundedAnswerPersistenceDb,
+  persistGroundedAnswer,
+} from "@/lib/qa/persistence";
 import { prisma } from "@/lib/prisma";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
@@ -90,54 +93,23 @@ export async function POST(request: NextRequest) {
       question,
     });
 
-    const questionRecord = await prisma.question.create({
-      data: {
-        documentId: result.primaryDocumentId,
-        ownerId: session.user.id,
-        text: question,
-      },
-      select: {
-        id: true,
-      },
-    });
-    const answerRecord = await prisma.answer.create({
-      data: {
-        documentId: result.primaryDocumentId,
-        ownerId: session.user.id,
-        questionId: questionRecord.id,
-        text: result.answer,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        action: "agent_tool_ask_with_citations",
-        actorId: session.user.id,
-        ipAddress: readIpAddress(request),
-        metadata: buildAnswerAuditMetadata({
-          answerId: answerRecord.id,
-          citationCount: result.citations.length,
-          insufficientInformation: result.insufficientInformation,
-          matchedSnippetCount: result.matchedSnippets.length,
-          model: result.model,
-          question,
-        }),
-        resourceId: questionRecord.id,
-        resourceType: "Question",
-        userAgent: readUserAgent(request),
-      },
+    const persistedAnswer = await persistGroundedAnswer({
+      action: "agent_tool_ask_with_citations",
+      db: prisma as unknown as GroundedAnswerPersistenceDb,
+      ipAddress: readIpAddress(request),
+      ownerId: session.user.id,
+      question,
+      result,
+      userAgent: readUserAgent(request),
     });
 
     return NextResponse.json({
       answer: result.answer,
-      answerId: answerRecord.id,
+      answerId: persistedAnswer.answerId,
       citations: result.citations,
       insufficientInformation: result.insufficientInformation,
       matchedSnippets: result.matchedSnippets,
-      questionId: questionRecord.id,
+      questionId: persistedAnswer.questionId,
       tool: "ask-with-citations",
     });
   } catch (error) {
