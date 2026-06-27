@@ -9,6 +9,11 @@ import {
   CROSS_ORIGIN_REQUEST_ERROR,
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
+import {
+  isJsonBodyTooLargeError,
+  JSON_REQUEST_BODY_TOO_LARGE_ERROR,
+  readBoundedJsonBody,
+} from "@/lib/api/json-body";
 import { prisma } from "@/lib/prisma";
 import {
   normalizeDocumentId,
@@ -36,8 +41,15 @@ export async function POST(request: NextRequest) {
   let body: unknown;
 
   try {
-    body = await request.json();
-  } catch {
+    body = await readBoundedJsonBody(request);
+  } catch (error) {
+    if (isJsonBodyTooLargeError(error)) {
+      return NextResponse.json(
+        { error: JSON_REQUEST_BODY_TOO_LARGE_ERROR },
+        { status: 413 },
+      );
+    }
+
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 

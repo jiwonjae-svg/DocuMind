@@ -44,6 +44,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Bounded display filenames that remove path components while preserving Japanese/Korean names.
 - Same-origin checks for authenticated mutating POST routes.
 - Baseline security headers and `no-store` caching for API responses.
+- Bounded JSON body parsing for search, ask, and agent tool endpoints.
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
@@ -108,6 +109,7 @@ flowchart LR
 - Protected dashboard navigation at `/dashboard`
 - Browser-origin checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Security headers for browser hardening and `Cache-Control: no-store` on API routes
+- 16 KB JSON body limit for search, ask, and agent tool APIs
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Bounded document operation notices for upload/delete redirects
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
@@ -285,6 +287,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
+- `tests/json-body.test.ts`: bounded JSON request parsing and oversized body rejection.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests.
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
