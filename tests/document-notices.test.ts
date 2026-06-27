@@ -3,6 +3,10 @@ import {
   getDocumentOperationNotice,
   readDocumentNoticeParam,
 } from "../lib/documents/notices";
+import {
+  DOCUMENT_UPLOAD_PARSE_ERROR,
+  DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
+} from "../lib/documents/validation";
 
 describe("document operation notices", () => {
   it("returns success notices for upload and delete redirects", () => {
@@ -36,6 +40,25 @@ describe("document operation notices", () => {
       }),
     ).toEqual({
       text: "Only .txt, .md, and .pdf files are supported.",
+      tone: "error",
+    });
+  });
+
+  it("maps upload request format errors", () => {
+    expect(
+      getDocumentOperationNotice({
+        error: DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
+      }),
+    ).toEqual({
+      text: "Document upload must use multipart form data.",
+      tone: "error",
+    });
+    expect(
+      getDocumentOperationNotice({
+        error: DOCUMENT_UPLOAD_PARSE_ERROR,
+      }),
+    ).toEqual({
+      text: "Document upload could not be parsed.",
       tone: "error",
     });
   });

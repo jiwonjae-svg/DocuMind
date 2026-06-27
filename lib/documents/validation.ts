@@ -4,6 +4,9 @@ export const MAX_DOCUMENT_UPLOAD_REQUEST_BYTES =
 export const MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH = 180;
 export const MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH = 255;
 export const DOCUMENT_UPLOAD_TOO_LARGE_ERROR = "Files must be 10 MB or smaller.";
+export const DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR =
+  "Document upload must use multipart form data.";
+export const DOCUMENT_UPLOAD_PARSE_ERROR = "Document upload could not be parsed.";
 
 const allowedMimeTypesByExtension = {
   ".txt": new Set(["", "text/plain", "application/octet-stream"]),
@@ -58,6 +61,16 @@ export function isDocumentUploadRequestTooLarge(headers: Headers) {
   return (
     contentLength !== null &&
     contentLength > MAX_DOCUMENT_UPLOAD_REQUEST_BYTES
+  );
+}
+
+export function isMultipartDocumentUploadRequest(headers: Headers) {
+  return (
+    headers
+      .get("content-type")
+      ?.toLowerCase()
+      .split(";")[0]
+      .trim() === "multipart/form-data"
   );
 }
 

@@ -11,8 +11,11 @@ import {
   resolveStoragePath,
 } from "@/lib/documents/storage";
 import {
+  DOCUMENT_UPLOAD_PARSE_ERROR,
   DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+  DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
   isDocumentUploadRequestTooLarge,
+  isMultipartDocumentUploadRequest,
   validateDocumentBytes,
   validateDocumentUpload,
 } from "@/lib/documents/validation";
@@ -66,7 +69,22 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const formData = await request.formData();
+  if (!isMultipartDocumentUploadRequest(request.headers)) {
+    return redirectToDocuments(request, {
+      error: DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
+    });
+  }
+
+  let formData: FormData;
+
+  try {
+    formData = await request.formData();
+  } catch {
+    return redirectToDocuments(request, {
+      error: DOCUMENT_UPLOAD_PARSE_ERROR,
+    });
+  }
+
   const file = formData.get("file");
 
   if (!isUploadFile(file)) {

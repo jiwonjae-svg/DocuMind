@@ -41,6 +41,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Auth.js credentials authentication and protected dashboard routes.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
+- Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
 - Declared oversized upload requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components while preserving Japanese/Korean names.
 - Same-origin checks for authenticated mutating POST routes.
@@ -113,6 +114,7 @@ flowchart LR
 - Security headers for browser hardening and `Cache-Control: no-store` on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
+- Multipart content-type enforcement and parse-error handling for document uploads
 - Declared oversized upload requests are rejected before multipart body parsing
 - Bounded document operation notices for upload/delete redirects
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
@@ -276,7 +278,7 @@ Unit tests use mocked `fetch` implementations for OpenAI helpers and do not requ
 The test suite is designed to cover the reliability and safety concerns that matter for AI-enabled internal tools:
 
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
-- `tests/document-validation.test.ts`: file extension, MIME type, file/request size, safe storage/display filename, and upload validation.
+- `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, and upload validation.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, and timed-out answer retries.

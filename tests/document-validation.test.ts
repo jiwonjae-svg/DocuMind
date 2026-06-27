@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  DOCUMENT_UPLOAD_PARSE_ERROR,
   DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+  DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
   MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH,
   MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH,
   MAX_DOCUMENT_UPLOAD_BYTES,
   MAX_DOCUMENT_UPLOAD_REQUEST_BYTES,
   isDocumentUploadRequestTooLarge,
+  isMultipartDocumentUploadRequest,
   validateDocumentBytes,
   validateDocumentUpload,
 } from "../lib/documents/validation";
@@ -114,6 +117,33 @@ describe("document upload validation", () => {
         }),
       ),
     ).toBe(false);
+  });
+
+  it("accepts multipart upload request content types with parameters", () => {
+    expect(
+      isMultipartDocumentUploadRequest(
+        new Headers({
+          "content-type": "multipart/form-data; boundary=----documind",
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects missing or non-multipart upload request content types", () => {
+    expect(isMultipartDocumentUploadRequest(new Headers())).toBe(false);
+    expect(
+      isMultipartDocumentUploadRequest(
+        new Headers({
+          "content-type": "application/json",
+        }),
+      ),
+    ).toBe(false);
+    expect(DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR).toBe(
+      "Document upload must use multipart form data.",
+    );
+    expect(DOCUMENT_UPLOAD_PARSE_ERROR).toBe(
+      "Document upload could not be parsed.",
+    );
   });
 
   it("rejects mismatched mime types", () => {

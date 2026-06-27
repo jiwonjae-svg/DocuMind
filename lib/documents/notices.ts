@@ -1,3 +1,9 @@
+import {
+  DOCUMENT_UPLOAD_PARSE_ERROR,
+  DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+  DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
+} from "./validation";
+
 export type DocumentNotice = {
   text: string;
   tone: "error" | "success";
@@ -6,9 +12,14 @@ export type DocumentNotice = {
 const knownDocumentErrors = new Map([
   ["missing-file", "Choose a file before uploading."],
   ["not-found", "Document not found."],
+  [
+    DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
+    "Document upload must use multipart form data.",
+  ],
+  [DOCUMENT_UPLOAD_PARSE_ERROR, "Document upload could not be parsed."],
   ["Choose a file to upload.", "Choose a file before uploading."],
   ["The uploaded file is empty.", "The uploaded file is empty."],
-  ["Files must be 10 MB or smaller.", "Files must be 10 MB or smaller."],
+  [DOCUMENT_UPLOAD_TOO_LARGE_ERROR, "Files must be 10 MB or smaller."],
   [
     "Only .txt, .md, and .pdf files are supported.",
     "Only .txt, .md, and .pdf files are supported.",
