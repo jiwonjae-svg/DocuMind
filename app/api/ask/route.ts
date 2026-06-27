@@ -9,6 +9,7 @@ import {
   CROSS_ORIGIN_REQUEST_ERROR,
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
+import { buildAnswerAuditMetadata } from "@/lib/audit/metadata";
 import {
   answerGroundedQuestion,
   normalizeQuestion,
@@ -95,13 +96,14 @@ export async function POST(request: NextRequest) {
         action: "question_ask",
         actorId: session.user.id,
         ipAddress: readIpAddress(request),
-        metadata: {
+        metadata: buildAnswerAuditMetadata({
           answerId: answerRecord.id,
           citationCount: result.citations.length,
           insufficientInformation: result.insufficientInformation,
           matchedSnippetCount: result.matchedSnippets.length,
           model: result.model,
-        },
+          question,
+        }),
         resourceId: questionRecord.id,
         resourceType: "Question",
         userAgent: readUserAgent(request),

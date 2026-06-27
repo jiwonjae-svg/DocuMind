@@ -5,6 +5,10 @@ import {
   MAX_AUDIT_METADATA_ENTRIES,
   MAX_AUDIT_METADATA_VALUE_LENGTH,
 } from "../lib/audit/formatting";
+import {
+  buildAnswerAuditMetadata,
+  buildSearchAuditMetadata,
+} from "../lib/audit/metadata";
 
 describe("audit metadata formatting", () => {
   it("formats primitive metadata values", () => {
@@ -44,5 +48,43 @@ describe("audit metadata formatting", () => {
     expect(formatted?.split(" / ")).toHaveLength(MAX_AUDIT_METADATA_ENTRIES);
     expect(formatted).toContain("one: 1");
     expect(formatted).not.toContain("five: 5");
+  });
+
+  it("builds search audit metadata without storing the query text", () => {
+    const metadata = buildSearchAuditMetadata({
+      limit: 5,
+      query: "confidential launch policy",
+      resultCount: 2,
+    });
+
+    expect(metadata).toEqual({
+      queryLength: 26,
+      limit: 5,
+      resultCount: 2,
+    });
+    expect(Object.values(metadata)).not.toContain("confidential launch policy");
+  });
+
+  it("builds answer audit metadata without storing the question text", () => {
+    const metadata = buildAnswerAuditMetadata({
+      answerId: "answer-1",
+      citationCount: 1,
+      insufficientInformation: false,
+      matchedSnippetCount: 3,
+      model: "test-model",
+      question: "What is the private roadmap?",
+    });
+
+    expect(metadata).toEqual({
+      questionLength: 28,
+      citationCount: 1,
+      insufficientInformation: false,
+      matchedSnippetCount: 3,
+      model: "test-model",
+      answerId: "answer-1",
+    });
+    expect(Object.values(metadata)).not.toContain(
+      "What is the private roadmap?",
+    );
   });
 });

@@ -9,6 +9,7 @@ import {
   CROSS_ORIGIN_REQUEST_ERROR,
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
+import { buildSearchAuditMetadata } from "@/lib/audit/metadata";
 import { prisma } from "@/lib/prisma";
 import { searchDocumentChunks } from "@/lib/search/semantic";
 import { normalizeSearchLimit, normalizeSearchQuery } from "@/lib/search/validation";
@@ -77,11 +78,11 @@ export async function POST(request: NextRequest) {
         action: "document_search",
         actorId: session.user.id,
         ipAddress: readIpAddress(request),
-        metadata: {
+        metadata: buildSearchAuditMetadata({
           limit,
-          queryLength: query.length,
+          query,
           resultCount: results.length,
-        },
+        }),
         resourceType: "Search",
         userAgent: readUserAgent(request),
       },

@@ -53,6 +53,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
 - Shared per-user in-memory rate limiting for AI search and answer generation across app and agent tool endpoints.
 - Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
+- Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
@@ -277,7 +278,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
-- `tests/audit-formatting.test.ts`: bounded audit metadata formatting for dashboard display.
+- `tests/audit-formatting.test.ts`: bounded audit metadata formatting and raw query/question text avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
@@ -299,7 +300,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  21 passed (21)
-Tests       82 passed (82)
+Tests       84 passed (84)
 ```
 
 ## Useful Commands
@@ -345,6 +346,7 @@ The page is intentionally owner-scoped for the MVP:
 - It filters `AuditLog.actorId` to the current session user.
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
 - Metadata display is capped to keep long filenames, provider details, or nested values from dominating the audit screen.
+- Search and ask audit metadata records input lengths, not the raw search query or question text.
 - Upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available.
 - It does not expose other users' audit records.
 
