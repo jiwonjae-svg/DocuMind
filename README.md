@@ -48,6 +48,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
+- JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
 - Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
@@ -266,7 +267,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-validation.test.ts`: file extension, MIME type, size, safe storage/display filename, and upload validation.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
-- `tests/answers.test.ts`: grounded answer formatting, prompt boundary construction, insufficient-information behavior, and citation handling.
+- `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, and citation handling.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
@@ -293,7 +294,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  20 passed (20)
-Tests       73 passed (73)
+Tests       74 passed (74)
 ```
 
 ## Useful Commands
@@ -430,7 +431,7 @@ The RAG flow is:
 - The API authenticates the user and applies a per-user in-memory rate limit.
 - The question is embedded server-side with `OPENAI_EMBEDDING_MODEL`.
 - The app retrieves top matching `READY` chunks where both `DocumentChunk.ownerId` and `Document.ownerId` match the signed-in user.
-- Retrieved chunks are passed as the only allowed context to the answer model.
+- Retrieved chunks are passed as the only allowed context to the answer model, packaged as JSON Lines so source text cannot spoof citation boundaries.
 - The model must return insufficient information when the retrieved chunks do not directly support an answer.
 - The response includes the answer, citations, and matched snippets.
 - The app stores `Question` and `Answer` records and writes a `question_ask` audit log.
