@@ -312,8 +312,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  21 passed (21)
-Tests       84 passed (84)
+Test Files  24 passed (24)
+Tests       107 passed (107)
 ```
 
 ## Useful Commands
@@ -340,14 +340,16 @@ Password: DocuMindDemo123!
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
-For a quick reviewer pass:
+For a quick reviewer pass, all steps below are implemented in the current demo:
 
 1. Sign in with the seeded demo account.
-2. Open Documents and review existing files, or upload a short `.txt` or `.md` file.
-3. Run a semantic search from the Search page and inspect matching chunks and scores.
-4. Ask a grounded question using content from the uploaded or demo document.
-5. Confirm the answer, source citations, matched snippets, and insufficient-information behavior.
+2. Open Documents, review existing files, or upload a short `.txt` or `.md` file.
+3. Run semantic search from the Search page and inspect matching chunks and scores.
+4. Ask a grounded question using content from an uploaded or seeded document.
+5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
 6. Review owner-scoped audit log entries for your activity.
+
+Planned work such as MCP wrapping, enterprise SSO/team RBAC, durable object storage, and organization-wide admin audit review is listed under Future / Production Hardening and is not expected in this demo.
 
 ## Audit Logs
 

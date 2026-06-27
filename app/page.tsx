@@ -121,16 +121,16 @@ const plannedFeatures = [
 ] as const;
 
 const demoSteps = [
-  "Sign in with the prefilled demo account",
-  "Open Documents and review existing files; upload a short .txt or .md file if needed",
-  "Run a semantic search to inspect top matching chunks and scores",
-  "Ask a grounded question using content from the uploaded or demo document",
-  "Check the answer, source citations, matched snippets, and insufficient-information behavior",
-  "Review owner-scoped audit log entries for your activity",
+  "Sign in with the prefilled demo account.",
+  "Open Documents, review existing files, or upload a short .txt or .md file.",
+  "Run semantic search and inspect top matching chunks and scores.",
+  "Ask a grounded question using content from an uploaded or seeded document.",
+  "Check the answer, citations, matched snippets, and insufficient-information behavior.",
+  "Review owner-scoped audit log entries for your activity.",
 ] as const;
 
 const implementationUrl =
-  "https://github.com/jiwonjae-svg/DocuMind/blob/main/README.md";
+  "https://github.com/jiwonjae-svg/DocuMind#readme";
 
 export default function Home() {
   return (
@@ -191,7 +191,7 @@ export default function Home() {
                 href={implementationUrl}
                 target="_blank"
                 rel="noreferrer"
-                aria-label="View the DocuMind README implementation notes on GitHub"
+                aria-label="View the DocuMind implementation README on GitHub"
                 className={`${ui.secondaryButton} w-full sm:w-auto`}
               >
                 <Icon name="view" className="h-5 w-5 text-blue-700" />
