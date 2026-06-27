@@ -10,6 +10,14 @@ const AI_PROVIDER_RATE_LIMIT_ERROR =
   "AI provider is rate limiting requests. Try again shortly.";
 const AI_PROVIDER_TEMPORARY_ERROR =
   "AI provider is temporarily unavailable. Try again shortly.";
+const AI_PROVIDER_TEMPORARY_STATUS_CODES = new Set([
+  408,
+  409,
+  500,
+  502,
+  503,
+  504,
+]);
 
 function readErrorName(error: unknown) {
   return error instanceof Error ? error.name : null;
@@ -53,7 +61,10 @@ export function toApiError(error: unknown, fallbackMessage: string): ApiError {
       };
     }
 
-    if (providerStatus !== null && providerStatus >= 500) {
+    if (
+      providerStatus !== null &&
+      AI_PROVIDER_TEMPORARY_STATUS_CODES.has(providerStatus)
+    ) {
       return {
         error: AI_PROVIDER_TEMPORARY_ERROR,
         status: 503,

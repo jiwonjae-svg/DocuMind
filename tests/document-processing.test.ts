@@ -51,6 +51,16 @@ describe("document processing errors", () => {
     ).toBe(DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR);
     expect(
       normalizeDocumentProcessingError(
+        namedError("EmbeddingApiError", "sensitive timeout detail", 408),
+      ),
+    ).toBe(DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR);
+    expect(
+      normalizeDocumentProcessingError(
+        namedError("EmbeddingApiError", "sensitive conflict detail", 409),
+      ),
+    ).toBe(DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR);
+    expect(
+      normalizeDocumentProcessingError(
         namedError("EmbeddingApiError", "OpenAI embedding request timed out."),
       ),
     ).toBe(DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR);

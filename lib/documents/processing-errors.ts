@@ -11,6 +11,14 @@ export const DOCUMENT_PROCESSING_AI_RATE_LIMIT_ERROR =
   "AI provider is rate limiting requests. Try again shortly.";
 export const DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR =
   "AI provider is temporarily unavailable. Try again shortly.";
+const AI_PROVIDER_TEMPORARY_STATUS_CODES = new Set([
+  408,
+  409,
+  500,
+  502,
+  503,
+  504,
+]);
 
 function readErrorName(error: unknown) {
   return error instanceof Error ? error.name : null;
@@ -52,7 +60,10 @@ export function normalizeDocumentProcessingError(error: unknown) {
       return DOCUMENT_PROCESSING_AI_RATE_LIMIT_ERROR;
     }
 
-    if (status !== null && status >= 500) {
+    if (
+      status !== null &&
+      AI_PROVIDER_TEMPORARY_STATUS_CODES.has(status)
+    ) {
       return DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR;
     }
 

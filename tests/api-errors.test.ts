@@ -29,6 +29,14 @@ describe("API error normalization", () => {
       error: "AI provider is rate limiting requests. Try again shortly.",
       status: 429,
     });
+    expect(toApiError(namedError("AnswerApiError", 408), "fallback")).toEqual({
+      error: "AI provider is temporarily unavailable. Try again shortly.",
+      status: 503,
+    });
+    expect(toApiError(namedError("EmbeddingApiError", 409), "fallback")).toEqual({
+      error: "AI provider is temporarily unavailable. Try again shortly.",
+      status: 503,
+    });
     expect(toApiError(namedError("AnswerApiError", 503), "fallback")).toEqual({
       error: "AI provider is temporarily unavailable. Try again shortly.",
       status: 503,
