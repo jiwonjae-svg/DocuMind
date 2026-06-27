@@ -26,9 +26,9 @@ function isSearchResult(value: unknown): value is SearchResult {
   const result = value as Partial<SearchResult>;
 
   return (
-    typeof result.chunkIndex === "number" &&
+    Number.isInteger(result.chunkIndex) &&
     typeof result.documentTitle === "string" &&
-    typeof result.similarityScore === "number" &&
+    Number.isFinite(result.similarityScore) &&
     typeof result.snippet === "string"
   );
 }

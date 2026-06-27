@@ -24,6 +24,28 @@ function formatScore(score: number) {
   return `${Math.round(score * 100)}%`;
 }
 
+function isCitation(value: unknown): value is Citation {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const citation = value as Partial<Citation>;
+
+  return (
+    Number.isInteger(citation.chunkIndex) &&
+    typeof citation.documentTitle === "string" &&
+    typeof citation.snippet === "string"
+  );
+}
+
+function isMatchedSnippet(value: unknown): value is MatchedSnippet {
+  if (!isCitation(value)) {
+    return false;
+  }
+
+  return Number.isFinite((value as Partial<MatchedSnippet>).similarityScore);
+}
+
 export function AskForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -68,11 +90,21 @@ export function AskForm() {
         throw new Error("Question response was not valid.");
       }
 
+      const citations = payload.citations.filter(isCitation);
+      const matchedSnippets = payload.matchedSnippets.filter(isMatchedSnippet);
+
+      if (
+        citations.length !== payload.citations.length ||
+        matchedSnippets.length !== payload.matchedSnippets.length
+      ) {
+        throw new Error("Question response contained invalid sources.");
+      }
+
       setResult({
         answer: payload.answer,
-        citations: payload.citations,
+        citations,
         insufficientInformation: payload.insufficientInformation === true,
-        matchedSnippets: payload.matchedSnippets,
+        matchedSnippets,
       });
     } catch (caughtError) {
       setError(
