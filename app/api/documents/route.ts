@@ -11,6 +11,8 @@ import {
   resolveStoragePath,
 } from "@/lib/documents/storage";
 import {
+  DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+  isDocumentUploadRequestTooLarge,
   validateDocumentBytes,
   validateDocumentUpload,
 } from "@/lib/documents/validation";
@@ -56,6 +58,12 @@ export async function POST(request: NextRequest) {
 
   if (!session?.user?.id) {
     return redirectToLogin(request);
+  }
+
+  if (isDocumentUploadRequestTooLarge(request.headers)) {
+    return redirectToDocuments(request, {
+      error: DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+    });
   }
 
   const formData = await request.formData();

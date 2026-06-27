@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
   MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH,
   MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH,
   MAX_DOCUMENT_UPLOAD_BYTES,
+  MAX_DOCUMENT_UPLOAD_REQUEST_BYTES,
+  isDocumentUploadRequestTooLarge,
   validateDocumentBytes,
   validateDocumentUpload,
 } from "../lib/documents/validation";
@@ -79,7 +82,38 @@ describe("document upload validation", () => {
       type: "application/pdf",
     });
 
-    expect(result.ok).toBe(false);
+    expect(result).toEqual({
+      ok: false,
+      error: DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+    });
+  });
+
+  it("detects oversized declared multipart upload requests", () => {
+    expect(
+      isDocumentUploadRequestTooLarge(
+        new Headers({
+          "content-length": String(MAX_DOCUMENT_UPLOAD_REQUEST_BYTES + 1),
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isDocumentUploadRequestTooLarge(
+        new Headers({
+          "content-length": String(MAX_DOCUMENT_UPLOAD_REQUEST_BYTES),
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("does not reject upload requests with absent or malformed content lengths", () => {
+    expect(isDocumentUploadRequestTooLarge(new Headers())).toBe(false);
+    expect(
+      isDocumentUploadRequestTooLarge(
+        new Headers({
+          "content-length": "not-a-number",
+        }),
+      ),
+    ).toBe(false);
   });
 
   it("rejects mismatched mime types", () => {

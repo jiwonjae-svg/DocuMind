@@ -1,6 +1,9 @@
 export const MAX_DOCUMENT_UPLOAD_BYTES = 10 * 1024 * 1024;
+export const MAX_DOCUMENT_UPLOAD_REQUEST_BYTES =
+  MAX_DOCUMENT_UPLOAD_BYTES + 1024 * 1024;
 export const MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH = 180;
 export const MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH = 255;
+export const DOCUMENT_UPLOAD_TOO_LARGE_ERROR = "Files must be 10 MB or smaller.";
 
 const allowedMimeTypesByExtension = {
   ".txt": new Set(["", "text/plain", "application/octet-stream"]),
@@ -34,6 +37,29 @@ export type UploadValidationResult =
       ok: false;
       error: string;
     };
+
+function readContentLength(headers: Headers) {
+  const rawContentLength = headers.get("content-length");
+
+  if (!rawContentLength?.trim()) {
+    return null;
+  }
+
+  const contentLength = Number(rawContentLength);
+
+  return Number.isSafeInteger(contentLength) && contentLength >= 0
+    ? contentLength
+    : null;
+}
+
+export function isDocumentUploadRequestTooLarge(headers: Headers) {
+  const contentLength = readContentLength(headers);
+
+  return (
+    contentLength !== null &&
+    contentLength > MAX_DOCUMENT_UPLOAD_REQUEST_BYTES
+  );
+}
 
 function getBasename(fileName: string) {
   return fileName.replace(/\0/g, "").split(/[\\/]/).pop() ?? "";
@@ -120,7 +146,7 @@ export function validateDocumentUpload(
   if (candidate.size > MAX_DOCUMENT_UPLOAD_BYTES) {
     return {
       ok: false,
-      error: "Files must be 10 MB or smaller.",
+      error: DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
     };
   }
 
