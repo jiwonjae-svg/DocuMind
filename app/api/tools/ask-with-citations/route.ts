@@ -10,11 +10,7 @@ import {
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
 import {
-  isJsonBodyUnsupportedMediaTypeError,
-  isJsonBodyTooLargeError,
-  JSON_REQUEST_BODY_TOO_LARGE_ERROR,
-  JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR,
-  readBoundedJsonBody,
+  readJsonBodyResult,
 } from "@/lib/api/json-body";
 import {
   answerGroundedQuestion,
@@ -44,27 +40,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  let body: unknown;
+  const jsonBody = await readJsonBodyResult(request);
 
-  try {
-    body = await readBoundedJsonBody(request);
-  } catch (error) {
-    if (isJsonBodyUnsupportedMediaTypeError(error)) {
-      return NextResponse.json(
-        { error: JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR },
-        { status: 415 },
-      );
-    }
-
-    if (isJsonBodyTooLargeError(error)) {
-      return NextResponse.json(
-        { error: JSON_REQUEST_BODY_TOO_LARGE_ERROR },
-        { status: 413 },
-      );
-    }
-
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  if (!jsonBody.ok) {
+    return NextResponse.json(
+      { error: jsonBody.error },
+      { status: jsonBody.status },
+    );
   }
+
+  const { body } = jsonBody;
 
   const question =
     typeof body === "object" && body !== null && "question" in body

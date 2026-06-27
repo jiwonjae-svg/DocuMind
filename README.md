@@ -295,7 +295,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
-- `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, and oversized body rejection.
+- `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests.
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
@@ -313,7 +313,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  24 passed (24)
-Tests       107 passed (107)
+Tests       109 passed (109)
 ```
 
 ## Useful Commands

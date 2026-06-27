@@ -4,8 +4,10 @@ import {
   isJsonBodyUnsupportedMediaTypeError,
   isJsonBodyTooLargeError,
   JSON_REQUEST_BODY_TOO_LARGE_ERROR,
+  JSON_REQUEST_INVALID_ERROR,
   JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR,
   readBoundedJsonBody,
+  readJsonBodyResult,
 } from "../lib/api/json-body";
 
 function jsonRequest(body: string, headers?: HeadersInit) {
@@ -77,9 +79,11 @@ describe("bounded JSON request bodies", () => {
     await expect(readBoundedJsonBody(request, 64)).rejects.toSatisfy((error) =>
       isJsonBodyTooLargeError(error),
     );
-    await expect(readBoundedJsonBody(jsonRequest("{}", {
-      "content-length": "128",
-    }), 64)).rejects.toThrow(JSON_REQUEST_BODY_TOO_LARGE_ERROR);
+    await expect(
+      readBoundedJsonBody(jsonRequest("{}", {
+        "content-length": "128",
+      }), 64),
+    ).rejects.toThrow(JSON_REQUEST_BODY_TOO_LARGE_ERROR);
   });
 
   it("rejects streamed bodies over the configured limit", async () => {
@@ -94,5 +98,50 @@ describe("bounded JSON request bodies", () => {
     await expect(readBoundedJsonBody(jsonRequest("{not-json"), 64)).rejects.toSatisfy(
       (error) => isJsonBodyParseError(error),
     );
+  });
+
+  it("returns parsed JSON results for route handlers", async () => {
+    await expect(
+      readJsonBodyResult(jsonRequest("{\"query\":\"hello\"}"), 64),
+    ).resolves.toEqual({
+      body: { query: "hello" },
+      ok: true,
+    });
+  });
+
+  it("maps route handler JSON body errors to stable statuses", async () => {
+    await expect(
+      readJsonBodyResult(
+        jsonRequest("{\"query\":\"hello\"}", {
+          "content-type": "text/plain",
+        }),
+        64,
+      ),
+    ).resolves.toEqual({
+      error: JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR,
+      ok: false,
+      status: 415,
+    });
+
+    await expect(
+      readJsonBodyResult(
+        jsonRequest("{}", {
+          "content-length": "128",
+        }),
+        64,
+      ),
+    ).resolves.toEqual({
+      error: JSON_REQUEST_BODY_TOO_LARGE_ERROR,
+      ok: false,
+      status: 413,
+    });
+
+    await expect(
+      readJsonBodyResult(jsonRequest("{not-json"), 64),
+    ).resolves.toEqual({
+      error: JSON_REQUEST_INVALID_ERROR,
+      ok: false,
+      status: 400,
+    });
   });
 });

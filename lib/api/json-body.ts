@@ -1,12 +1,26 @@
 export const JSON_REQUEST_BODY_LIMIT_BYTES = 16 * 1024;
 export const JSON_REQUEST_BODY_TOO_LARGE_ERROR =
   "JSON request body must be 16 KB or smaller.";
+export const JSON_REQUEST_INVALID_ERROR = "Invalid JSON body.";
 export const JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR =
   "Content-Type must be application/json.";
 
+type JsonBodyErrorStatus = 400 | 413 | 415;
+
+type JsonBodyReadResult =
+  | {
+      body: unknown;
+      ok: true;
+    }
+  | {
+      error: string;
+      ok: false;
+      status: JsonBodyErrorStatus;
+    };
+
 export class JsonBodyParseError extends Error {
   constructor() {
-    super("Invalid JSON body.");
+    super(JSON_REQUEST_INVALID_ERROR);
     this.name = "JsonBodyParseError";
   }
 }
@@ -126,6 +140,40 @@ export async function readBoundedJsonBody(
     return JSON.parse(text);
   } catch {
     throw new JsonBodyParseError();
+  }
+}
+
+export async function readJsonBodyResult(
+  request: Request,
+  limitBytes = JSON_REQUEST_BODY_LIMIT_BYTES,
+): Promise<JsonBodyReadResult> {
+  try {
+    return {
+      body: await readBoundedJsonBody(request, limitBytes),
+      ok: true,
+    };
+  } catch (error) {
+    if (isJsonBodyUnsupportedMediaTypeError(error)) {
+      return {
+        error: JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR,
+        ok: false,
+        status: 415,
+      };
+    }
+
+    if (isJsonBodyTooLargeError(error)) {
+      return {
+        error: JSON_REQUEST_BODY_TOO_LARGE_ERROR,
+        ok: false,
+        status: 413,
+      };
+    }
+
+    return {
+      error: JSON_REQUEST_INVALID_ERROR,
+      ok: false,
+      status: 400,
+    };
   }
 }
 
