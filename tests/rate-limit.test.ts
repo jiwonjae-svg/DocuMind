@@ -2,8 +2,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   AI_ANSWER_RATE_LIMIT,
   AI_ANSWER_RATE_LIMIT_ERROR,
+  AI_SEARCH_RATE_LIMIT,
+  AI_SEARCH_RATE_LIMIT_ERROR,
   buildAiAnswerRateLimitResponseInit,
+  buildAiSearchRateLimitResponseInit,
   checkAiAnswerRateLimit,
+  checkAiSearchRateLimit,
 } from "../lib/api/ai-rate-limit";
 import {
   checkRateLimit,
@@ -98,6 +102,28 @@ describe("rate limiting", () => {
 
     expect(AI_ANSWER_RATE_LIMIT_ERROR).toBe(
       "Too many answer requests. Try again shortly.",
+    );
+    expect(responseInit).toEqual({
+      headers: {
+        "Retry-After": "60",
+      },
+      status: 429,
+    });
+  });
+
+  it("shares the AI search quota across search endpoints", () => {
+    const now = () => 1000;
+
+    for (let index = 0; index < AI_SEARCH_RATE_LIMIT; index += 1) {
+      expect(checkAiSearchRateLimit("user-1", { now }).allowed).toBe(true);
+    }
+
+    const rateLimit = checkAiSearchRateLimit("user-1", { now });
+    const responseInit = buildAiSearchRateLimitResponseInit(rateLimit);
+
+    expect(rateLimit.allowed).toBe(false);
+    expect(AI_SEARCH_RATE_LIMIT_ERROR).toBe(
+      "Too many search requests. Try again shortly.",
     );
     expect(responseInit).toEqual({
       headers: {

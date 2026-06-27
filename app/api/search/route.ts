@@ -1,4 +1,9 @@
 import { auth } from "@/auth";
+import {
+  AI_SEARCH_RATE_LIMIT_ERROR,
+  buildAiSearchRateLimitResponseInit,
+  checkAiSearchRateLimit,
+} from "@/lib/api/ai-rate-limit";
 import { toApiError } from "@/lib/api/errors";
 import {
   CROSS_ORIGIN_REQUEST_ERROR,
@@ -24,6 +29,15 @@ export async function POST(request: NextRequest) {
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  const rateLimit = checkAiSearchRateLimit(session.user.id);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: AI_SEARCH_RATE_LIMIT_ERROR },
+      buildAiSearchRateLimitResponseInit(rateLimit),
+    );
   }
 
   let body: unknown;

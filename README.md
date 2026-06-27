@@ -49,7 +49,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
-- Shared per-user in-memory rate limiting for answer-generating app and agent tool endpoints.
+- Shared per-user in-memory rate limiting for AI search and answer generation across app and agent tool endpoints.
 - Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
@@ -111,7 +111,7 @@ flowchart LR
 - Dashboard semantic search UI at `/dashboard/search`
 - Grounded question answering endpoint at `POST /api/ask`
 - Agent-ready tool endpoints under `/api/tools/*`
-- Shared per-user rate limiting across answer-generating dashboard and tool endpoints
+- Shared per-user rate limiting across AI-backed dashboard and tool endpoints
 - Ask UI with source citations at `/dashboard/ask`
 - Document upload/delete audit logs
 - Semantic search audit logs
@@ -271,7 +271,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, and citation handling.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
-- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI answer quota, retry headers, and expired bucket cleanup.
+- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
@@ -296,7 +296,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  20 passed (20)
-Tests       76 passed (76)
+Tests       77 passed (77)
 ```
 
 ## Useful Commands
@@ -410,7 +410,7 @@ The endpoint returns top matching chunks for the authenticated user only:
 }
 ```
 
-Search generates the query embedding server-side and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
+Search applies a shared per-user in-memory rate limit, generates the query embedding server-side, and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
 
 ## Grounded Question Answering
 
@@ -468,7 +468,7 @@ The ask UI and API never call OpenAI from client components. The shared answer-g
 
 These endpoints are not MCP tools yet. They are scoped HTTP endpoints that can be wrapped by MCP or another agent runtime later.
 
-All tool endpoints require the same Auth.js session as the dashboard. Unauthenticated requests return `401`. Each endpoint filters by the authenticated user's `ownerId` and writes an agent tool audit log. Answer-generating tool endpoints share the same per-user in-memory rate limit as `/api/ask`.
+All tool endpoints require the same Auth.js session as the dashboard. Unauthenticated requests return `401`. Each endpoint filters by the authenticated user's `ownerId` and writes an agent tool audit log. Search and answer-generating tool endpoints share the same per-user in-memory rate limits as the dashboard APIs.
 
 ### Search Documents
 
@@ -561,7 +561,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 ## Known Limitations
 
 - Local file storage is intended for development; production should use object storage such as S3 or GCS.
-- Answer-generating endpoints use an in-memory rate limiter, which is not shared across multiple app instances.
+- AI-backed search and answer endpoints use an in-memory rate limiter, which is not shared across multiple app instances.
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - Authentication is credentials-based for demo purposes; enterprise SSO is not implemented.
