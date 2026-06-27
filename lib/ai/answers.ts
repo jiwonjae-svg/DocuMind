@@ -199,11 +199,24 @@ export function parseGroundedAnswerPayload(
   text: string,
   sourceCount: number,
 ): Omit<GroundedAnswerResult, "model"> {
-  const parsed = JSON.parse(extractJsonObject(text)) as {
+  let parsed: {
     answer?: unknown;
     citationIndexes?: unknown;
     insufficientInformation?: unknown;
   };
+
+  try {
+    parsed = JSON.parse(extractJsonObject(text)) as typeof parsed;
+  } catch (error) {
+    if (error instanceof AnswerApiError) {
+      throw error;
+    }
+
+    throw new AnswerApiError(
+      "OpenAI answer response did not contain valid JSON.",
+    );
+  }
+
   const answer =
     typeof parsed.answer === "string" ? parsed.answer.trim() : "";
 

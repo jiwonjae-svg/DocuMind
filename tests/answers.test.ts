@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import {
+  AnswerApiError,
   buildGroundedAnswerRequestBody,
   createGroundedAnswer,
   INSUFFICIENT_INFORMATION_ANSWER,
@@ -47,6 +48,15 @@ describe("grounded answer generation", () => {
       citationIndexes: [],
       insufficientInformation: true,
     });
+  });
+
+  it("maps malformed answer JSON to a stable provider error", () => {
+    expect(() => parseGroundedAnswerPayload("{\"answer\":}", 1)).toThrow(
+      AnswerApiError,
+    );
+    expect(() => parseGroundedAnswerPayload("{\"answer\":}", 1)).toThrow(
+      "OpenAI answer response did not contain valid JSON.",
+    );
   });
 
   it("keeps document instructions inside source context", () => {
@@ -162,6 +172,29 @@ describe("grounded answer generation", () => {
 
     expect(result.answer).toBe("Manager review is required before publishing.");
     expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry malformed successful answer payloads", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          output_text: "{\"answer\":}",
+        }),
+        { status: 200 },
+      ),
+    ) as unknown as typeof fetch;
+
+    await expect(
+      createGroundedAnswer({
+        apiKey: "test-key",
+        fetchImpl,
+        question: "What approval step is required?",
+        retryBaseDelayMs: 0,
+        sources,
+      }),
+    ).rejects.toThrow("OpenAI answer response did not contain valid JSON.");
+
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
   it("returns insufficient information without calling OpenAI when no sources exist", async () => {
