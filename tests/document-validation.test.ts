@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH,
   MAX_DOCUMENT_UPLOAD_BYTES,
   validateDocumentBytes,
   validateDocumentUpload,
@@ -30,6 +31,23 @@ describe("document upload validation", () => {
     });
 
     expect(result.ok).toBe(false);
+  });
+
+  it("bounds sanitized filenames while preserving the extension", () => {
+    const result = validateDocumentUpload({
+      name: `${"very-long-name-".repeat(30)}.md`,
+      size: 128,
+      type: "text/markdown",
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (result.ok) {
+      expect(result.safeFileName).toHaveLength(
+        MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH,
+      );
+      expect(result.safeFileName.endsWith(".md")).toBe(true);
+    }
   });
 
   it("rejects oversized files", () => {

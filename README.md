@@ -261,7 +261,7 @@ Unit tests use mocked `fetch` implementations for OpenAI helpers and do not requ
 The test suite is designed to cover the reliability and safety concerns that matter for AI-enabled internal tools:
 
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
-- `tests/document-validation.test.ts`: file extension, MIME type, size, and upload validation.
+- `tests/document-validation.test.ts`: file extension, MIME type, size, safe filename, and upload validation.
 - `tests/document-ownership.test.ts`: owner-scoped access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, prompt boundary construction, insufficient-information behavior, and citation handling.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
@@ -290,7 +290,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  19 passed (19)
-Tests       65 passed (65)
+Tests       66 passed (66)
 ```
 
 ## Useful Commands

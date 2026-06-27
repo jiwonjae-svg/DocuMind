@@ -1,4 +1,5 @@
 export const MAX_DOCUMENT_UPLOAD_BYTES = 10 * 1024 * 1024;
+export const MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH = 180;
 
 const allowedMimeTypesByExtension = {
   ".txt": new Set(["", "text/plain", "application/octet-stream"]),
@@ -56,12 +57,23 @@ function sanitizeStem(stem: string) {
   return sanitized || "document";
 }
 
+function truncateSafeStem(stem: string, extension: string) {
+  const maxStemLength = Math.max(
+    1,
+    MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH - extension.length,
+  );
+  const truncatedStem = stem.slice(0, maxStemLength).replace(/[._-]+$/g, "");
+
+  return truncatedStem || "document";
+}
+
 export function sanitizeDocumentFileName(fileName: string) {
   const basename = getBasename(fileName).trim();
   const extension = getExtension(basename);
   const stem = extension ? basename.slice(0, -extension.length) : basename;
+  const safeStem = truncateSafeStem(sanitizeStem(stem), extension);
 
-  return `${sanitizeStem(stem)}${extension}`;
+  return `${safeStem}${extension}`;
 }
 
 export function validateDocumentUpload(
