@@ -2,6 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { extractDocumentText } from "./extraction";
 import { splitTextIntoChunks, TextChunk } from "./chunking";
 import { embedMissingDocumentChunks } from "./embeddings";
+import {
+  DOCUMENT_PROCESSING_NO_TEXT_ERROR,
+  normalizeDocumentProcessingError,
+} from "./processing-errors";
 
 type ProcessDocumentResult =
   | {
@@ -13,14 +17,6 @@ type ProcessDocumentResult =
       error: string;
       status: "FAILED";
     };
-
-function toProcessingError(error: unknown) {
-  if (error instanceof Error && error.message.trim()) {
-    return error.message.slice(0, 1000);
-  }
-
-  return "Document processing failed.";
-}
 
 function approximateTokenCount(content: string) {
   return Math.ceil(content.length / 4);
@@ -71,7 +67,7 @@ export function createChunksForDocumentText({
   const chunks = splitTextIntoChunks(text);
 
   if (chunks.length === 0) {
-    throw new Error("No extractable text found in document.");
+    throw new Error(DOCUMENT_PROCESSING_NO_TEXT_ERROR);
   }
 
   return buildChunkData({ chunks, document });
@@ -166,7 +162,7 @@ export async function processDocument(
       status: "READY",
     };
   } catch (error) {
-    const processingError = toProcessingError(error);
+    const processingError = normalizeDocumentProcessingError(error);
 
     await prisma.$transaction([
       prisma.documentChunk.deleteMany({

@@ -55,6 +55,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - OpenAI embedding and answer requests use bounded timeouts with retry handling for transient failures.
 - Shared per-user in-memory rate limiting for AI search and answer generation across app and agent tool endpoints.
 - AI rate limits are applied after request validation and immediately before AI-backed work.
+- Document processing failure messages are normalized before being stored or shown in the dashboard.
 - Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
 - Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
@@ -281,6 +282,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
+- `tests/document-processing.test.ts`: document processing failure messages avoid leaking provider or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded audit metadata formatting and raw query/question text avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query and limit validation.
@@ -387,6 +389,7 @@ After upload, documents are processed server-side:
 - Existing chunk embeddings are skipped when backfilling missing embeddings.
 - Status changes to `READY` when chunks and embeddings are stored.
 - Status changes to `FAILED` with a processing error when extraction fails or no text is found.
+- Failed processing stores a normalized user-facing error instead of raw provider, parser, or filesystem details.
 
 ## Semantic Search
 
