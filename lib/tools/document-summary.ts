@@ -44,10 +44,16 @@ export function normalizeDocumentId(documentId: unknown) {
 }
 
 export function selectSummaryChunks(chunks: SummaryChunk[]) {
+  const eligibleChunks = chunks
+    .map((chunk) => ({
+      chunkIndex: chunk.chunkIndex,
+      content: chunk.content.trim(),
+    }))
+    .filter((chunk) => chunk.content.length > 0);
   const selected: SummaryChunk[] = [];
   let usedChars = 0;
 
-  for (const chunk of chunks) {
+  for (const chunk of eligibleChunks) {
     if (selected.length >= MAX_SUMMARY_CHUNKS) {
       break;
     }
@@ -73,11 +79,10 @@ export function selectSummaryChunks(chunks: SummaryChunk[]) {
   return {
     chunks: selected,
     truncated:
-      selected.length < chunks.length ||
+      selected.length < eligibleChunks.length ||
       selected.some(
-        (selectedChunk) =>
-          chunks.find((chunk) => chunk.chunkIndex === selectedChunk.chunkIndex)
-            ?.content.length !== selectedChunk.content.length,
+        (selectedChunk, index) =>
+          selectedChunk.content.length !== eligibleChunks[index]?.content.length,
       ),
   };
 }

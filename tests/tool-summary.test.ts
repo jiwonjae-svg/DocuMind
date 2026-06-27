@@ -29,6 +29,23 @@ describe("agent tool summary helpers", () => {
     expect(selected.truncated).toBe(true);
   });
 
+  it("skips blank summary chunks and trims selected context", () => {
+    const selected = selectSummaryChunks([
+      { chunkIndex: 0, content: "   " },
+      { chunkIndex: 1, content: "  Alpha policy note.  " },
+      { chunkIndex: 2, content: "\n\t" },
+      { chunkIndex: 3, content: "\nBeta action item.\n" },
+    ]);
+
+    expect(selected).toEqual({
+      chunks: [
+        { chunkIndex: 1, content: "Alpha policy note." },
+        { chunkIndex: 3, content: "Beta action item." },
+      ],
+      truncated: false,
+    });
+  });
+
   it("creates concise snippets", () => {
     expect(createSnippet("  alpha   beta  ", 20)).toBe("alpha beta");
     expect(createSnippet("a".repeat(30), 10)).toBe("aaaaaaaaa...");
