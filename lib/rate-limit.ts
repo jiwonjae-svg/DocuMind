@@ -11,11 +11,20 @@ type RateLimitOptions = {
 
 const buckets = new Map<string, RateLimitState>();
 
+export function pruneExpiredRateLimitBuckets(now = Date.now()) {
+  for (const [key, bucket] of buckets.entries()) {
+    if (bucket.resetAt <= now) {
+      buckets.delete(key);
+    }
+  }
+}
+
 export function checkRateLimit(
   key: string,
   { limit, now = Date.now, windowMs }: RateLimitOptions,
 ) {
   const currentTime = now();
+  pruneExpiredRateLimitBuckets(currentTime);
   const existing = buckets.get(key);
 
   if (!existing || existing.resetAt <= currentTime) {
@@ -57,4 +66,8 @@ export function checkRateLimit(
 
 export function clearRateLimitBuckets() {
   buckets.clear();
+}
+
+export function getRateLimitBucketCount() {
+  return buckets.size;
 }

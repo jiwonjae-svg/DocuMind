@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { checkRateLimit, clearRateLimitBuckets } from "../lib/rate-limit";
+import {
+  checkRateLimit,
+  clearRateLimitBuckets,
+  getRateLimitBucketCount,
+  pruneExpiredRateLimitBuckets,
+} from "../lib/rate-limit";
 
 describe("rate limiting", () => {
   beforeEach(() => {
@@ -34,5 +39,34 @@ describe("rate limiting", () => {
     expect(
       checkRateLimit("user-1", { limit: 1, now, windowMs: 60_000 }).allowed,
     ).toBe(true);
+  });
+
+  it("prunes expired buckets when checking a new key", () => {
+    checkRateLimit("expired-user", {
+      limit: 1,
+      now: () => 1000,
+      windowMs: 60_000,
+    });
+    expect(getRateLimitBucketCount()).toBe(1);
+
+    checkRateLimit("active-user", {
+      limit: 1,
+      now: () => 61_000,
+      windowMs: 60_000,
+    });
+
+    expect(getRateLimitBucketCount()).toBe(1);
+  });
+
+  it("keeps active buckets during pruning", () => {
+    checkRateLimit("active-user", {
+      limit: 1,
+      now: () => 1000,
+      windowMs: 60_000,
+    });
+
+    pruneExpiredRateLimitBuckets(60_999);
+
+    expect(getRateLimitBucketCount()).toBe(1);
   });
 });

@@ -263,7 +263,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-ownership.test.ts`: owner-scoped access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, prompt boundary construction, insufficient-information behavior, and citation handling.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
-- `tests/rate-limit.test.ts`: per-user rate limiting behavior.
+- `tests/rate-limit.test.ts`: per-user rate limiting behavior and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
@@ -286,7 +286,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  17 passed (17)
-Tests       55 passed (55)
+Tests       57 passed (57)
 ```
 
 ## Useful Commands
