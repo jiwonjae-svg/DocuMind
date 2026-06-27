@@ -5,6 +5,7 @@ export const INSUFFICIENT_INFORMATION_ANSWER =
   "I don't have enough information in the retrieved documents to answer that.";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+const MAX_ANSWER_OUTPUT_TOKENS = 1600;
 const TRANSIENT_STATUS_CODES = new Set([408, 409, 429, 500, 502, 503, 504]);
 
 type FetchLike = typeof fetch;
@@ -41,6 +42,13 @@ type ResponsesApiBody = {
     }>;
   }>;
   output_text?: unknown;
+};
+
+export type GroundedAnswerRequestBody = {
+  input: string;
+  instructions: string;
+  max_output_tokens: number;
+  model: string;
 };
 
 export class AnswerConfigurationError extends Error {
@@ -129,6 +137,23 @@ ${question}
 
 Sources:
 ${sourceText}`;
+}
+
+export function buildGroundedAnswerRequestBody({
+  model,
+  question,
+  sources,
+}: {
+  model: string;
+  question: string;
+  sources: AnswerSource[];
+}): GroundedAnswerRequestBody {
+  return {
+    input: buildInput(question.trim(), sources),
+    instructions: buildInstructions(),
+    max_output_tokens: MAX_ANSWER_OUTPUT_TOKENS,
+    model,
+  };
 }
 
 function stripJsonFence(text: string) {
@@ -296,12 +321,13 @@ export async function createGroundedAnswer({
   while (true) {
     try {
       const response = await fetchImpl(OPENAI_RESPONSES_URL, {
-        body: JSON.stringify({
-          input: buildInput(normalizedQuestion, sources),
-          instructions: buildInstructions(),
-          max_output_tokens: 1600,
-          model: answerModel,
-        }),
+        body: JSON.stringify(
+          buildGroundedAnswerRequestBody({
+            model: answerModel,
+            question: normalizedQuestion,
+            sources,
+          }),
+        ),
         headers: {
           Authorization: `Bearer ${key}`,
           "Content-Type": "application/json",

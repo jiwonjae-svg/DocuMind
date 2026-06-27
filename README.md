@@ -256,7 +256,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
 - `tests/document-validation.test.ts`: file extension, MIME type, size, and upload validation.
 - `tests/document-ownership.test.ts`: owner-scoped access control for document operations.
-- `tests/answers.test.ts`: grounded answer formatting, insufficient-information behavior, and citation handling.
+- `tests/answers.test.ts`: grounded answer formatting, prompt boundary construction, insufficient-information behavior, and citation handling.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
@@ -279,7 +279,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  15 passed (15)
-Tests       50 passed (50)
+Tests       51 passed (51)
 ```
 
 ## Useful Commands
