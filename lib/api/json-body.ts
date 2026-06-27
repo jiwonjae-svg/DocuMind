@@ -1,6 +1,8 @@
 export const JSON_REQUEST_BODY_LIMIT_BYTES = 16 * 1024;
 export const JSON_REQUEST_BODY_TOO_LARGE_ERROR =
   "JSON request body must be 16 KB or smaller.";
+export const JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR =
+  "Content-Type must be application/json.";
 
 export class JsonBodyParseError extends Error {
   constructor() {
@@ -13,6 +15,26 @@ export class JsonBodyTooLargeError extends Error {
   constructor() {
     super(JSON_REQUEST_BODY_TOO_LARGE_ERROR);
     this.name = "JsonBodyTooLargeError";
+  }
+}
+
+export class JsonBodyUnsupportedMediaTypeError extends Error {
+  constructor() {
+    super(JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR);
+    this.name = "JsonBodyUnsupportedMediaTypeError";
+  }
+}
+
+function isJsonContentType(contentType: string | null) {
+  return contentType
+    ?.toLowerCase()
+    .split(";")[0]
+    .trim() === "application/json";
+}
+
+function assertJsonContentType(headers: Headers) {
+  if (!isJsonContentType(headers.get("content-type"))) {
+    throw new JsonBodyUnsupportedMediaTypeError();
   }
 }
 
@@ -88,6 +110,8 @@ export async function readBoundedJsonBody(
 ): Promise<unknown> {
   let text: string;
 
+  assertJsonContentType(request.headers);
+
   try {
     text = await readBoundedRequestText(request, limitBytes);
   } catch (error) {
@@ -111,4 +135,8 @@ export function isJsonBodyParseError(error: unknown) {
 
 export function isJsonBodyTooLargeError(error: unknown) {
   return error instanceof JsonBodyTooLargeError;
+}
+
+export function isJsonBodyUnsupportedMediaTypeError(error: unknown) {
+  return error instanceof JsonBodyUnsupportedMediaTypeError;
 }

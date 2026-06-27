@@ -10,8 +10,10 @@ import {
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
 import {
+  isJsonBodyUnsupportedMediaTypeError,
   isJsonBodyTooLargeError,
   JSON_REQUEST_BODY_TOO_LARGE_ERROR,
+  JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR,
   readBoundedJsonBody,
 } from "@/lib/api/json-body";
 import { prisma } from "@/lib/prisma";
@@ -43,6 +45,13 @@ export async function POST(request: NextRequest) {
   try {
     body = await readBoundedJsonBody(request);
   } catch (error) {
+    if (isJsonBodyUnsupportedMediaTypeError(error)) {
+      return NextResponse.json(
+        { error: JSON_REQUEST_UNSUPPORTED_MEDIA_TYPE_ERROR },
+        { status: 415 },
+      );
+    }
+
     if (isJsonBodyTooLargeError(error)) {
       return NextResponse.json(
         { error: JSON_REQUEST_BODY_TOO_LARGE_ERROR },
