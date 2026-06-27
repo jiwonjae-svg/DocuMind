@@ -1,7 +1,6 @@
 export const DEFAULT_SEARCH_LIMIT = 5;
 export const MAX_SEARCH_LIMIT = 10;
-
-const MAX_QUERY_LENGTH = 1000;
+export const MAX_SEARCH_QUERY_LENGTH = 1000;
 
 export function normalizeSearchQuery(query: unknown) {
   if (typeof query !== "string") {
@@ -10,7 +9,10 @@ export function normalizeSearchQuery(query: unknown) {
 
   const normalizedQuery = query.replace(/\s+/g, " ").trim();
 
-  if (!normalizedQuery || normalizedQuery.length > MAX_QUERY_LENGTH) {
+  if (
+    !normalizedQuery ||
+    normalizedQuery.length > MAX_SEARCH_QUERY_LENGTH
+  ) {
     return null;
   }
 

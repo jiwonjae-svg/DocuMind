@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon, IconTile, ui } from "@/components/ui";
+import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
 import { FormEvent, useState } from "react";
 
 type Citation = {
@@ -132,13 +133,15 @@ export function AskForm() {
             id="question"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            maxLength={1000}
+            maxLength={MAX_SEARCH_QUERY_LENGTH}
             rows={7}
             className={`mt-2 block min-h-44 resize-y leading-6 ${ui.input}`}
             placeholder="What does the onboarding guide say about approval steps?"
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-500">{question.length}/1000</p>
+            <p className="text-xs text-slate-500">
+              {question.length}/{MAX_SEARCH_QUERY_LENGTH}
+            </p>
             <button
               type="submit"
               disabled={isPending}

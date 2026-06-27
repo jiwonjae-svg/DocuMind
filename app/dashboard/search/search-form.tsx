@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon, IconTile, ui } from "@/components/ui";
+import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
 import { FormEvent, useState } from "react";
 
 type SearchResult = {
@@ -101,13 +102,15 @@ export function SearchForm() {
             id="query"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            maxLength={1000}
+            maxLength={MAX_SEARCH_QUERY_LENGTH}
             rows={5}
             className={`mt-2 block min-h-36 resize-y leading-6 ${ui.input}`}
             placeholder="Search policies, onboarding guides, and project notes..."
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-500">{query.length}/1000</p>
+            <p className="text-xs text-slate-500">
+              {query.length}/{MAX_SEARCH_QUERY_LENGTH}
+            </p>
             <button
               type="submit"
               disabled={isPending}

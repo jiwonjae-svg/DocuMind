@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SEARCH_LIMIT,
+  MAX_SEARCH_QUERY_LENGTH,
   MAX_SEARCH_LIMIT,
   normalizeSearchLimit,
   normalizeSearchQuery,
@@ -16,7 +17,9 @@ describe("search validation", () => {
   it("rejects invalid search queries", () => {
     expect(normalizeSearchQuery("")).toBeNull();
     expect(normalizeSearchQuery("   \n\t")).toBeNull();
-    expect(normalizeSearchQuery("x".repeat(1001))).toBeNull();
+    expect(
+      normalizeSearchQuery("x".repeat(MAX_SEARCH_QUERY_LENGTH + 1)),
+    ).toBeNull();
     expect(normalizeSearchQuery(null)).toBeNull();
   });
 

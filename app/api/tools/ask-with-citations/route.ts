@@ -16,6 +16,7 @@ import {
   answerGroundedQuestion,
   normalizeQuestion,
 } from "@/lib/qa/grounded-answer";
+import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
 import {
   type GroundedAnswerPersistenceDb,
   persistGroundedAnswer,
@@ -58,7 +59,9 @@ export async function POST(request: NextRequest) {
 
   if (!question) {
     return NextResponse.json(
-      { error: "Question must be between 1 and 1000 characters." },
+      {
+        error: `Question must be between 1 and ${MAX_SEARCH_QUERY_LENGTH} characters.`,
+      },
       { status: 400 },
     );
   }

@@ -15,7 +15,11 @@ import {
 import { buildSearchAuditMetadata } from "@/lib/audit/metadata";
 import { prisma } from "@/lib/prisma";
 import { searchDocumentChunks } from "@/lib/search/semantic";
-import { normalizeSearchLimit, normalizeSearchQuery } from "@/lib/search/validation";
+import {
+  MAX_SEARCH_QUERY_LENGTH,
+  normalizeSearchLimit,
+  normalizeSearchQuery,
+} from "@/lib/search/validation";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -53,7 +57,9 @@ export async function POST(request: NextRequest) {
 
   if (!query) {
     return NextResponse.json(
-      { error: "Search query must be between 1 and 1000 characters." },
+      {
+        error: `Search query must be between 1 and ${MAX_SEARCH_QUERY_LENGTH} characters.`,
+      },
       { status: 400 },
     );
   }
