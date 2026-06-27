@@ -1,4 +1,9 @@
 import { auth } from "@/auth";
+import {
+  AI_ANSWER_RATE_LIMIT_ERROR,
+  buildAiAnswerRateLimitResponseInit,
+  checkAiAnswerRateLimit,
+} from "@/lib/api/ai-rate-limit";
 import { toApiError } from "@/lib/api/errors";
 import {
   CROSS_ORIGIN_REQUEST_ERROR,
@@ -9,14 +14,10 @@ import {
   normalizeQuestion,
 } from "@/lib/qa/grounded-answer";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-
-const ASK_RATE_LIMIT = 10;
-const ASK_RATE_LIMIT_WINDOW_MS = 60_000;
 
 export async function POST(request: NextRequest) {
   if (!isSameOriginRequest(request)) {
@@ -32,20 +33,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit(`ask:${session.user.id}`, {
-    limit: ASK_RATE_LIMIT,
-    windowMs: ASK_RATE_LIMIT_WINDOW_MS,
-  });
+  const rateLimit = checkAiAnswerRateLimit(session.user.id);
 
   if (!rateLimit.allowed) {
     return NextResponse.json(
-      { error: "Too many ask requests. Try again shortly." },
-      {
-        headers: {
-          "Retry-After": String(rateLimit.retryAfterSeconds),
-        },
-        status: 429,
-      },
+      { error: AI_ANSWER_RATE_LIMIT_ERROR },
+      buildAiAnswerRateLimitResponseInit(rateLimit),
     );
   }
 
