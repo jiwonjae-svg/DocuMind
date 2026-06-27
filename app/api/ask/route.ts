@@ -1,6 +1,10 @@
 import { auth } from "@/auth";
 import { toApiError } from "@/lib/api/errors";
 import {
+  CROSS_ORIGIN_REQUEST_ERROR,
+  isSameOriginRequest,
+} from "@/lib/api/request-origin";
+import {
   answerGroundedQuestion,
   normalizeQuestion,
 } from "@/lib/qa/grounded-answer";
@@ -15,6 +19,13 @@ const ASK_RATE_LIMIT = 10;
 const ASK_RATE_LIMIT_WINDOW_MS = 60_000;
 
 export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json(
+      { error: CROSS_ORIGIN_REQUEST_ERROR },
+      { status: 403 },
+    );
+  }
+
   const session = await auth();
 
   if (!session?.user?.id) {

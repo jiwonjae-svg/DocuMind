@@ -1,5 +1,9 @@
 import { rm } from "node:fs/promises";
 import { auth } from "@/auth";
+import {
+  CROSS_ORIGIN_REQUEST_ERROR,
+  isSameOriginRequest,
+} from "@/lib/api/request-origin";
 import { isDocumentOwner } from "@/lib/documents/access";
 import { resolveStoragePath } from "@/lib/documents/storage";
 import { prisma } from "@/lib/prisma";
@@ -25,6 +29,10 @@ function redirectToDocuments(request: NextRequest, params: Record<string, string
 }
 
 export async function POST(request: NextRequest, context: DeleteRouteContext) {
+  if (!isSameOriginRequest(request)) {
+    return redirectToDocuments(request, { error: CROSS_ORIGIN_REQUEST_ERROR });
+  }
+
   const session = await auth();
 
   if (!session?.user?.id) {

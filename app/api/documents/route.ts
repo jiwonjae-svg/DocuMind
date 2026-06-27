@@ -3,6 +3,10 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { auth } from "@/auth";
 import {
+  CROSS_ORIGIN_REQUEST_ERROR,
+  isSameOriginRequest,
+} from "@/lib/api/request-origin";
+import {
   buildDocumentStoragePath,
   resolveStoragePath,
 } from "@/lib/documents/storage";
@@ -44,6 +48,10 @@ function getTitleFromFileName(fileName: string) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) {
+    return redirectToDocuments(request, { error: CROSS_ORIGIN_REQUEST_ERROR });
+  }
+
   const session = await auth();
 
   if (!session?.user?.id) {

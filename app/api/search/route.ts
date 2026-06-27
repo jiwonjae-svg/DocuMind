@@ -1,5 +1,9 @@
 import { auth } from "@/auth";
 import { toApiError } from "@/lib/api/errors";
+import {
+  CROSS_ORIGIN_REQUEST_ERROR,
+  isSameOriginRequest,
+} from "@/lib/api/request-origin";
 import { prisma } from "@/lib/prisma";
 import { searchDocumentChunks } from "@/lib/search/semantic";
 import { normalizeSearchLimit, normalizeSearchQuery } from "@/lib/search/validation";
@@ -9,6 +13,13 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json(
+      { error: CROSS_ORIGIN_REQUEST_ERROR },
+      { status: 403 },
+    );
+  }
+
   const session = await auth();
 
   if (!session?.user?.id) {
