@@ -92,6 +92,7 @@ flowchart LR
 - Responsive landing page
 - Auth.js credentials authentication
 - PostgreSQL support through Prisma
+- Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Protected dashboard navigation at `/dashboard`
@@ -273,6 +274,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests.
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
+- `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 
 Run the suite with:
 
@@ -283,8 +285,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  16 passed (16)
-Tests       53 passed (53)
+Test Files  17 passed (17)
+Tests       55 passed (55)
 ```
 
 ## Useful Commands
