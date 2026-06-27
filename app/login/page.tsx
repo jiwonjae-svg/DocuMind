@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
+import { normalizeLoginCallbackUrl } from "@/lib/auth/callback-url";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./login-form";
@@ -15,7 +16,7 @@ function readParam(value: string | string[] | undefined) {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
   const params = searchParams ? await searchParams : {};
-  const callbackUrl = readParam(params.callbackUrl) ?? "/dashboard";
+  const callbackUrl = normalizeLoginCallbackUrl(readParam(params.callbackUrl));
 
   if (session?.user) {
     redirect(callbackUrl);

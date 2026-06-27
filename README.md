@@ -91,6 +91,7 @@ flowchart LR
 - Tailwind CSS
 - Responsive landing page
 - Auth.js credentials authentication
+- App-relative login callback URL normalization
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
@@ -275,6 +276,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
+- `tests/auth-callback-url.test.ts`: login redirects reject external callback URLs.
 
 Run the suite with:
 
@@ -285,8 +287,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  17 passed (17)
-Tests       57 passed (57)
+Test Files  18 passed (18)
+Tests       60 passed (60)
 ```
 
 ## Useful Commands
