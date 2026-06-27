@@ -122,14 +122,15 @@ const plannedFeatures = [
 
 const demoSteps = [
   "Sign in with the prefilled demo account",
-  "Open Documents and review existing files; upload a short .txt or .md file if the list is empty",
+  "Open Documents and review existing files; upload a short .txt or .md file if needed",
   "Run a semantic search to inspect top matching chunks and scores",
-  "Ask a grounded question from the Ask page",
-  "Check the answer, source citations, matched snippets, and confidence boundaries",
+  "Ask a grounded question using content from the uploaded or demo document",
+  "Check the answer, source citations, matched snippets, and insufficient-information behavior",
   "Review owner-scoped audit log entries for your activity",
 ] as const;
 
-const implementationUrl = "https://github.com/jiwonjae-svg/DocuMind#readme";
+const implementationUrl =
+  "https://github.com/jiwonjae-svg/DocuMind/blob/main/README.md";
 
 export default function Home() {
   return (
@@ -190,7 +191,7 @@ export default function Home() {
                 href={implementationUrl}
                 target="_blank"
                 rel="noreferrer"
-                aria-label="View the DocuMind implementation README on GitHub"
+                aria-label="View the DocuMind README implementation notes on GitHub"
                 className={`${ui.secondaryButton} w-full sm:w-auto`}
               >
                 <Icon name="view" className="h-5 w-5 text-blue-700" />
@@ -264,7 +265,8 @@ export default function Home() {
             The MVP focuses on secure retrieval-augmented document workflows:
             authentication, ownership checks, document processing, vector
             search, grounded answers, and auditable tool APIs. Everything in
-            this section is available in the current demo.
+            this section is implemented in the current demo; planned work is
+            separated below.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -292,7 +294,8 @@ export default function Home() {
               Intentionally outside the current MVP
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              These items are planned and are not part of the current demo.
+              Planned for production hardening; not implemented in the current
+              demo.
             </p>
           </div>
           <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
@@ -377,7 +380,7 @@ export default function Home() {
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
               What reviewers should test
             </h2>
-            <ol
+            <ul
               aria-label="Try the demo steps"
               className="mt-5 grid list-none gap-3 p-0"
             >
@@ -392,7 +395,7 @@ export default function Home() {
                   <span>{step}</span>
                 </li>
               ))}
-            </ol>
+            </ul>
             <p className="mt-5 text-sm leading-6 text-slate-500">
               The dashboard now includes an owner-scoped audit log view for
               the signed-in user. Organization-wide admin audit review remains

@@ -319,7 +319,14 @@ Password: DocuMindDemo123!
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
-For a quick reviewer pass, sign in, open Documents, upload or review a small `.txt` or `.md` file, run a semantic search from the Search page, ask a grounded question from the Ask page, then confirm source citations and your owner-scoped audit log entries.
+For a quick reviewer pass:
+
+1. Sign in with the seeded demo account.
+2. Open Documents and review existing files, or upload a short `.txt` or `.md` file.
+3. Run a semantic search from the Search page and inspect matching chunks and scores.
+4. Ask a grounded question using content from the uploaded or demo document.
+5. Confirm the answer, source citations, matched snippets, and insufficient-information behavior.
+6. Review owner-scoped audit log entries for your activity.
 
 ## Audit Logs
 
