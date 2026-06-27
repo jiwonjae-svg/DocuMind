@@ -42,6 +42,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Same-origin checks for authenticated mutating POST routes.
+- Baseline security headers and `no-store` caching for API responses.
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
@@ -94,6 +95,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Protected dashboard navigation at `/dashboard`
 - Browser-origin checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
+- Security headers for browser hardening and `Cache-Control: no-store` on API routes
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
 - OpenAI embeddings for document chunks
@@ -265,6 +267,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests.
+- `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 
 Run the suite with:
 
@@ -275,8 +278,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  14 passed (14)
-Tests       48 passed (48)
+Test Files  15 passed (15)
+Tests       50 passed (50)
 ```
 
 ## Useful Commands
