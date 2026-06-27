@@ -5,6 +5,10 @@ import { createEmbedding, toPgVector } from "@/lib/ai/embeddings";
 import { SEARCH_EMBEDDING_BACKFILL_LIMIT } from "@/lib/documents/embedding-limits";
 import { embedMissingDocumentChunks } from "@/lib/documents/embeddings";
 import { prisma } from "@/lib/prisma";
+import {
+  hasSearchableChunk,
+  type SearchableChunkAvailabilityRow,
+} from "@/lib/search/availability";
 import { DEFAULT_SEARCH_LIMIT } from "@/lib/search/validation";
 import { createSnippet } from "@/lib/text/snippet";
 
@@ -32,6 +36,22 @@ export type PublicSemanticSearchResult = Pick<
   "chunkIndex" | "documentTitle" | "similarityScore" | "snippet"
 >;
 
+async function hasSearchableDocumentChunks(ownerId: string) {
+  const rows = await prisma.$queryRaw<SearchableChunkAvailabilityRow[]>(Prisma.sql`
+    SELECT EXISTS (
+      SELECT 1
+      FROM "document_chunks" dc
+      INNER JOIN "documents" d ON d."id" = dc."documentId"
+      WHERE dc."ownerId" = ${ownerId}
+        AND d."ownerId" = ${ownerId}
+        AND d."status" = 'READY'::"DocumentStatus"
+        AND dc."embedding" IS NOT NULL
+    ) AS "exists"
+  `);
+
+  return hasSearchableChunk(rows);
+}
+
 export async function retrieveRelevantDocumentChunks({
   limit = DEFAULT_SEARCH_LIMIT,
   ownerId,
@@ -45,6 +65,10 @@ export async function retrieveRelevantDocumentChunks({
     limit: SEARCH_EMBEDDING_BACKFILL_LIMIT,
     ownerId,
   });
+
+  if (!(await hasSearchableDocumentChunks(ownerId))) {
+    return [];
+  }
 
   const queryEmbedding = await createEmbedding(query);
   const queryVector = toPgVector(queryEmbedding.embedding);

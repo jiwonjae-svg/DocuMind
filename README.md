@@ -47,6 +47,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
+- Empty searches skip query embedding when the signed-in user has no searchable ready chunks.
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
@@ -278,6 +279,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded audit metadata formatting for dashboard display.
 - `tests/search-validation.test.ts`: semantic search query and limit validation.
+- `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests.
@@ -296,8 +298,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  20 passed (20)
-Tests       79 passed (79)
+Test Files  21 passed (21)
+Tests       82 passed (82)
 ```
 
 ## Useful Commands
@@ -414,6 +416,7 @@ The endpoint returns top matching chunks for the authenticated user only:
 Search applies a shared per-user in-memory rate limit, generates the query embedding server-side, and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
 
 If ready chunks are missing embeddings, search backfills only a bounded batch per request. Full document processing still embeds all chunks for the uploaded document.
+If no ready chunks have embeddings after that bounded backfill, search returns an empty result set without generating a query embedding.
 
 ## Grounded Question Answering
 
