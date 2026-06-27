@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { buildAuditLogOwnerWhere } from "@/lib/audit/access";
+import { formatAuditMetadata } from "@/lib/audit/formatting";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -29,45 +30,6 @@ function formatTimestamp(date: Date) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
-}
-
-function formatMetadataValue(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  if (typeof value === "string") {
-    return value.length > 80 ? `${value.slice(0, 77)}...` : value;
-  }
-
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-
-  if (Array.isArray(value)) {
-    return `${value.length} items`;
-  }
-
-  return JSON.stringify(value);
-}
-
-function formatMetadata(metadata: unknown) {
-  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
-    return null;
-  }
-
-  const entries = Object.entries(metadata)
-    .map(([key, value]) => [key, formatMetadataValue(value)] as const)
-    .filter(([, value]) => value.length > 0);
-
-  if (entries.length === 0) {
-    return null;
-  }
-
-  return entries
-    .slice(0, 4)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(" / ");
 }
 
 export default async function AuditLogsPage() {
@@ -182,7 +144,7 @@ export default async function AuditLogsPage() {
           ) : (
             <div className="divide-y divide-slate-200">
               {auditLogs.map((log) => {
-                const metadata = formatMetadata(log.metadata);
+                const metadata = formatAuditMetadata(log.metadata);
 
                 return (
                   <article

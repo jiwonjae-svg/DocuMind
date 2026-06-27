@@ -258,6 +258,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
+- `tests/audit-formatting.test.ts`: bounded audit metadata formatting for dashboard display.
 - `tests/search-validation.test.ts`: semantic search query and limit validation.
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
@@ -271,8 +272,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  12 passed (12)
-Tests       40 passed (40)
+Test Files  13 passed (13)
+Tests       44 passed (44)
 ```
 
 ## Useful Commands
@@ -310,6 +311,7 @@ The page is intentionally owner-scoped for the MVP:
 - It authenticates the user with Auth.js before querying.
 - It filters `AuditLog.actorId` to the current session user.
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
+- Metadata display is capped to keep long filenames, provider details, or nested values from dominating the audit screen.
 - Upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available.
 - It does not expose other users' audit records.
 
