@@ -46,6 +46,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Baseline security headers and `no-store` caching for API responses.
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
+- Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
@@ -270,7 +271,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, and citation handling.
-- `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
+- `tests/embeddings.test.ts`: OpenAI embedding helper behavior, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
@@ -296,7 +297,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  20 passed (20)
-Tests       77 passed (77)
+Tests       79 passed (79)
 ```
 
 ## Useful Commands
@@ -411,6 +412,8 @@ The endpoint returns top matching chunks for the authenticated user only:
 ```
 
 Search applies a shared per-user in-memory rate limit, generates the query embedding server-side, and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
+
+If ready chunks are missing embeddings, search backfills only a bounded batch per request. Full document processing still embeds all chunks for the uploaded document.
 
 ## Grounded Question Answering
 

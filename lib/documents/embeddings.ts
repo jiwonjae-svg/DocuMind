@@ -3,6 +3,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { createEmbedding, toPgVector } from "@/lib/ai/embeddings";
 import { prisma } from "@/lib/prisma";
+import { normalizeEmbeddingBackfillLimit } from "./embedding-limits";
 
 type EmbeddableChunk = {
   content: string;
@@ -11,11 +12,13 @@ type EmbeddableChunk = {
 
 type EmbedMissingChunksOptions = {
   documentId?: string;
+  limit?: number;
   ownerId: string;
 };
 
 async function findMissingDocumentChunkEmbeddings({
   documentId,
+  limit,
   ownerId,
 }: EmbedMissingChunksOptions) {
   if (documentId) {
@@ -26,6 +29,22 @@ async function findMissingDocumentChunkEmbeddings({
         AND "ownerId" = ${ownerId}
         AND "embedding" IS NULL
       ORDER BY "chunkIndex" ASC
+    `);
+  }
+
+  const normalizedLimit = normalizeEmbeddingBackfillLimit(limit);
+
+  if (normalizedLimit) {
+    return prisma.$queryRaw<EmbeddableChunk[]>(Prisma.sql`
+      SELECT dc."id", dc."content"
+      FROM "document_chunks" dc
+      INNER JOIN "documents" d ON d."id" = dc."documentId"
+      WHERE dc."ownerId" = ${ownerId}
+        AND d."ownerId" = ${ownerId}
+        AND d."status" = 'READY'::"DocumentStatus"
+        AND dc."embedding" IS NULL
+      ORDER BY d."createdAt" DESC, dc."chunkIndex" ASC
+      LIMIT ${normalizedLimit}
     `);
   }
 

@@ -2,6 +2,7 @@ import "server-only";
 
 import { Prisma } from "@prisma/client";
 import { createEmbedding, toPgVector } from "@/lib/ai/embeddings";
+import { SEARCH_EMBEDDING_BACKFILL_LIMIT } from "@/lib/documents/embedding-limits";
 import { embedMissingDocumentChunks } from "@/lib/documents/embeddings";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_SEARCH_LIMIT } from "@/lib/search/validation";
@@ -40,7 +41,10 @@ export async function retrieveRelevantDocumentChunks({
   ownerId: string;
   query: string;
 }): Promise<SemanticSearchResult[]> {
-  await embedMissingDocumentChunks({ ownerId });
+  await embedMissingDocumentChunks({
+    limit: SEARCH_EMBEDDING_BACKFILL_LIMIT,
+    ownerId,
+  });
 
   const queryEmbedding = await createEmbedding(query);
   const queryVector = toPgVector(queryEmbedding.embedding);
