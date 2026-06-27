@@ -58,5 +58,9 @@ describe("agent tool summary helpers", () => {
     expect(createSnippet("a".repeat(DEFAULT_SNIPPET_LENGTH + 10))).toHaveLength(
       DEFAULT_SNIPPET_LENGTH,
     );
+    expect(createSnippet("a".repeat(DEFAULT_SNIPPET_LENGTH + 10), NaN))
+      .toHaveLength(DEFAULT_SNIPPET_LENGTH);
+    expect(createSnippet("a".repeat(DEFAULT_SNIPPET_LENGTH + 10), Infinity))
+      .toHaveLength(DEFAULT_SNIPPET_LENGTH);
   });
 });
