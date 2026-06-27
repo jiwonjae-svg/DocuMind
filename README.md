@@ -260,6 +260,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/search-validation.test.ts`: semantic search query and limit validation.
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
+- `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
 
 Run the suite with:
 
@@ -270,8 +271,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  11 passed (11)
-Tests       36 passed (36)
+Test Files  12 passed (12)
+Tests       40 passed (40)
 ```
 
 ## Useful Commands
@@ -377,7 +378,7 @@ The endpoint returns top matching chunks for the authenticated user only:
 }
 ```
 
-Search generates the query embedding server-side and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count.
+Search generates the query embedding server-side and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
 
 ## Grounded Question Answering
 
@@ -429,7 +430,7 @@ Response shape:
 }
 ```
 
-The ask UI and API never call OpenAI from client components. The local rate limiter is process-local and intended for development/MVP use.
+The ask UI and API never call OpenAI from client components. The local rate limiter is process-local and intended for development/MVP use. AI configuration and provider failures are normalized before they are returned to the client.
 
 ## Agent Tool API
 

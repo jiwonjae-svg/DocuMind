@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { toApiError } from "@/lib/api/errors";
 import {
   answerGroundedQuestion,
   normalizeQuestion,
@@ -112,8 +113,11 @@ export async function POST(request: NextRequest) {
       questionId: questionRecord.id,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Ask request failed.";
+    const apiError = toApiError(error, "Ask request failed.");
 
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: apiError.error },
+      { status: apiError.status },
+    );
   }
 }

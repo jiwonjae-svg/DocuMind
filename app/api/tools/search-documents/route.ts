@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { toApiError } from "@/lib/api/errors";
 import { prisma } from "@/lib/prisma";
 import { searchDocumentChunks } from "@/lib/search/semantic";
 import { normalizeSearchLimit, normalizeSearchQuery } from "@/lib/search/validation";
@@ -65,8 +66,11 @@ export async function POST(request: NextRequest) {
       tool: "search-documents",
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Search failed.";
+    const apiError = toApiError(error, "Search failed.");
 
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: apiError.error },
+      { status: apiError.status },
+    );
   }
 }

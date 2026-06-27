@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { toApiError } from "@/lib/api/errors";
 import { prisma } from "@/lib/prisma";
 import {
   normalizeDocumentId,
@@ -103,9 +104,11 @@ export async function POST(request: NextRequest) {
       truncated: result.truncated,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Document summarization failed.";
+    const apiError = toApiError(error, "Document summarization failed.");
 
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: apiError.error },
+      { status: apiError.status },
+    );
   }
 }
