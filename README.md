@@ -286,7 +286,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, retry headers, and expired bucket cleanup.
-- `tests/tool-summary.test.ts`: document summary tool response behavior and bounded, non-empty summary context selection.
+- `tests/tool-summary.test.ts`: document summary tool response behavior, bounded snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/document-processing.test.ts`: document processing failure messages avoid leaking provider or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.

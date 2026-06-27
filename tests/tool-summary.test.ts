@@ -6,7 +6,10 @@ import {
   normalizeDocumentId,
   selectSummaryChunks,
 } from "../lib/tools/document-summary";
-import { createSnippet } from "../lib/text/snippet";
+import {
+  createSnippet,
+  DEFAULT_SNIPPET_LENGTH,
+} from "../lib/text/snippet";
 
 describe("agent tool summary helpers", () => {
   it("normalizes document IDs", () => {
@@ -48,6 +51,12 @@ describe("agent tool summary helpers", () => {
 
   it("creates concise snippets", () => {
     expect(createSnippet("  alpha   beta  ", 20)).toBe("alpha beta");
-    expect(createSnippet("a".repeat(30), 10)).toBe("aaaaaaaaa...");
+    expect(createSnippet("a".repeat(30), 10)).toBe("aaaaaaa...");
+    expect(createSnippet("a".repeat(30), 10)).toHaveLength(10);
+    expect(createSnippet("abcdef", 2)).toBe("..");
+    expect(createSnippet("abcdef", 0)).toBe("");
+    expect(createSnippet("a".repeat(DEFAULT_SNIPPET_LENGTH + 10))).toHaveLength(
+      DEFAULT_SNIPPET_LENGTH,
+    );
   });
 });
