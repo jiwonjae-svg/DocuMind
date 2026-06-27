@@ -41,3 +41,9 @@ export function resolveStoragePath(relativeStoragePath: string) {
 
   return resolvedPath;
 }
+
+export function resolveOptionalStoragePath(
+  relativeStoragePath: string | null | undefined,
+) {
+  return relativeStoragePath ? resolveStoragePath(relativeStoragePath) : null;
+}

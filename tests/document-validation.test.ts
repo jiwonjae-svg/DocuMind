@@ -12,7 +12,10 @@ import {
   validateDocumentBytes,
   validateDocumentUpload,
 } from "../lib/documents/validation";
-import { resolveStoragePath } from "../lib/documents/storage";
+import {
+  resolveOptionalStoragePath,
+  resolveStoragePath,
+} from "../lib/documents/storage";
 
 describe("document upload validation", () => {
   it("accepts supported text uploads and sanitizes traversal filenames", () => {
@@ -173,6 +176,17 @@ describe("document upload validation", () => {
 
   it("rejects stored paths that escape the upload root", () => {
     expect(() => resolveStoragePath("../outside.txt")).toThrow(
+      /upload directory/,
+    );
+  });
+
+  it("resolves optional stored paths before delete operations", () => {
+    expect(resolveOptionalStoragePath("")).toBeNull();
+    expect(resolveOptionalStoragePath(null)).toBeNull();
+    expect(resolveOptionalStoragePath("user/document/file.txt")).toContain(
+      "uploads",
+    );
+    expect(() => resolveOptionalStoragePath("../outside.txt")).toThrow(
       /upload directory/,
     );
   });

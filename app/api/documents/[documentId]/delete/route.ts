@@ -5,7 +5,7 @@ import {
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
 import { buildDocumentOwnerWhere } from "@/lib/documents/access";
-import { resolveStoragePath } from "@/lib/documents/storage";
+import { resolveOptionalStoragePath } from "@/lib/documents/storage";
 import { prisma } from "@/lib/prisma";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
@@ -59,6 +59,8 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
     return redirectToDocuments(request, { error: "not-found" });
   }
 
+  const resolvedStoragePath = resolveOptionalStoragePath(document.storagePath);
+
   await prisma.$transaction([
     prisma.document.delete({
       where: { id: document.id },
@@ -78,8 +80,8 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
     }),
   ]);
 
-  if (document.storagePath) {
-    await rm(resolveStoragePath(document.storagePath), { force: true });
+  if (resolvedStoragePath) {
+    await rm(resolvedStoragePath, { force: true });
   }
 
   return redirectToDocuments(request, { deleted: "1" });
