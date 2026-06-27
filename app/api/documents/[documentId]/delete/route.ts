@@ -4,7 +4,7 @@ import {
   CROSS_ORIGIN_REQUEST_ERROR,
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
-import { isDocumentOwner } from "@/lib/documents/access";
+import { buildDocumentOwnerWhere } from "@/lib/documents/access";
 import { resolveStoragePath } from "@/lib/documents/storage";
 import { prisma } from "@/lib/prisma";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
@@ -42,8 +42,11 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
   }
 
   const { documentId } = await context.params;
-  const document = await prisma.document.findUnique({
-    where: { id: documentId },
+  const document = await prisma.document.findFirst({
+    where: buildDocumentOwnerWhere({
+      documentId,
+      ownerId: session.user.id,
+    }),
     select: {
       id: true,
       ownerId: true,
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
     },
   });
 
-  if (!document || !isDocumentOwner(document, session.user.id)) {
+  if (!document) {
     return redirectToDocuments(request, { error: "not-found" });
   }
 

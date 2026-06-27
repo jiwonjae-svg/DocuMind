@@ -265,7 +265,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
 - `tests/document-validation.test.ts`: file extension, MIME type, size, safe storage/display filename, and upload validation.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
-- `tests/document-ownership.test.ts`: owner-scoped access control for document operations.
+- `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, prompt boundary construction, insufficient-information behavior, and citation handling.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior with mocked API responses.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior and expired bucket cleanup.
@@ -293,7 +293,7 @@ Local verification on 2026-06-27:
 
 ```text
 Test Files  20 passed (20)
-Tests       72 passed (72)
+Tests       73 passed (73)
 ```
 
 ## Useful Commands
@@ -361,7 +361,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID.
+The app validates file extension, MIME type, size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID, and delete lookups include the owner filter before document metadata is read.
 
 After upload, documents are processed server-side:
 
