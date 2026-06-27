@@ -44,7 +44,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
-- Source-cited grounded question answering.
+- Grounded question answering with source citations.
 - Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
@@ -99,7 +99,7 @@ flowchart LR
 - Dashboard semantic search UI at `/dashboard/search`
 - Grounded question answering endpoint at `POST /api/ask`
 - Agent-ready tool endpoints under `/api/tools/*`
-- Source-cited ask UI at `/dashboard/ask`
+- Ask UI with source citations at `/dashboard/ask`
 - Document upload/delete audit logs
 - Semantic search audit logs
 - Question ask audit logs
@@ -300,7 +300,7 @@ Password: DocuMindDemo123!
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
-For a quick reviewer pass, sign in, open Documents, upload or review a small `.txt` or `.md` file, run a semantic search from the Search page, ask a grounded question from the Ask page, then confirm citations and your owner-scoped audit log entries.
+For a quick reviewer pass, sign in, open Documents, upload or review a small `.txt` or `.md` file, run a semantic search from the Search page, ask a grounded question from the Ask page, then confirm source citations and your owner-scoped audit log entries.
 
 ## Audit Logs
 

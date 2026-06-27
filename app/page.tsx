@@ -54,8 +54,8 @@ const implementedFeatures = [
     accent: "emerald",
   },
   {
-    title: "Grounded answers with citations",
-    body: "Retrieved chunks bound the answer prompt and the UI returns source titles, chunk indexes, snippets, and scores.",
+    title: "Grounded answers with source citations",
+    body: "Retrieved chunks constrain the answer prompt, and the UI returns source titles, chunk indexes, snippets, and scores.",
     icon: "question",
     accent: "violet",
   },
@@ -67,7 +67,7 @@ const implementedFeatures = [
   },
   {
     title: "Agent-ready API endpoint structure",
-    body: "Authenticated tool routes expose search, cited answers, and document summaries without bypassing application rules.",
+    body: "Authenticated tool routes expose search, answers with citations, and document summaries without bypassing application rules.",
     icon: "network",
     accent: "emerald",
   },
@@ -125,7 +125,7 @@ const demoSteps = [
   "Open Documents and review existing files; upload a short .txt or .md file if the list is empty",
   "Run a semantic search to inspect top matching chunks and scores",
   "Ask a grounded question from the Ask page",
-  "Check the answer, citations, matched snippets, and confidence boundaries",
+  "Check the answer, source citations, matched snippets, and confidence boundaries",
   "Review owner-scoped audit log entries for your activity",
 ] as const;
 
@@ -377,16 +377,22 @@ export default function Home() {
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
               What reviewers should test
             </h2>
-            <ul aria-label="Try the demo steps" className="mt-5 grid gap-3">
+            <ol
+              aria-label="Try the demo steps"
+              className="mt-5 grid list-none gap-3 p-0"
+            >
               {demoSteps.map((step, index) => (
                 <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700">
-                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">
+                  <span
+                    aria-hidden="true"
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue-50 text-xs font-bold text-blue-700"
+                  >
                     {index + 1}
                   </span>
                   <span>{step}</span>
                 </li>
               ))}
-            </ul>
+            </ol>
             <p className="mt-5 text-sm leading-6 text-slate-500">
               The dashboard now includes an owner-scoped audit log view for
               the signed-in user. Organization-wide admin audit review remains
