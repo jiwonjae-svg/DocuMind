@@ -51,6 +51,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
+- Docker build context hygiene for secrets, local uploads, and generated outputs.
 - GitHub Actions CI for Prisma generation, lint, tests, and build.
 
 ### Future / Production Hardening
@@ -110,6 +111,7 @@ flowchart LR
 - Agent tool usage audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Dockerfile and Docker Compose setup for app + PostgreSQL
+- `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - GitHub Actions CI for lint, tests, and build
 - Demo user seed script
 - Health check route at `/api/health`
@@ -210,6 +212,8 @@ docker compose down
 
 The `app` service runs `npx prisma migrate deploy` before `npm run start`. Uploaded development files are stored in the `uploads-data` Docker volume. Set `OPENAI_API_KEY` in your shell or `.env` file before using embeddings, search, ask, or summarize flows that call OpenAI.
 
+The Docker build context is intentionally bounded with `.dockerignore` so local secrets, `.vercel`, `uploads`, dependencies, test coverage, and framework build output are not copied into image builds.
+
 Example `.env` values for Docker:
 
 ```text
@@ -268,6 +272,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests.
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
+- `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
 
 Run the suite with:
 
@@ -278,8 +283,8 @@ npm run test
 Local verification on 2026-06-27:
 
 ```text
-Test Files  15 passed (15)
-Tests       51 passed (51)
+Test Files  16 passed (16)
+Tests       53 passed (53)
 ```
 
 ## Useful Commands
