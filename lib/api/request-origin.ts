@@ -20,6 +20,10 @@ function readFetchSite(headers: Headers) {
   return headers.get("sec-fetch-site")?.trim().toLowerCase() ?? null;
 }
 
+function hasCookieHeader(headers: Headers) {
+  return Boolean(headers.get("cookie")?.trim());
+}
+
 export function isSameOriginRequest(request: RequestWithOrigin) {
   const fetchSite = readFetchSite(request.headers);
 
@@ -34,7 +38,7 @@ export function isSameOriginRequest(request: RequestWithOrigin) {
   const origin = parseOrigin(request.headers.get("origin"));
 
   if (!origin) {
-    return true;
+    return !hasCookieHeader(request.headers);
   }
 
   if (origin === "invalid") {
