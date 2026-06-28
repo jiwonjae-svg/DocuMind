@@ -50,7 +50,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Document IDs are normalized before owner-scoped document mutations.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
-- Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, disabled framework powered-by header, and `no-store` caching for API responses.
+- Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, cross-origin opener/resource policies, disabled framework powered-by header, and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Search and ask text inputs are normalized to remove control characters before embedding, persistence, and audit metadata length calculation.
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts, with aggregate denial short-circuiting before new client/email buckets are created.
@@ -127,7 +127,7 @@ flowchart LR
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked
-- Security headers, Content Security Policy without production `unsafe-eval`, disabled Next.js powered-by header, HSTS, and `Cache-Control: no-store` on API routes
+- Security headers, Content Security Policy without production `unsafe-eval`, cross-origin opener/resource policies, disabled Next.js powered-by header, HSTS, and `Cache-Control: no-store` on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Control-character normalization for search and ask inputs before AI-backed work or question persistence
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
@@ -322,7 +322,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
-- `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, disabled powered-by header, and API cache headers in Next.js configuration.
+- `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, cross-origin opener/resource policies, disabled powered-by header, and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
 - `tests/seed-policy.test.ts`: production seed runs reject the documented default demo password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
