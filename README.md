@@ -45,7 +45,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Upload requests must include a valid `Content-Length`, and declared oversized requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components while preserving Japanese/Korean names.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
-- Baseline security headers and `no-store` caching for API responses.
+- Baseline security headers, HSTS, and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Per-client and per-email in-memory rate limiting for credentials sign-in attempts.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
@@ -115,7 +115,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
-- Security headers for browser hardening and `Cache-Control: no-store` on API routes
+- Security headers, HSTS, and `Cache-Control: no-store` on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Multipart content-type enforcement and parse-error handling for document uploads
@@ -284,6 +284,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
 - `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, and upload validation.
+- `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, malformed answer payload/response handling, and timed-out answer retries.
@@ -314,11 +315,12 @@ Run the suite with:
 npm run test
 ```
 
-Local verification on 2026-06-27:
+Local verification on 2026-06-28:
 
 ```text
-Test Files  24 passed (24)
-Tests       114 passed (114)
+Test Files  26 passed (26)
+Tests       128 passed (128)
+npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
 ## Useful Commands
@@ -389,7 +391,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID, delete lookups include the owner filter before document metadata is read, and stored paths are resolved before the delete transaction runs.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
 
 After upload, documents are processed server-side:
 

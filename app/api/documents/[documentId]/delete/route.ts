@@ -4,7 +4,10 @@ import {
   CROSS_ORIGIN_REQUEST_ERROR,
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
-import { buildDocumentOwnerWhere } from "@/lib/documents/access";
+import {
+  deleteOwnedDocument,
+  type DeleteOwnedDocumentDb,
+} from "@/lib/documents/deletion";
 import { resolveOptionalStoragePath } from "@/lib/documents/storage";
 import { prisma } from "@/lib/prisma";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
@@ -42,46 +45,21 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
   }
 
   const { documentId } = await context.params;
-  const document = await prisma.document.findFirst({
-    where: buildDocumentOwnerWhere({
-      documentId,
-      ownerId: session.user.id,
-    }),
-    select: {
-      id: true,
-      ownerId: true,
-      originalName: true,
-      storagePath: true,
-    },
+  const result = await deleteOwnedDocument({
+    db: prisma as unknown as DeleteOwnedDocumentDb,
+    documentId,
+    ipAddress: readIpAddress(request),
+    resolveStoragePath: resolveOptionalStoragePath,
+    userAgent: readUserAgent(request),
+    ownerId: session.user.id,
   });
 
-  if (!document) {
+  if (!result.deleted) {
     return redirectToDocuments(request, { error: "not-found" });
   }
 
-  const resolvedStoragePath = resolveOptionalStoragePath(document.storagePath);
-
-  await prisma.$transaction([
-    prisma.document.delete({
-      where: { id: document.id },
-    }),
-    prisma.auditLog.create({
-      data: {
-        actorId: session.user.id,
-        action: "document_delete",
-        ipAddress: readIpAddress(request),
-        resourceType: "Document",
-        resourceId: document.id,
-        metadata: {
-          originalName: document.originalName,
-        },
-        userAgent: readUserAgent(request),
-      },
-    }),
-  ]);
-
-  if (resolvedStoragePath) {
-    await rm(resolvedStoragePath, { force: true });
+  if (result.resolvedStoragePath) {
+    await rm(result.resolvedStoragePath, { force: true });
   }
 
   return redirectToDocuments(request, { deleted: "1" });
