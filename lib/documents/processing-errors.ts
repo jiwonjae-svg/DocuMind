@@ -1,6 +1,12 @@
+import { DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR } from "./processing-limits";
+
 export const DOCUMENT_PROCESSING_GENERIC_ERROR = "Document processing failed.";
 export const DOCUMENT_PROCESSING_NO_TEXT_ERROR =
   "No extractable text found in document.";
+export {
+  DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR,
+  MAX_EXTRACTED_DOCUMENT_TEXT_CHARS,
+} from "./processing-limits";
 export const DOCUMENT_PROCESSING_UNSUPPORTED_TYPE_ERROR =
   "Unsupported document type.";
 export const DOCUMENT_PROCESSING_AI_CONFIGURATION_ERROR =
@@ -21,6 +27,7 @@ const AI_PROVIDER_TEMPORARY_STATUS_CODES = new Set([
 ]);
 const DISPLAYABLE_DOCUMENT_PROCESSING_ERRORS = new Set([
   DOCUMENT_PROCESSING_NO_TEXT_ERROR,
+  DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR,
   DOCUMENT_PROCESSING_UNSUPPORTED_TYPE_ERROR,
   DOCUMENT_PROCESSING_AI_CONFIGURATION_ERROR,
   DOCUMENT_PROCESSING_AI_PROVIDER_ERROR,
@@ -85,6 +92,7 @@ export function normalizeDocumentProcessingError(error: unknown) {
 
   if (
     message === DOCUMENT_PROCESSING_NO_TEXT_ERROR ||
+    message === DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR ||
     message === DOCUMENT_PROCESSING_UNSUPPORTED_TYPE_ERROR
   ) {
     return message;

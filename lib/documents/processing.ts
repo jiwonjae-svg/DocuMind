@@ -3,6 +3,7 @@ import { buildDocumentOwnerWhere } from "./access";
 import { extractDocumentText } from "./extraction";
 import { splitTextIntoChunks, TextChunk } from "./chunking";
 import { embedMissingDocumentChunks } from "./embeddings";
+import { readProcessableExtractedTextLength } from "./processing-limits";
 import {
   DOCUMENT_PROCESSING_NO_TEXT_ERROR,
   normalizeDocumentProcessingError,
@@ -65,6 +66,7 @@ export function createChunksForDocumentText({
   };
   text: string;
 }) {
+  readProcessableExtractedTextLength(text);
   const chunks = splitTextIntoChunks(text);
 
   if (chunks.length === 0) {
@@ -121,6 +123,7 @@ export async function processDocument(
 
   try {
     const text = await extractDocumentText(document);
+    const extractedCharCount = readProcessableExtractedTextLength(text);
     const chunkData = createChunksForDocumentText({ document, text });
 
     await prisma.$transaction([
@@ -140,16 +143,21 @@ export async function processDocument(
       ownerId,
     });
 
-    await prisma.$transaction([
-      prisma.document.updateMany({
+    const readyUpdateSucceeded = await prisma.$transaction(async (transaction) => {
+      const readyUpdate = await transaction.document.updateMany({
         where: ownerWhere,
         data: {
-          extractedCharCount: text.trim().length,
+          extractedCharCount,
           processingError: null,
           status: "READY",
         },
-      }),
-      prisma.auditLog.create({
+      });
+
+      if (readyUpdate.count !== 1) {
+        return false;
+      }
+
+      await transaction.auditLog.create({
         data: {
           actorId: ownerId,
           action: "document_process_ready",
@@ -158,11 +166,20 @@ export async function processDocument(
           metadata: {
             chunkCount: chunkData.length,
             embeddedChunkCount: embeddingSummary.embeddedChunkCount,
-            extractedCharCount: text.trim().length,
+            extractedCharCount,
           },
         },
-      }),
-    ]);
+      });
+
+      return true;
+    });
+
+    if (!readyUpdateSucceeded) {
+      return {
+        error: "Document not found.",
+        status: "FAILED",
+      };
+    }
 
     return {
       chunkCount: chunkData.length,
@@ -172,21 +189,27 @@ export async function processDocument(
   } catch (error) {
     const processingError = normalizeDocumentProcessingError(error);
 
-    await prisma.$transaction([
-      prisma.documentChunk.deleteMany({
+    const failedUpdateSucceeded = await prisma.$transaction(async (transaction) => {
+      await transaction.documentChunk.deleteMany({
         where: {
           documentId: document.id,
           ownerId,
         },
-      }),
-      prisma.document.updateMany({
+      });
+
+      const failedUpdate = await transaction.document.updateMany({
         where: ownerWhere,
         data: {
           processingError,
           status: "FAILED",
         },
-      }),
-      prisma.auditLog.create({
+      });
+
+      if (failedUpdate.count !== 1) {
+        return false;
+      }
+
+      await transaction.auditLog.create({
         data: {
           actorId: ownerId,
           action: "document_process_failed",
@@ -196,8 +219,17 @@ export async function processDocument(
             error: processingError,
           },
         },
-      }),
-    ]);
+      });
+
+      return true;
+    });
+
+    if (!failedUpdateSucceeded) {
+      return {
+        error: "Document not found.",
+        status: "FAILED",
+      };
+    }
 
     return {
       error: processingError,

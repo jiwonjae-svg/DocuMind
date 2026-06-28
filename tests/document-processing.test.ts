@@ -9,9 +9,14 @@ import {
   DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR,
   DOCUMENT_PROCESSING_GENERIC_ERROR,
   DOCUMENT_PROCESSING_NO_TEXT_ERROR,
+  DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR,
   formatStoredDocumentProcessingError,
   normalizeDocumentProcessingError,
 } from "../lib/documents/processing-errors";
+import {
+  MAX_EXTRACTED_DOCUMENT_TEXT_CHARS,
+  readProcessableExtractedTextLength,
+} from "../lib/documents/processing-limits";
 
 function namedError(name: string, message: string, status?: number) {
   const error = new Error(message);
@@ -33,7 +38,22 @@ describe("document processing errors", () => {
 
     expect(source).toContain("buildDocumentOwnerWhere");
     expect(source).toContain("prisma.document.updateMany");
+    expect(source).toContain("readyUpdate.count !== 1");
+    expect(source).toContain("failedUpdate.count !== 1");
     expect(source).not.toContain("prisma.document.update({");
+  });
+
+  it("bounds extracted text before chunking and embedding", () => {
+    expect(
+      readProcessableExtractedTextLength(
+        "a".repeat(MAX_EXTRACTED_DOCUMENT_TEXT_CHARS),
+      ),
+    ).toBe(MAX_EXTRACTED_DOCUMENT_TEXT_CHARS);
+    expect(() =>
+      readProcessableExtractedTextLength(
+        "a".repeat(MAX_EXTRACTED_DOCUMENT_TEXT_CHARS + 1),
+      ),
+    ).toThrow(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
   });
 
   it("keeps known document processing errors user-readable", () => {
@@ -42,6 +62,11 @@ describe("document processing errors", () => {
         new Error(DOCUMENT_PROCESSING_NO_TEXT_ERROR),
       ),
     ).toBe(DOCUMENT_PROCESSING_NO_TEXT_ERROR);
+    expect(
+      normalizeDocumentProcessingError(
+        new Error(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR),
+      ),
+    ).toBe(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
   });
 
   it("maps AI configuration failures without leaking provider details", () => {
@@ -100,6 +125,11 @@ describe("document processing errors", () => {
     expect(
       formatStoredDocumentProcessingError(DOCUMENT_PROCESSING_NO_TEXT_ERROR),
     ).toBe(DOCUMENT_PROCESSING_NO_TEXT_ERROR);
+    expect(
+      formatStoredDocumentProcessingError(
+        DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR,
+      ),
+    ).toBe(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
     expect(
       formatStoredDocumentProcessingError(
         "ENOENT C:/Users/example/uploads/private.txt",
