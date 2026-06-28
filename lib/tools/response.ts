@@ -4,7 +4,10 @@ export const MAX_USER_AGENT_LENGTH = 512;
 type RequestWithHeaders = { headers: Headers };
 
 function normalizeHeaderValue(value: string | null | undefined, maxLength: number) {
-  const trimmedValue = value?.trim();
+  const trimmedValue = value
+    ?.replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   if (!trimmedValue) {
     return null;

@@ -14,6 +14,20 @@ function requestWithHeaders(headers: HeadersInit): RequestWithHeaders {
   } as RequestWithHeaders;
 }
 
+function requestWithRawHeaderValues(headers: Record<string, string>): RequestWithHeaders {
+  const normalizedHeaders = Object.fromEntries(
+    Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value]),
+  );
+
+  return {
+    headers: {
+      get(name: string) {
+        return normalizedHeaders[name.toLowerCase()] ?? null;
+      },
+    },
+  } as RequestWithHeaders;
+}
+
 describe("request metadata helpers", () => {
   it("reads the first forwarded IP address", () => {
     const request = requestWithHeaders({
@@ -51,5 +65,15 @@ describe("request metadata helpers", () => {
 
     expect(readIpAddress(request)).toHaveLength(MAX_IP_ADDRESS_LENGTH);
     expect(readUserAgent(request)).toHaveLength(MAX_USER_AGENT_LENGTH);
+  });
+
+  it("removes control characters before storing audit metadata", () => {
+    const request = requestWithRawHeaderValues({
+      "user-agent": "DocuMind\r\nReviewer\tBrowser",
+      "x-forwarded-for": " 203.0.113.10\r\nInjected, 10.0.0.2 ",
+    });
+
+    expect(readIpAddress(request)).toBe("203.0.113.10 Injected");
+    expect(readUserAgent(request)).toBe("DocuMind Reviewer Browser");
   });
 });

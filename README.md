@@ -71,6 +71,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - AI rate limits are applied after request validation and immediately before AI-backed work.
 - Document processing failure messages are normalized before being stored or shown in the dashboard.
 - Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
+- Request metadata stored in audit logs is stripped of control characters and length-bounded.
 - Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
@@ -314,7 +315,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/audit-formatting.test.ts`: bounded audit metadata formatting and raw query/question text avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
-- `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
+- `tests/tools-response.test.ts`: bounded and control-character-normalized request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
@@ -338,7 +339,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       151 passed (151)
+Tests       152 passed (152)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -390,7 +391,7 @@ The page is intentionally owner-scoped for the MVP:
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
 - Metadata display is capped to keep long filenames, provider details, or nested values from dominating the audit screen.
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
-- Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available.
+- Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control characters normalized before persistence.
 - Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
 - It does not expose other users' audit records.
 
