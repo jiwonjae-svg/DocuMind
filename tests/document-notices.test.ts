@@ -3,6 +3,7 @@ import {
   getDocumentOperationNotice,
   readDocumentNoticeParam,
 } from "../lib/documents/notices";
+import { DOCUMENT_UPLOAD_RATE_LIMIT_ERROR } from "../lib/api/upload-rate-limit";
 import {
   DOCUMENT_UPLOAD_PARSE_ERROR,
   DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
@@ -59,6 +60,17 @@ describe("document operation notices", () => {
       }),
     ).toEqual({
       text: "Document upload could not be parsed.",
+      tone: "error",
+    });
+  });
+
+  it("maps document upload rate limit errors", () => {
+    expect(
+      getDocumentOperationNotice({
+        error: DOCUMENT_UPLOAD_RATE_LIMIT_ERROR,
+      }),
+    ).toEqual({
+      text: "Too many document uploads. Try again shortly.",
       tone: "error",
     });
   });

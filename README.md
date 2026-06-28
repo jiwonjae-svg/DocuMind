@@ -51,6 +51,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Baseline security headers, HSTS, and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Per-client and per-email in-memory rate limiting for credentials sign-in attempts.
+- Per-user in-memory rate limiting for document uploads before multipart parsing.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
@@ -124,6 +125,7 @@ flowchart LR
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Multipart content-type enforcement and parse-error handling for document uploads
 - Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
+- Per-user upload rate limiting before multipart body parsing
 - Bounded document operation notices for upload/delete redirects
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
 - OpenAI embeddings for document chunks
@@ -296,7 +298,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, malformed answer payload/response handling, and timed-out answer retries.
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
-- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, retry headers, and expired bucket cleanup.
+- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/document-processing.test.ts`: document processing failure messages avoid leaking provider or filesystem details.
@@ -307,7 +309,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
-- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, and bounded JSON parsing contracts.
+- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, and upload rate limiting before multipart parsing.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
@@ -328,7 +330,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       137 passed (137)
+Tests       140 passed (140)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -402,7 +404,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
 
 After upload, documents are processed server-side:
 

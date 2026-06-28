@@ -75,4 +75,13 @@ describe("API route security contracts", () => {
       expect(source, relativePath).toContain("readJsonBodyResult(request)");
     }
   });
+
+  it("keeps document uploads rate-limited before multipart parsing", () => {
+    const source = readRoute(path.join(apiRoot, "documents", "route.ts"));
+    const rateLimitIndex = source.indexOf("checkDocumentUploadRateLimit");
+    const formDataIndex = source.indexOf("request.formData()");
+
+    expect(rateLimitIndex).toBeGreaterThanOrEqual(0);
+    expect(formDataIndex).toBeGreaterThan(rateLimitIndex);
+  });
 });

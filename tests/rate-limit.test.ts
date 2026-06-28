@@ -10,6 +10,11 @@ import {
   checkAiSearchRateLimit,
 } from "../lib/api/ai-rate-limit";
 import {
+  DOCUMENT_UPLOAD_RATE_LIMIT,
+  DOCUMENT_UPLOAD_RATE_LIMIT_ERROR,
+  checkDocumentUploadRateLimit,
+} from "../lib/api/upload-rate-limit";
+import {
   checkRateLimit,
   clearRateLimitBuckets,
   getRateLimitBucketCount,
@@ -131,5 +136,23 @@ describe("rate limiting", () => {
       },
       status: 429,
     });
+  });
+
+  it("limits document uploads per signed-in user before expensive parsing", () => {
+    const now = () => 1000;
+
+    for (let index = 0; index < DOCUMENT_UPLOAD_RATE_LIMIT; index += 1) {
+      expect(checkDocumentUploadRateLimit("user-1", { now }).allowed).toBe(
+        true,
+      );
+    }
+
+    const rateLimit = checkDocumentUploadRateLimit("user-1", { now });
+
+    expect(rateLimit.allowed).toBe(false);
+    expect(rateLimit.retryAfterSeconds).toBe(60);
+    expect(DOCUMENT_UPLOAD_RATE_LIMIT_ERROR).toBe(
+      "Too many document uploads. Try again shortly.",
+    );
   });
 });

@@ -7,6 +7,10 @@ import {
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
 import {
+  DOCUMENT_UPLOAD_RATE_LIMIT_ERROR,
+  checkDocumentUploadRateLimit,
+} from "@/lib/api/upload-rate-limit";
+import {
   buildDocumentStoragePath,
   resolveStoragePath,
 } from "@/lib/documents/storage";
@@ -63,6 +67,14 @@ export async function POST(request: NextRequest) {
 
   if (!session?.user?.id) {
     return redirectToLogin(request);
+  }
+
+  const uploadRateLimit = checkDocumentUploadRateLimit(session.user.id);
+
+  if (!uploadRateLimit.allowed) {
+    return redirectToDocuments(request, {
+      error: DOCUMENT_UPLOAD_RATE_LIMIT_ERROR,
+    });
   }
 
   if (isDocumentUploadRequestTooLarge(request.headers)) {

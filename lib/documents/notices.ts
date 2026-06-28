@@ -4,6 +4,7 @@ import {
   DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
   DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
 } from "./validation";
+import { DOCUMENT_UPLOAD_RATE_LIMIT_ERROR } from "../api/upload-rate-limit";
 
 export type DocumentNotice = {
   text: string;
@@ -17,6 +18,7 @@ const knownDocumentErrors = new Map([
     DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
     "Document upload must use multipart form data.",
   ],
+  [DOCUMENT_UPLOAD_RATE_LIMIT_ERROR, DOCUMENT_UPLOAD_RATE_LIMIT_ERROR],
   [
     DOCUMENT_UPLOAD_LENGTH_REQUIRED_ERROR,
     "Document upload requires a valid Content-Length header.",
