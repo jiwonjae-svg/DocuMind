@@ -8,6 +8,16 @@ function safePathSegment(segment: string) {
   return segment.replace(/[^a-zA-Z0-9_-]+/g, "_");
 }
 
+function safeFileNameSegment(fileName: string) {
+  const basename = fileName.replace(/\0/g, "").split(/[\\/]/).pop() ?? "";
+  const sanitized = basename
+    .replace(/[^a-zA-Z0-9._-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^[._-]+|[._-]+$/g, "");
+
+  return sanitized || "document";
+}
+
 export function buildDocumentStoragePath({
   documentId,
   fileName,
@@ -20,7 +30,7 @@ export function buildDocumentStoragePath({
   return path.posix.join(
     safePathSegment(userId),
     safePathSegment(documentId),
-    fileName,
+    safeFileNameSegment(fileName),
   );
 }
 

@@ -46,6 +46,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
 - Upload requests must include a valid `Content-Length`, and declared oversized requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components while preserving Japanese/Korean names.
+- Storage path construction re-sanitizes filename segments before resolving local upload paths.
 - Document IDs are normalized before owner-scoped document mutations.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
@@ -130,6 +131,7 @@ flowchart LR
 - Multipart content-type enforcement and parse-error handling for document uploads
 - Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
 - Per-user upload rate limiting before multipart body parsing
+- Defense-in-depth filename segment sanitization during storage path construction
 - Document IDs are normalized before delete mutations
 - Bounded document operation notices for upload/delete redirects
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
@@ -297,7 +299,7 @@ Unit tests use mocked `fetch` implementations for OpenAI helpers and do not requ
 The test suite is designed to cover the reliability and safety concerns that matter for AI-enabled internal tools:
 
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
-- `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, and upload validation.
+- `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, storage path construction, and upload validation.
 - `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
@@ -336,7 +338,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       148 passed (148)
+Tests       149 passed (149)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -411,7 +413,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
 
 After upload, documents are processed server-side:
 

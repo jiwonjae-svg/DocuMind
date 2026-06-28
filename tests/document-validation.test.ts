@@ -15,6 +15,7 @@ import {
   validateDocumentUpload,
 } from "../lib/documents/validation";
 import {
+  buildDocumentStoragePath,
   resolveOptionalStoragePath,
   resolveStoragePath,
 } from "../lib/documents/storage";
@@ -217,6 +218,18 @@ describe("document upload validation", () => {
     expect(() => resolveStoragePath("../outside.txt")).toThrow(
       /upload directory/,
     );
+  });
+
+  it("re-sanitizes storage path filename segments", () => {
+    const storagePath = buildDocumentStoragePath({
+      documentId: "document-1",
+      fileName: "../nested\\..\0evil policy.md",
+      userId: "user-1",
+    });
+
+    expect(storagePath).toBe("user-1/document-1/evil_policy.md");
+    expect(storagePath).not.toContain("..");
+    expect(storagePath).not.toContain("\\");
   });
 
   it("resolves optional stored paths before delete operations", () => {
