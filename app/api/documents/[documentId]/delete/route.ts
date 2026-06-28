@@ -5,6 +5,10 @@ import {
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
 import {
+  DOCUMENT_DELETE_RATE_LIMIT_ERROR,
+  checkDocumentDeleteRateLimit,
+} from "@/lib/api/document-delete-rate-limit";
+import {
   deleteOwnedDocument,
   type DeleteOwnedDocumentDb,
 } from "@/lib/documents/deletion";
@@ -43,6 +47,14 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
     return NextResponse.redirect(
       new URL("/login?callbackUrl=/dashboard/documents", request.url),
     );
+  }
+
+  const deleteRateLimit = checkDocumentDeleteRateLimit(session.user.id);
+
+  if (!deleteRateLimit.allowed) {
+    return redirectToDocuments(request, {
+      error: DOCUMENT_DELETE_RATE_LIMIT_ERROR,
+    });
   }
 
   const { documentId: rawDocumentId } = await context.params;

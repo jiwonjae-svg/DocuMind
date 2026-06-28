@@ -4,6 +4,7 @@ import {
   DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
   DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
 } from "./validation";
+import { DOCUMENT_DELETE_RATE_LIMIT_ERROR } from "../api/document-delete-rate-limit";
 import { DOCUMENT_UPLOAD_RATE_LIMIT_ERROR } from "../api/upload-rate-limit";
 
 export type DocumentNotice = {
@@ -14,6 +15,7 @@ export type DocumentNotice = {
 const knownDocumentErrors = new Map([
   ["missing-file", "Choose a file before uploading."],
   ["not-found", "Document not found."],
+  [DOCUMENT_DELETE_RATE_LIMIT_ERROR, DOCUMENT_DELETE_RATE_LIMIT_ERROR],
   [
     DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
     "Document upload must use multipart form data.",

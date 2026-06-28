@@ -54,7 +54,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Search and ask text inputs are normalized to remove control characters before embedding, persistence, and audit metadata length calculation.
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts, with aggregate denial short-circuiting before new client/email buckets are created.
-- Per-user in-memory rate limiting for document uploads before multipart parsing.
+- Per-user in-memory rate limiting for document uploads before multipart parsing and document deletes before delete lookup.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
 - Text extraction and chunking with overlap metadata.
@@ -133,7 +133,7 @@ flowchart LR
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Multipart content-type enforcement and parse-error handling for document uploads
 - Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
-- Per-user upload rate limiting before multipart body parsing
+- Per-user upload rate limiting before multipart body parsing and delete rate limiting before delete lookup
 - Defense-in-depth filename segment sanitization during storage path construction
 - Document IDs are normalized before delete mutations
 - Bounded document operation notices for upload/delete redirects
@@ -304,12 +304,12 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
 - `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, display-name control/format character stripping, storage path construction, and upload validation.
 - `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
-- `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text.
+- `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text while allowing known rate-limit notices.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, malformed answer payload/response handling, and timed-out answer retries.
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
-- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload quota, retry headers, and expired bucket cleanup.
+- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text is capped before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
@@ -320,7 +320,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tools-response.test.ts`: bounded, control-character-normalized, valid-IP-filtered request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
-- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
+- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
 - `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, cross-origin opener/resource policies, disabled powered-by header, and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
@@ -341,7 +341,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       160 passed (160)
+Tests       163 passed (163)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -416,7 +416,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
 
 After upload, documents are processed server-side:
 

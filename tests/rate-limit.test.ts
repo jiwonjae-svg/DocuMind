@@ -10,6 +10,11 @@ import {
   checkAiSearchRateLimit,
 } from "../lib/api/ai-rate-limit";
 import {
+  DOCUMENT_DELETE_RATE_LIMIT,
+  DOCUMENT_DELETE_RATE_LIMIT_ERROR,
+  checkDocumentDeleteRateLimit,
+} from "../lib/api/document-delete-rate-limit";
+import {
   DOCUMENT_UPLOAD_RATE_LIMIT,
   DOCUMENT_UPLOAD_RATE_LIMIT_ERROR,
   checkDocumentUploadRateLimit,
@@ -153,6 +158,24 @@ describe("rate limiting", () => {
     expect(rateLimit.retryAfterSeconds).toBe(60);
     expect(DOCUMENT_UPLOAD_RATE_LIMIT_ERROR).toBe(
       "Too many document uploads. Try again shortly.",
+    );
+  });
+
+  it("limits document deletes per signed-in user before delete lookup", () => {
+    const now = () => 1000;
+
+    for (let index = 0; index < DOCUMENT_DELETE_RATE_LIMIT; index += 1) {
+      expect(checkDocumentDeleteRateLimit("user-1", { now }).allowed).toBe(
+        true,
+      );
+    }
+
+    const rateLimit = checkDocumentDeleteRateLimit("user-1", { now });
+
+    expect(rateLimit.allowed).toBe(false);
+    expect(rateLimit.retryAfterSeconds).toBe(60);
+    expect(DOCUMENT_DELETE_RATE_LIMIT_ERROR).toBe(
+      "Too many document delete requests. Try again shortly.",
     );
   });
 });

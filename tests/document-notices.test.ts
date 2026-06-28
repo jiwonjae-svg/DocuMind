@@ -3,6 +3,7 @@ import {
   getDocumentOperationNotice,
   readDocumentNoticeParam,
 } from "../lib/documents/notices";
+import { DOCUMENT_DELETE_RATE_LIMIT_ERROR } from "../lib/api/document-delete-rate-limit";
 import { DOCUMENT_UPLOAD_RATE_LIMIT_ERROR } from "../lib/api/upload-rate-limit";
 import {
   DOCUMENT_UPLOAD_PARSE_ERROR,
@@ -71,6 +72,17 @@ describe("document operation notices", () => {
       }),
     ).toEqual({
       text: "Too many document uploads. Try again shortly.",
+      tone: "error",
+    });
+  });
+
+  it("maps document delete rate limit errors", () => {
+    expect(
+      getDocumentOperationNotice({
+        error: DOCUMENT_DELETE_RATE_LIMIT_ERROR,
+      }),
+    ).toEqual({
+      text: "Too many document delete requests. Try again shortly.",
       tone: "error",
     });
   });

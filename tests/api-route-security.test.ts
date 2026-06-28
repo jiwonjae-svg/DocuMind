@@ -85,6 +85,19 @@ describe("API route security contracts", () => {
     expect(formDataIndex).toBeGreaterThan(rateLimitIndex);
   });
 
+  it("keeps document deletes rate-limited before delete lookup", () => {
+    const source = readRoute(
+      path.join(apiRoot, "documents", "[documentId]", "delete", "route.ts"),
+    );
+    const rateLimitIndex = source.indexOf("checkDocumentDeleteRateLimit");
+    const deleteLookupIndex = source.indexOf(
+      "const result = await deleteOwnedDocument",
+    );
+
+    expect(rateLimitIndex).toBeGreaterThanOrEqual(0);
+    expect(deleteLookupIndex).toBeGreaterThan(rateLimitIndex);
+  });
+
   it("keeps summarize-document rate-limited before document chunk lookup", () => {
     const source = readRoute(
       path.join(apiRoot, "tools", "summarize-document", "route.ts"),
