@@ -47,6 +47,15 @@ describe("request metadata helpers", () => {
     expect(readIpAddress(request)).toBe("198.51.100.5");
   });
 
+  it("ignores malformed forwarded IP metadata before audit persistence", () => {
+    const request = requestWithHeaders({
+      "x-forwarded-for": " 203.0.113.10<script>, 10.0.0.2 ",
+      "x-real-ip": " 198.51.100.5 ",
+    });
+
+    expect(readIpAddress(request)).toBe("198.51.100.5");
+  });
+
   it("returns null for blank request metadata", () => {
     const request = requestWithHeaders({
       "user-agent": "   ",
@@ -63,7 +72,7 @@ describe("request metadata helpers", () => {
       "x-forwarded-for": "b".repeat(MAX_IP_ADDRESS_LENGTH + 10),
     });
 
-    expect(readIpAddress(request)).toHaveLength(MAX_IP_ADDRESS_LENGTH);
+    expect(readIpAddress(request)).toBeNull();
     expect(readUserAgent(request)).toHaveLength(MAX_USER_AGENT_LENGTH);
   });
 
@@ -73,7 +82,7 @@ describe("request metadata helpers", () => {
       "x-forwarded-for": " 203.0.113.10\r\nInjected, 10.0.0.2 ",
     });
 
-    expect(readIpAddress(request)).toBe("203.0.113.10 Injected");
+    expect(readIpAddress(request)).toBeNull();
     expect(readUserAgent(request)).toBe("DocuMind Reviewer Browser");
   });
 });

@@ -34,7 +34,7 @@ describe("login audit data", () => {
     });
   });
 
-  it("bounds long request metadata before persistence", () => {
+  it("bounds long user agents and ignores malformed IP metadata before persistence", () => {
     const auditData = buildUserLoginAuditData({
       request: requestWithHeaders({
         "user-agent": "u".repeat(MAX_USER_AGENT_LENGTH + 1),
@@ -43,7 +43,7 @@ describe("login audit data", () => {
       userId: "user-1",
     });
 
-    expect(auditData.ipAddress).toHaveLength(MAX_IP_ADDRESS_LENGTH);
+    expect(auditData.ipAddress).toBeNull();
     expect(auditData.userAgent).toHaveLength(MAX_USER_AGENT_LENGTH);
   });
 

@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 export const MAX_IP_ADDRESS_LENGTH = 128;
 export const MAX_USER_AGENT_LENGTH = 512;
 
@@ -16,13 +18,18 @@ function normalizeHeaderValue(value: string | null | undefined, maxLength: numbe
   return trimmedValue.slice(0, maxLength);
 }
 
+function normalizeIpAddress(value: string | null | undefined) {
+  const normalizedValue = normalizeHeaderValue(value, MAX_IP_ADDRESS_LENGTH);
+
+  return normalizedValue && isIP(normalizedValue) ? normalizedValue : null;
+}
+
 export function readIpAddress(request: RequestWithHeaders) {
   return (
-    normalizeHeaderValue(
+    normalizeIpAddress(
       request.headers.get("x-forwarded-for")?.split(",")[0],
-      MAX_IP_ADDRESS_LENGTH,
     ) ??
-    normalizeHeaderValue(request.headers.get("x-real-ip"), MAX_IP_ADDRESS_LENGTH)
+    normalizeIpAddress(request.headers.get("x-real-ip"))
   );
 }
 

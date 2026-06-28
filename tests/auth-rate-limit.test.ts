@@ -126,19 +126,36 @@ describe("credential login rate limiting", () => {
 
   it("normalizes client identifiers before building keys", () => {
     const headers = new Headers({
-      "x-forwarded-for": " 203.0.113.10;<script> ",
+      "x-forwarded-for": " 203.0.113.10 ",
     });
     const loginRequest = { headers } as Pick<Request, "headers">;
 
-    expect(readLoginClientIdentifier(headers)).toBe("203.0.113.10_script");
+    expect(readLoginClientIdentifier(headers)).toBe("203.0.113.10");
     expect(
       buildLoginAttemptRateLimitKeys({
         email: "Demo@DocuMind.Local",
         request: loginRequest,
       }),
     ).toEqual([
-      "auth-login:client:203.0.113.10_script",
+      "auth-login:client:203.0.113.10",
       "auth-login:email:demo@documind.local",
     ]);
+  });
+
+  it("does not trust malformed forwarded IP values for client rate limit keys", () => {
+    const headers = new Headers({
+      "x-forwarded-for": " 203.0.113.10;<script> ",
+    });
+
+    expect(readLoginClientIdentifier(headers)).toBe("unknown");
+  });
+
+  it("uses a valid real IP fallback when forwarded IP metadata is malformed", () => {
+    const headers = new Headers({
+      "x-forwarded-for": " attacker-controlled ",
+      "x-real-ip": " 198.51.100.42 ",
+    });
+
+    expect(readLoginClientIdentifier(headers)).toBe("198.51.100.42");
   });
 });

@@ -1,4 +1,5 @@
 import { checkRateLimit } from "../rate-limit";
+import { readIpAddress } from "../tools/response";
 
 export const LOGIN_ATTEMPT_RATE_LIMIT = 10;
 export const LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT = 100;
@@ -25,11 +26,7 @@ function normalizeRateLimitKeySegment(value: string | null | undefined) {
 }
 
 export function readLoginClientIdentifier(headers: Headers) {
-  return normalizeRateLimitKeySegment(
-    headers.get("x-forwarded-for")?.split(",")[0] ??
-      headers.get("x-real-ip") ??
-      null,
-  );
+  return normalizeRateLimitKeySegment(readIpAddress({ headers }));
 }
 
 export function buildLoginAttemptRateLimitKeys({
