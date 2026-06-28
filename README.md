@@ -306,7 +306,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text while allowing known rate-limit notices.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
-- `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, malformed answer payload/response handling, and timed-out answer retries.
+- `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, and timed-out answer retries.
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, and expired bucket cleanup.
@@ -341,7 +341,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       163 passed (163)
+Tests       164 passed (164)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 

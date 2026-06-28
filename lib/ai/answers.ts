@@ -11,6 +11,7 @@ export const INSUFFICIENT_INFORMATION_ANSWER =
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_ANSWER_OUTPUT_TOKENS = 1600;
+export const MAX_GROUNDED_ANSWER_CHARS = 8_000;
 const TRANSIENT_STATUS_CODES = new Set([408, 409, 429, 500, 502, 503, 504]);
 
 type FetchLike = typeof fetch;
@@ -227,6 +228,10 @@ export function parseGroundedAnswerPayload(
   const insufficientInformation =
     parsed.insufficientInformation === true ||
     answer === INSUFFICIENT_INFORMATION_ANSWER;
+
+  if (!insufficientInformation && answer.length > MAX_GROUNDED_ANSWER_CHARS) {
+    throw new AnswerApiError("OpenAI answer response exceeded maximum length.");
+  }
 
   return {
     answer: insufficientInformation ? INSUFFICIENT_INFORMATION_ANSWER : answer,

@@ -7,6 +7,7 @@ import {
   buildGroundedAnswerRequestBody,
   createGroundedAnswer,
   INSUFFICIENT_INFORMATION_ANSWER,
+  MAX_GROUNDED_ANSWER_CHARS,
   parseGroundedAnswerPayload,
 } from "../lib/ai/answers";
 
@@ -48,6 +49,19 @@ describe("grounded answer generation", () => {
       citationIndexes: [],
       insufficientInformation: true,
     });
+  });
+
+  it("rejects oversized grounded answer text before persistence", () => {
+    expect(() =>
+      parseGroundedAnswerPayload(
+        JSON.stringify({
+          answer: "a".repeat(MAX_GROUNDED_ANSWER_CHARS + 1),
+          citationIndexes: [1],
+          insufficientInformation: false,
+        }),
+        1,
+      ),
+    ).toThrow("OpenAI answer response exceeded maximum length.");
   });
 
   it("maps malformed answer JSON to a stable provider error", () => {
