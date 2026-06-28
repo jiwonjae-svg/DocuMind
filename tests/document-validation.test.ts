@@ -172,6 +172,22 @@ describe("document upload validation", () => {
     expect(validateDocumentBytes(".txt", Buffer.from([0x41, 0x00])).ok).toBe(
       false,
     );
+    expect(
+      validateDocumentBytes(
+        ".md",
+        Buffer.concat([Buffer.alloc(4096, 0x41), Buffer.from([0x00])]),
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("checks actual upload byte sizes after multipart parsing", () => {
+    expect(validateDocumentBytes(".txt", Buffer.alloc(0)).ok).toBe(false);
+    expect(
+      validateDocumentBytes(".txt", Buffer.alloc(MAX_DOCUMENT_UPLOAD_BYTES + 1)),
+    ).toEqual({
+      ok: false,
+      error: DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+    });
   });
 
   it("rejects stored paths that escape the upload root", () => {

@@ -6,11 +6,19 @@ import {
 
 type RequestWithOrigin = Parameters<typeof isSameOriginRequest>[0];
 
-function request(url: string, origin?: string | null): RequestWithOrigin {
+function request(
+  url: string,
+  origin?: string | null,
+  fetchSite?: string | null,
+): RequestWithOrigin {
   const headers = new Headers();
 
   if (origin !== undefined && origin !== null) {
     headers.set("origin", origin);
+  }
+
+  if (fetchSite !== undefined && fetchSite !== null) {
+    headers.set("sec-fetch-site", fetchSite);
   }
 
   return { headers, url } as RequestWithOrigin;
@@ -31,6 +39,14 @@ describe("request origin checks", () => {
     );
   });
 
+  it("allows same-origin Fetch Metadata without an Origin header", () => {
+    expect(
+      isSameOriginRequest(
+        request("https://documind.example/api/search", null, "same-origin"),
+      ),
+    ).toBe(true);
+  });
+
   it("rejects cross-origin browser mutations", () => {
     expect(
       isSameOriginRequest(
@@ -44,5 +60,26 @@ describe("request origin checks", () => {
       isSameOriginRequest(request("https://documind.example/api/search", "null")),
     ).toBe(false);
     expect(CROSS_ORIGIN_REQUEST_ERROR).toBe("Cross-origin request blocked.");
+  });
+
+  it("rejects cross-site and same-site browser mutations without Origin", () => {
+    expect(
+      isSameOriginRequest(
+        request("https://documind.example/api/search", null, "cross-site"),
+      ),
+    ).toBe(false);
+    expect(
+      isSameOriginRequest(
+        request("https://documind.example/api/search", null, "same-site"),
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects malformed Fetch Metadata headers", () => {
+    expect(
+      isSameOriginRequest(
+        request("https://documind.example/api/search", null, "unexpected"),
+      ),
+    ).toBe(false);
   });
 });

@@ -16,7 +16,21 @@ function parseOrigin(value: string | null) {
   }
 }
 
+function readFetchSite(headers: Headers) {
+  return headers.get("sec-fetch-site")?.trim().toLowerCase() ?? null;
+}
+
 export function isSameOriginRequest(request: RequestWithOrigin) {
+  const fetchSite = readFetchSite(request.headers);
+
+  if (fetchSite === "cross-site" || fetchSite === "same-site") {
+    return false;
+  }
+
+  if (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none") {
+    return false;
+  }
+
   const origin = parseOrigin(request.headers.get("origin"));
 
   if (!origin) {

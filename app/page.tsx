@@ -190,7 +190,7 @@ export default function Home() {
               <a
                 href={implementationUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noreferrer noopener"
                 aria-label="View the DocuMind implementation README on GitHub"
                 className={`${ui.secondaryButton} w-full sm:w-auto`}
               >

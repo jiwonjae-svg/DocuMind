@@ -4,8 +4,12 @@ import {
   normalizeEmailCredential,
   normalizePasswordCredential,
 } from "@/lib/auth/credentials";
+import { checkLoginAttemptRateLimit } from "@/lib/auth/login-rate-limit";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
+
+const DUMMY_PASSWORD_HASH =
+  "scrypt:documind_dummy_login_salt:9416b5514bd04012f409f5e5bac8205fb08d2a7c5481b7f65a8b808182666299fad451c9ca3297607854d2306cbd08270dcb857cfcd3af0970f7ea5990882edb";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
@@ -24,9 +28,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const email = normalizeEmailCredential(credentials?.email);
         const password = normalizePasswordCredential(credentials?.password);
+        const rateLimit = checkLoginAttemptRateLimit({
+          email,
+          request,
+        });
+
+        if (!rateLimit.allowed) {
+          return null;
+        }
 
         if (!email || !password) {
           return null;
@@ -42,13 +54,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
-        if (!user) {
-          return null;
-        }
+        const passwordMatches = await verifyPassword(
+          password,
+          user?.passwordHash ?? DUMMY_PASSWORD_HASH,
+        );
 
-        const passwordMatches = await verifyPassword(password, user.passwordHash);
-
-        if (!passwordMatches) {
+        if (!user || !passwordMatches) {
           return null;
         }
 

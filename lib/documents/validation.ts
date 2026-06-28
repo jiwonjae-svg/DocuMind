@@ -196,15 +196,24 @@ export function validateDocumentBytes(
   extension: AllowedDocumentExtension,
   bytes: Buffer,
 ): UploadValidationResult | { ok: true } {
+  if (bytes.length <= 0) {
+    return { ok: false, error: "The uploaded file is empty." };
+  }
+
+  if (bytes.length > MAX_DOCUMENT_UPLOAD_BYTES) {
+    return {
+      ok: false,
+      error: DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+    };
+  }
+
   if (extension === ".pdf") {
     return bytes.subarray(0, 5).toString("utf8") === "%PDF-"
       ? { ok: true }
       : { ok: false, error: "PDF uploads must contain a valid PDF header." };
   }
 
-  const sample = bytes.subarray(0, Math.min(bytes.length, 4096));
-
-  if (sample.includes(0)) {
+  if (bytes.includes(0)) {
     return {
       ok: false,
       error: "Text and Markdown uploads must be text files.",

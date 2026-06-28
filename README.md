@@ -44,9 +44,11 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
 - Declared oversized upload requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components while preserving Japanese/Korean names.
-- Same-origin checks for authenticated mutating POST routes.
+- Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Baseline security headers and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
+- Per-client and per-email in-memory rate limiting for credentials sign-in attempts.
+- Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Text extraction and chunking with overlap metadata.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
@@ -105,13 +107,13 @@ flowchart LR
 - Responsive landing page
 - Auth.js credentials authentication
 - App-relative login callback URL normalization
-- Bounded server-side credential normalization before database lookup and password verification
+- Bounded server-side credential normalization, sign-in attempt rate limiting, and dummy password verification for unknown users
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Protected dashboard navigation at `/dashboard`
-- Browser-origin checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
+- Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Security headers for browser hardening and `Cache-Control: no-store` on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
@@ -302,6 +304,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
+- `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by client and email.
 
 Run the suite with:
 
@@ -384,7 +387,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID, delete lookups include the owner filter before document metadata is read, and stored paths are resolved before the delete transaction runs.
+The app validates file extension, MIME type, declared size, actual byte size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID, delete lookups include the owner filter before document metadata is read, and stored paths are resolved before the delete transaction runs.
 
 After upload, documents are processed server-side:
 
@@ -586,7 +589,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 ## Known Limitations
 
 - Local file storage is intended for development; production should use object storage such as S3 or GCS.
-- AI-backed search and answer endpoints use an in-memory rate limiter, which is not shared across multiple app instances.
+- AI-backed search, answer, and credentials sign-in endpoints use in-memory rate limiters, which are not shared across multiple app instances.
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - Authentication is credentials-based for demo purposes; enterprise SSO is not implemented.
