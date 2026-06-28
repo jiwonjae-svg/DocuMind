@@ -1,9 +1,7 @@
-import type { NextRequest } from "next/server";
-
 export const MAX_IP_ADDRESS_LENGTH = 128;
 export const MAX_USER_AGENT_LENGTH = 512;
 
-type RequestWithHeaders = Pick<NextRequest, "headers">;
+type RequestWithHeaders = { headers: Headers };
 
 function normalizeHeaderValue(value: string | null | undefined, maxLength: number) {
   const trimmedValue = value?.trim();

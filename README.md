@@ -314,6 +314,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by client and email.
+- `tests/auth-login-audit.test.ts`: successful sign-in audit records include bounded IP address and User-Agent metadata.
 
 Run the suite with:
 
@@ -324,8 +325,8 @@ npm run test
 Local verification on 2026-06-28:
 
 ```text
-Test Files  28 passed (28)
-Tests       134 passed (134)
+Test Files  29 passed (29)
+Tests       136 passed (136)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -377,7 +378,7 @@ The page is intentionally owner-scoped for the MVP:
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
 - Metadata display is capped to keep long filenames, provider details, or nested values from dominating the audit screen.
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
-- Upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available.
+- Login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available.
 - It does not expose other users' audit records.
 
 Organization-wide admin audit review is not implemented yet and remains a future production-hardening feature.

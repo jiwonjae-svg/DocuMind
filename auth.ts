@@ -4,6 +4,7 @@ import {
   normalizeEmailCredential,
   normalizePasswordCredential,
 } from "@/lib/auth/credentials";
+import { buildUserLoginAuditData } from "@/lib/auth/login-audit";
 import { checkLoginAttemptRateLimit } from "@/lib/auth/login-rate-limit";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
@@ -64,12 +65,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         await prisma.auditLog.create({
-          data: {
-            actorId: user.id,
-            action: "user_login",
-            resourceType: "User",
-            resourceId: user.id,
-          },
+          data: buildUserLoginAuditData({
+            request,
+            userId: user.id,
+          }),
         });
 
         return {
