@@ -56,11 +56,23 @@ export function checkLoginAttemptRateLimit({
     ...(now ? { now } : {}),
     windowMs: LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS,
   };
+  const globalResult = checkRateLimit("auth-login:global", {
+    ...rateLimitOptions,
+    limit: LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT,
+  });
+
+  if (!globalResult.allowed) {
+    return {
+      allowed: false,
+      limit: LOGIN_ATTEMPT_RATE_LIMIT,
+      remaining: 0,
+      resetAt: globalResult.resetAt,
+      retryAfterSeconds: globalResult.retryAfterSeconds,
+    };
+  }
+
   const results = [
-    checkRateLimit("auth-login:global", {
-      ...rateLimitOptions,
-      limit: LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT,
-    }),
+    globalResult,
     ...buildLoginAttemptRateLimitKeys({ email, request }).map((key) =>
       checkRateLimit(key, {
         ...rateLimitOptions,

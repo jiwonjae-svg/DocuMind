@@ -53,7 +53,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, disabled framework powered-by header, and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Search and ask text inputs are normalized to remove control characters before embedding, persistence, and audit metadata length calculation.
-- Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts.
+- Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts, with aggregate denial short-circuiting before new client/email buckets are created.
 - Per-user in-memory rate limiting for document uploads before multipart parsing.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
@@ -119,7 +119,7 @@ flowchart LR
 - Responsive landing page
 - Auth.js credentials authentication
 - App-relative login callback URL normalization
-- Bounded server-side credential normalization, per-client/per-email/aggregate sign-in attempt rate limiting, and dummy password verification for unknown users
+- Bounded server-side credential normalization, per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown users
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
@@ -328,7 +328,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
-- `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by client, email, and aggregate attempt volume.
+- `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by client, email, and aggregate attempt volume, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded request metadata without storing submitted credential values.
 
 Run the suite with:
@@ -341,7 +341,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       155 passed (155)
+Tests       156 passed (156)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 

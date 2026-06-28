@@ -8,7 +8,10 @@ import {
   LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS,
   readLoginClientIdentifier,
 } from "../lib/auth/login-rate-limit";
-import { clearRateLimitBuckets } from "../lib/rate-limit";
+import {
+  clearRateLimitBuckets,
+  getRateLimitBucketCount,
+} from "../lib/rate-limit";
 
 function request(ipAddress: string) {
   const headers = new Headers({
@@ -97,6 +100,28 @@ describe("credential login rate limiting", () => {
     expect(rateLimit.retryAfterSeconds).toBe(
       LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS / 1000,
     );
+  });
+
+  it("does not create new client or email buckets after the aggregate limit is reached", () => {
+    const now = () => 1000;
+
+    for (let index = 0; index < LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT; index += 1) {
+      checkLoginAttemptRateLimit({
+        email: `spray-${index}@documind.local`,
+        now,
+        request: request(`203.0.113.${index}`),
+      });
+    }
+
+    const bucketCountBeforeDeniedAttempt = getRateLimitBucketCount();
+    const rateLimit = checkLoginAttemptRateLimit({
+      email: "spray-after-limit@documind.local",
+      now,
+      request: request("198.51.100.250"),
+    });
+
+    expect(rateLimit.allowed).toBe(false);
+    expect(getRateLimitBucketCount()).toBe(bucketCountBeforeDeniedAttempt);
   });
 
   it("normalizes client identifiers before building keys", () => {
