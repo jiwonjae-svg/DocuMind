@@ -4,6 +4,7 @@ import {
   createGroundedAnswer,
   INSUFFICIENT_INFORMATION_ANSWER,
 } from "../ai/answers";
+import { normalizeDocumentId } from "../documents/access";
 import { createSnippet } from "../text/snippet";
 
 const MAX_SUMMARY_CHUNKS = 12;
@@ -29,19 +30,7 @@ export type DocumentSummaryResult = {
   truncated: boolean;
 };
 
-export function normalizeDocumentId(documentId: unknown) {
-  if (typeof documentId !== "string") {
-    return null;
-  }
-
-  const normalized = documentId.trim();
-
-  return normalized.length > 0 &&
-    normalized.length <= 128 &&
-    /^[A-Za-z0-9_-]+$/.test(normalized)
-    ? normalized
-    : null;
-}
+export { normalizeDocumentId };
 
 export function selectSummaryChunks(chunks: SummaryChunk[]) {
   const eligibleChunks = chunks

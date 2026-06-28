@@ -2,9 +2,18 @@ import { describe, expect, it } from "vitest";
 import {
   buildDocumentOwnerWhere,
   isDocumentOwner,
+  normalizeDocumentId,
 } from "../lib/documents/access";
 
 describe("document ownership checks", () => {
+  it("normalizes document IDs before document operations", () => {
+    expect(normalizeDocumentId(" document-1 ")).toBe("document-1");
+    expect(normalizeDocumentId("")).toBeNull();
+    expect(normalizeDocumentId("../outside")).toBeNull();
+    expect(normalizeDocumentId("x".repeat(129))).toBeNull();
+    expect(normalizeDocumentId(null)).toBeNull();
+  });
+
   it("builds owner-scoped document lookup filters", () => {
     expect(
       buildDocumentOwnerWhere({

@@ -95,4 +95,19 @@ describe("API route security contracts", () => {
     expect(rateLimitIndex).toBeGreaterThanOrEqual(0);
     expect(documentLookupIndex).toBeGreaterThan(rateLimitIndex);
   });
+
+  it("normalizes document IDs before owner-scoped delete mutations", () => {
+    const source = readRoute(
+      path.join(apiRoot, "documents", "[documentId]", "delete", "route.ts"),
+    );
+    const normalizeIndex = source.indexOf(
+      "const documentId = normalizeDocumentId",
+    );
+    const deleteIndex = source.indexOf(
+      "const result = await deleteOwnedDocument",
+    );
+
+    expect(normalizeIndex).toBeGreaterThanOrEqual(0);
+    expect(deleteIndex).toBeGreaterThan(normalizeIndex);
+  });
 });

@@ -8,6 +8,7 @@ import {
   deleteOwnedDocument,
   type DeleteOwnedDocumentDb,
 } from "@/lib/documents/deletion";
+import { normalizeDocumentId } from "@/lib/documents/access";
 import { resolveOptionalStoragePath } from "@/lib/documents/storage";
 import { prisma } from "@/lib/prisma";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
@@ -44,7 +45,13 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
     );
   }
 
-  const { documentId } = await context.params;
+  const { documentId: rawDocumentId } = await context.params;
+  const documentId = normalizeDocumentId(rawDocumentId);
+
+  if (!documentId) {
+    return redirectToDocuments(request, { error: "not-found" });
+  }
+
   const result = await deleteOwnedDocument({
     db: prisma as unknown as DeleteOwnedDocumentDb,
     documentId,

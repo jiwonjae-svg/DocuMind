@@ -7,6 +7,20 @@ type DocumentOwnerWhereInput = {
   ownerId: string;
 };
 
+export function normalizeDocumentId(documentId: unknown) {
+  if (typeof documentId !== "string") {
+    return null;
+  }
+
+  const normalized = documentId.trim();
+
+  return normalized.length > 0 &&
+    normalized.length <= 128 &&
+    /^[A-Za-z0-9_-]+$/.test(normalized)
+    ? normalized
+    : null;
+}
+
 export function buildDocumentOwnerWhere({
   documentId,
   ownerId,
