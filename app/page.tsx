@@ -165,7 +165,7 @@ export default function Home() {
             </p>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-slate-700">
               日本・韓国チーム向けの社内ナレッジ検索システムです。認証、
-              文書処理、セマンティック検索、出典付きの回答を安全に扱うための
+              文書処理、セマンティック検索、出典付き回答を安全に扱うための
               バックエンド重視のMVPです。
             </p>
             <div className="mt-5 max-w-2xl border-l-4 border-blue-600 bg-white/80 px-5 py-4 shadow-sm">
@@ -382,11 +382,12 @@ export default function Home() {
               What reviewers should test
             </h2>
             <p className="mt-4 text-sm leading-6 text-slate-600">
-              Use the implemented flow below. Planned-only items, including
-              MCP wrapping, team RBAC, and organization-wide audit review, are
-              intentionally separated in the MVP scope section above.
+              Use the flow below; each step is implemented in the current
+              demo. Planned-only items, including MCP wrapping, team RBAC, and
+              organization-wide audit review, are intentionally separated in
+              the MVP scope section above.
             </p>
-            <ul
+            <ol
               role="list"
               aria-label="Try the demo steps"
               className="mt-5 grid list-none gap-3 p-0"
@@ -405,7 +406,7 @@ export default function Home() {
                   </span>
                 </li>
               ))}
-            </ul>
+            </ol>
             <p className="mt-5 text-sm leading-6 text-slate-500">
               Implemented now: an owner-scoped audit log view for the
               signed-in user. Planned only: organization-wide admin audit
