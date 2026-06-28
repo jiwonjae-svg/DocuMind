@@ -50,6 +50,17 @@ describe("Next.js security headers", () => {
     expect(csp).toContain("frame-ancestors 'none'");
   });
 
+  it("does not allow eval-capable scripts outside local development", async () => {
+    const headers = await readHeaders();
+    const allRoutes = headers.find((rule) => rule.source === "/(.*)");
+    const csp = allRoutes?.headers.find(
+      (header) => header.key === "Content-Security-Policy",
+    )?.value;
+
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).not.toContain("'unsafe-eval'");
+  });
+
   it("prevents API responses from being stored by caches", async () => {
     const headers = await readHeaders();
     const apiRoutes = headers.find((rule) => rule.source === "/api/:path*");

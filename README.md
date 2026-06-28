@@ -50,7 +50,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Document IDs are normalized before owner-scoped document mutations.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
-- Baseline security headers, Content Security Policy, HSTS, disabled framework powered-by header, and `no-store` caching for API responses.
+- Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, disabled framework powered-by header, and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts.
 - Per-user in-memory rate limiting for document uploads before multipart parsing.
@@ -126,7 +126,7 @@ flowchart LR
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked
-- Security headers, Content Security Policy, disabled Next.js powered-by header, HSTS, and `Cache-Control: no-store` on API routes
+- Security headers, Content Security Policy without production `unsafe-eval`, disabled Next.js powered-by header, HSTS, and `Cache-Control: no-store` on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Multipart content-type enforcement and parse-error handling for document uploads
@@ -320,7 +320,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
-- `tests/next-config.test.ts`: security headers, Content Security Policy, disabled powered-by header, and API cache headers in Next.js configuration.
+- `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, disabled powered-by header, and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
 - `tests/seed-policy.test.ts`: production seed runs reject the documented default demo password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
@@ -339,7 +339,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       152 passed (152)
+Tests       153 passed (153)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
