@@ -131,7 +131,7 @@ const demoSteps = [
 
 const repositoryUrl = "https://github.com/jiwonjae-svg/DocuMind";
 const implementationUrl =
-  `${repositoryUrl}#readme`;
+  `${repositoryUrl}/blob/main/README.md`;
 
 export default function Home() {
   return (
@@ -192,7 +192,7 @@ export default function Home() {
                 href={implementationUrl}
                 target="_blank"
                 rel="noreferrer noopener"
-                aria-label="View the DocuMind implementation README on GitHub"
+                aria-label="View the DocuMind implementation README in the GitHub repository"
                 className={`${ui.secondaryButton} w-full sm:w-auto`}
               >
                 <Icon name="view" className="h-5 w-5 text-blue-700" />
@@ -382,10 +382,12 @@ export default function Home() {
               What reviewers should test
             </h2>
             <p className="mt-4 text-sm leading-6 text-slate-600">
-              These steps are available now. Future-only items are separated in
-              the MVP scope section above.
+              Use the implemented flow below. Planned-only items, including
+              MCP wrapping, team RBAC, and organization-wide audit review, are
+              intentionally separated in the MVP scope section above.
             </p>
-            <ol
+            <ul
+              role="list"
               aria-label="Try the demo steps"
               className="mt-5 grid list-none gap-3 p-0"
             >
@@ -397,13 +399,17 @@ export default function Home() {
                   >
                     {index + 1}
                   </span>
-                  <span>{step}</span>
+                  <span>
+                    <span className="sr-only">Step {index + 1}: </span>
+                    {step}
+                  </span>
                 </li>
               ))}
-            </ol>
+            </ul>
             <p className="mt-5 text-sm leading-6 text-slate-500">
               Implemented now: an owner-scoped audit log view for the
-              signed-in user. Future: organization-wide admin audit review.
+              signed-in user. Planned only: organization-wide admin audit
+              review.
             </p>
             <Link
               href="/login?callbackUrl=/dashboard/audit-logs"
