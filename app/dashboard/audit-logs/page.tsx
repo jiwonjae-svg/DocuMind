@@ -19,6 +19,7 @@ const auditActionLabels: Record<string, string> = {
   document_upload: "Document uploaded",
   question_ask: "Question asked",
   user_login: "User signed in",
+  user_login_failed: "User sign-in failed",
 };
 
 function formatAction(action: string) {

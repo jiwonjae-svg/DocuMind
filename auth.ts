@@ -4,13 +4,27 @@ import {
   normalizeEmailCredential,
   normalizePasswordCredential,
 } from "@/lib/auth/credentials";
-import { buildUserLoginAuditData } from "@/lib/auth/login-audit";
+import {
+  buildUserLoginAuditData,
+  buildUserLoginFailureAuditData,
+} from "@/lib/auth/login-audit";
 import { checkLoginAttemptRateLimit } from "@/lib/auth/login-rate-limit";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 
 const DUMMY_PASSWORD_HASH =
   "scrypt:documind_dummy_login_salt:9416b5514bd04012f409f5e5bac8205fb08d2a7c5481b7f65a8b808182666299fad451c9ca3297607854d2306cbd08270dcb857cfcd3af0970f7ea5990882edb";
+
+async function auditFailedLogin(request: Request, userId?: string | null) {
+  await prisma.auditLog
+    .create({
+      data: buildUserLoginFailureAuditData({
+        request,
+        userId,
+      }),
+    })
+    .catch(() => {});
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
@@ -42,6 +56,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         if (!email || !password) {
+          await auditFailedLogin(request);
+
           return null;
         }
 
@@ -61,6 +77,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (!user || !passwordMatches) {
+          await auditFailedLogin(request, user?.id);
+
           return null;
         }
 

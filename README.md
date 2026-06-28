@@ -54,6 +54,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts.
 - Per-user in-memory rate limiting for document uploads before multipart parsing.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
+- Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
 - Text extraction and chunking with overlap metadata.
 - Extracted document text is capped before chunking and embedding to bound processing cost.
 - Document processing status writes remain owner-scoped.
@@ -143,6 +144,7 @@ flowchart LR
 - Semantic search audit logs
 - Question ask audit logs
 - Agent tool usage audit logs
+- Failed credentials sign-in audit logs without raw credential values
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
@@ -322,7 +324,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by client, email, and aggregate attempt volume.
-- `tests/auth-login-audit.test.ts`: successful sign-in audit records include bounded IP address and User-Agent metadata.
+- `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded request metadata without storing submitted credential values.
 
 Run the suite with:
 
@@ -334,7 +336,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       146 passed (146)
+Tests       148 passed (148)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -386,7 +388,8 @@ The page is intentionally owner-scoped for the MVP:
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
 - Metadata display is capped to keep long filenames, provider details, or nested values from dominating the audit screen.
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
-- Login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available.
+- Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available.
+- Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
 - It does not expose other users' audit records.
 
 Organization-wide admin audit review is not implemented yet and remains a future production-hardening feature.

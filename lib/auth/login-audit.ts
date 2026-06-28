@@ -7,6 +7,11 @@ type LoginAuditDataInput = {
   userId: string;
 };
 
+type FailedLoginAuditDataInput = {
+  request: LoginAuditRequest;
+  userId?: string | null;
+};
+
 export function buildUserLoginAuditData({
   request,
   userId,
@@ -17,6 +22,23 @@ export function buildUserLoginAuditData({
     ipAddress: readIpAddress(request),
     resourceType: "User",
     resourceId: userId,
+    userAgent: readUserAgent(request),
+  };
+}
+
+export function buildUserLoginFailureAuditData({
+  request,
+  userId,
+}: FailedLoginAuditDataInput) {
+  return {
+    actorId: userId ?? null,
+    action: "user_login_failed",
+    ipAddress: readIpAddress(request),
+    metadata: {
+      reason: "invalid_credentials",
+    },
+    resourceType: userId ? "User" : "Auth",
+    resourceId: userId ?? null,
     userAgent: readUserAgent(request),
   };
 }

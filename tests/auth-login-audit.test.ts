@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildUserLoginAuditData } from "../lib/auth/login-audit";
+import {
+  buildUserLoginAuditData,
+  buildUserLoginFailureAuditData,
+} from "../lib/auth/login-audit";
 import {
   MAX_IP_ADDRESS_LENGTH,
   MAX_USER_AGENT_LENGTH,
@@ -42,5 +45,46 @@ describe("login audit data", () => {
 
     expect(auditData.ipAddress).toHaveLength(MAX_IP_ADDRESS_LENGTH);
     expect(auditData.userAgent).toHaveLength(MAX_USER_AGENT_LENGTH);
+  });
+
+  it("captures failed sign-ins without storing submitted secrets", () => {
+    const auditData = buildUserLoginFailureAuditData({
+      request: requestWithHeaders({
+        "user-agent": "DocuMind reviewer browser",
+        "x-forwarded-for": " 203.0.113.42, 10.0.0.1 ",
+      }),
+      userId: "user-1",
+    });
+
+    expect(auditData).toEqual({
+      actorId: "user-1",
+      action: "user_login_failed",
+      ipAddress: "203.0.113.42",
+      metadata: {
+        reason: "invalid_credentials",
+      },
+      resourceType: "User",
+      resourceId: "user-1",
+      userAgent: "DocuMind reviewer browser",
+    });
+    expect(JSON.stringify(auditData.metadata)).not.toContain(
+      "DocuMindDemo123!",
+    );
+    expect(JSON.stringify(auditData.metadata)).not.toContain(
+      "demo@documind.local",
+    );
+  });
+
+  it("records unknown-user sign-in failures without assigning ownership", () => {
+    expect(
+      buildUserLoginFailureAuditData({
+        request: requestWithHeaders({}),
+      }),
+    ).toMatchObject({
+      actorId: null,
+      action: "user_login_failed",
+      resourceType: "Auth",
+      resourceId: null,
+    });
   });
 });
