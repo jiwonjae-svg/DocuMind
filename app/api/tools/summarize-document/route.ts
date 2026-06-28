@@ -56,6 +56,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "documentId is required." }, { status: 400 });
   }
 
+  const rateLimit = checkAiAnswerRateLimit(session.user.id);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: AI_ANSWER_RATE_LIMIT_ERROR },
+      buildAiAnswerRateLimitResponseInit(rateLimit),
+    );
+  }
+
   try {
     const document = await prisma.document.findFirst({
       where: {
@@ -89,15 +98,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Document must be READY before summarization." },
         { status: 400 },
-      );
-    }
-
-    const rateLimit = checkAiAnswerRateLimit(session.user.id);
-
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        { error: AI_ANSWER_RATE_LIMIT_ERROR },
-        buildAiAnswerRateLimitResponseInit(rateLimit),
       );
     }
 

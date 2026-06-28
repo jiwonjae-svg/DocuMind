@@ -84,4 +84,15 @@ describe("API route security contracts", () => {
     expect(rateLimitIndex).toBeGreaterThanOrEqual(0);
     expect(formDataIndex).toBeGreaterThan(rateLimitIndex);
   });
+
+  it("keeps summarize-document rate-limited before document chunk lookup", () => {
+    const source = readRoute(
+      path.join(apiRoot, "tools", "summarize-document", "route.ts"),
+    );
+    const rateLimitIndex = source.indexOf("checkAiAnswerRateLimit");
+    const documentLookupIndex = source.indexOf("prisma.document.findFirst");
+
+    expect(rateLimitIndex).toBeGreaterThanOrEqual(0);
+    expect(documentLookupIndex).toBeGreaterThan(rateLimitIndex);
+  });
 });
