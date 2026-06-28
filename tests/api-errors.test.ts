@@ -14,14 +14,25 @@ function namedError(name: string, status?: number) {
 
 describe("API error normalization", () => {
   it("maps AI configuration errors to a stable service response", () => {
-    expect(toApiError(namedError("EmbeddingConfigurationError"), "fallback")).toEqual({
-      error: "AI service is not configured. Set OPENAI_API_KEY on the server.",
+    const embeddingError = toApiError(
+      namedError("EmbeddingConfigurationError"),
+      "fallback",
+    );
+    const answerError = toApiError(
+      namedError("AnswerConfigurationError"),
+      "fallback",
+    );
+
+    expect(embeddingError).toEqual({
+      error: "AI service is not configured. Contact an administrator.",
       status: 503,
     });
-    expect(toApiError(namedError("AnswerConfigurationError"), "fallback")).toEqual({
-      error: "AI service is not configured. Set OPENAI_API_KEY on the server.",
+    expect(answerError).toEqual({
+      error: "AI service is not configured. Contact an administrator.",
       status: 503,
     });
+    expect(embeddingError.error).not.toContain("OPENAI_API_KEY");
+    expect(answerError.error).not.toContain("OPENAI_API_KEY");
   });
 
   it("maps AI provider rate limits and outages without leaking provider details", () => {

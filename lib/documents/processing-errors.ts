@@ -10,7 +10,7 @@ export {
 export const DOCUMENT_PROCESSING_UNSUPPORTED_TYPE_ERROR =
   "Unsupported document type.";
 export const DOCUMENT_PROCESSING_AI_CONFIGURATION_ERROR =
-  "AI service is not configured. Set OPENAI_API_KEY on the server.";
+  "AI service is not configured. Contact an administrator.";
 export const DOCUMENT_PROCESSING_AI_PROVIDER_ERROR =
   "AI provider request failed.";
 export const DOCUMENT_PROCESSING_AI_RATE_LIMIT_ERROR =

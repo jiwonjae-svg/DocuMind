@@ -312,13 +312,13 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
-- `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text is capped before chunking/embedding, and failure messages avoid leaking provider or filesystem details.
+- `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text is capped before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query normalization, control-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded, control-character-normalized, valid-IP-filtered request metadata captured for audit logs.
-- `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
+- `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.

@@ -69,12 +69,13 @@ describe("document processing errors", () => {
     ).toBe(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
   });
 
-  it("maps AI configuration failures without leaking provider details", () => {
-    expect(
-      normalizeDocumentProcessingError(
-        namedError("EmbeddingConfigurationError", "missing secret"),
-      ),
-    ).toBe(DOCUMENT_PROCESSING_AI_CONFIGURATION_ERROR);
+  it("maps AI configuration failures without leaking configuration details", () => {
+    const error = normalizeDocumentProcessingError(
+      namedError("EmbeddingConfigurationError", "missing secret"),
+    );
+
+    expect(error).toBe(DOCUMENT_PROCESSING_AI_CONFIGURATION_ERROR);
+    expect(error).not.toContain("OPENAI_API_KEY");
   });
 
   it("maps AI provider rate limits and temporary failures", () => {

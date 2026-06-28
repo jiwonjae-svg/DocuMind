@@ -4,7 +4,7 @@ type ApiError = {
 };
 
 const AI_CONFIGURATION_ERROR =
-  "AI service is not configured. Set OPENAI_API_KEY on the server.";
+  "AI service is not configured. Contact an administrator.";
 const AI_PROVIDER_ERROR = "AI provider request failed.";
 const AI_PROVIDER_RATE_LIMIT_ERROR =
   "AI provider is rate limiting requests. Try again shortly.";
