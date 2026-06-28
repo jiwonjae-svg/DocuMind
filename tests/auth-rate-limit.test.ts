@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   buildLoginAttemptRateLimitKeys,
   checkLoginAttemptRateLimit,
+  LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT,
   LOGIN_ATTEMPT_RATE_LIMIT,
   LOGIN_ATTEMPT_RATE_LIMIT_ERROR,
   LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS,
@@ -71,6 +72,31 @@ describe("credential login rate limiting", () => {
         request: request("203.0.113.200"),
       }).allowed,
     ).toBe(false);
+  });
+
+  it("limits aggregate attempts across many clients and emails", () => {
+    const now = () => 1000;
+
+    for (let index = 0; index < LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT; index += 1) {
+      expect(
+        checkLoginAttemptRateLimit({
+          email: `spray-${index}@documind.local`,
+          now,
+          request: request(`203.0.113.${index}`),
+        }).allowed,
+      ).toBe(true);
+    }
+
+    const rateLimit = checkLoginAttemptRateLimit({
+      email: "spray-final@documind.local",
+      now,
+      request: request("198.51.100.200"),
+    });
+
+    expect(rateLimit.allowed).toBe(false);
+    expect(rateLimit.retryAfterSeconds).toBe(
+      LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS / 1000,
+    );
   });
 
   it("normalizes client identifiers before building keys", () => {

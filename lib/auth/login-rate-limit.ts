@@ -1,6 +1,7 @@
 import { checkRateLimit } from "../rate-limit";
 
 export const LOGIN_ATTEMPT_RATE_LIMIT = 10;
+export const LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT = 100;
 export const LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS = 60_000;
 export const LOGIN_ATTEMPT_RATE_LIMIT_ERROR =
   "Too many sign-in attempts. Try again shortly.";
@@ -51,13 +52,22 @@ export function checkLoginAttemptRateLimit({
   now,
   request,
 }: LoginAttemptRateLimitOptions) {
-  const results = buildLoginAttemptRateLimitKeys({ email, request }).map((key) =>
-    checkRateLimit(key, {
-      limit: LOGIN_ATTEMPT_RATE_LIMIT,
-      ...(now ? { now } : {}),
-      windowMs: LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS,
+  const rateLimitOptions = {
+    ...(now ? { now } : {}),
+    windowMs: LOGIN_ATTEMPT_RATE_LIMIT_WINDOW_MS,
+  };
+  const results = [
+    checkRateLimit("auth-login:global", {
+      ...rateLimitOptions,
+      limit: LOGIN_GLOBAL_ATTEMPT_RATE_LIMIT,
     }),
-  );
+    ...buildLoginAttemptRateLimitKeys({ email, request }).map((key) =>
+      checkRateLimit(key, {
+        ...rateLimitOptions,
+        limit: LOGIN_ATTEMPT_RATE_LIMIT,
+      }),
+    ),
+  ];
   const deniedResults = results.filter((result) => !result.allowed);
 
   return {

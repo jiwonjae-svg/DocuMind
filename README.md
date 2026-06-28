@@ -51,7 +51,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
 - Baseline security headers, HSTS, and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
-- Per-client and per-email in-memory rate limiting for credentials sign-in attempts.
+- Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts.
 - Per-user in-memory rate limiting for document uploads before multipart parsing.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Text extraction and chunking with overlap metadata.
@@ -115,7 +115,7 @@ flowchart LR
 - Responsive landing page
 - Auth.js credentials authentication
 - App-relative login callback URL normalization
-- Bounded server-side credential normalization, sign-in attempt rate limiting, and dummy password verification for unknown users
+- Bounded server-side credential normalization, per-client/per-email/aggregate sign-in attempt rate limiting, and dummy password verification for unknown users
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
@@ -321,7 +321,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
-- `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by client and email.
+- `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by client, email, and aggregate attempt volume.
 - `tests/auth-login-audit.test.ts`: successful sign-in audit records include bounded IP address and User-Agent metadata.
 
 Run the suite with:
@@ -334,7 +334,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       145 passed (145)
+Tests       146 passed (146)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
