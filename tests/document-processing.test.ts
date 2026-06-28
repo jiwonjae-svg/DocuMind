@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -23,6 +25,17 @@ function namedError(name: string, message: string, status?: number) {
 }
 
 describe("document processing errors", () => {
+  it("keeps document processing status writes owner-scoped", () => {
+    const source = readFileSync(
+      path.join(process.cwd(), "lib", "documents", "processing.ts"),
+      "utf8",
+    );
+
+    expect(source).toContain("buildDocumentOwnerWhere");
+    expect(source).toContain("prisma.document.updateMany");
+    expect(source).not.toContain("prisma.document.update({");
+  });
+
   it("keeps known document processing errors user-readable", () => {
     expect(
       normalizeDocumentProcessingError(

@@ -54,6 +54,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Per-user in-memory rate limiting for document uploads before multipart parsing.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Text extraction and chunking with overlap metadata.
+- Document processing status writes remain owner-scoped.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
 - Empty searches skip query embedding when the signed-in user has no searchable ready chunks.
@@ -301,7 +302,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload quota, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
-- `tests/document-processing.test.ts`: document processing failure messages avoid leaking provider or filesystem details.
+- `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, and failure messages avoid leaking provider or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded audit metadata formatting and raw query/question text avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query and limit validation.
@@ -330,7 +331,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       140 passed (140)
+Tests       141 passed (141)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -409,6 +410,7 @@ The app validates file extension, MIME type, declared request length, declared f
 After upload, documents are processed server-side:
 
 - Status changes to `PROCESSING` while text extraction and chunking run.
+- Processing status updates include the authenticated owner filter.
 - `.txt` and `.md` files are read as UTF-8 text.
 - `.pdf` files are parsed with `pdf-parse`.
 - Extracted text is split into chunks of about 3,000 characters with about 500 characters of overlap.

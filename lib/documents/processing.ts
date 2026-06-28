@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { buildDocumentOwnerWhere } from "./access";
 import { extractDocumentText } from "./extraction";
 import { splitTextIntoChunks, TextChunk } from "./chunking";
 import { embedMissingDocumentChunks } from "./embeddings";
@@ -99,15 +100,24 @@ export async function processDocument(
     };
   }
 
-  await prisma.document.update({
-    where: {
-      id: document.id,
-    },
+  const ownerWhere = buildDocumentOwnerWhere({
+    documentId: document.id,
+    ownerId,
+  });
+  const processingUpdate = await prisma.document.updateMany({
+    where: ownerWhere,
     data: {
       processingError: null,
       status: "PROCESSING",
     },
   });
+
+  if (processingUpdate.count !== 1) {
+    return {
+      error: "Document not found.",
+      status: "FAILED",
+    };
+  }
 
   try {
     const text = await extractDocumentText(document);
@@ -131,10 +141,8 @@ export async function processDocument(
     });
 
     await prisma.$transaction([
-      prisma.document.update({
-        where: {
-          id: document.id,
-        },
+      prisma.document.updateMany({
+        where: ownerWhere,
         data: {
           extractedCharCount: text.trim().length,
           processingError: null,
@@ -171,10 +179,8 @@ export async function processDocument(
           ownerId,
         },
       }),
-      prisma.document.update({
-        where: {
-          id: document.id,
-        },
+      prisma.document.updateMany({
+        where: ownerWhere,
         data: {
           processingError,
           status: "FAILED",
