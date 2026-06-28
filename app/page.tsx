@@ -387,7 +387,7 @@ export default function Home() {
               organization-wide audit review, are intentionally separated in
               the MVP scope section above.
             </p>
-            <ol
+            <ul
               role="list"
               aria-label="Try the demo steps"
               className="mt-5 grid list-none gap-3 p-0"
@@ -406,7 +406,7 @@ export default function Home() {
                   </span>
                 </li>
               ))}
-            </ol>
+            </ul>
             <p className="mt-5 text-sm leading-6 text-slate-500">
               Implemented now: an owner-scoped audit log view for the
               signed-in user. Planned only: organization-wide admin audit
