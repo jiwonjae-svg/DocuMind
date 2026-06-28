@@ -122,15 +122,16 @@ const plannedFeatures = [
 
 const demoSteps = [
   "Sign in with the seeded demo account.",
-  "Open Documents, review existing files, or upload a short .txt or .md file.",
-  "Run semantic search and inspect top matching chunks and scores.",
+  "Open Documents to review existing files or upload a short .txt or .md file.",
+  "Run semantic search from Search and inspect matching chunks, snippets, and scores.",
   "Ask a grounded question using content from an uploaded or seeded document.",
   "Check the answer, citations, matched snippets, and insufficient-information behavior.",
   "Review owner-scoped audit log entries for your activity.",
 ] as const;
 
+const repositoryUrl = "https://github.com/jiwonjae-svg/DocuMind";
 const implementationUrl =
-  "https://github.com/jiwonjae-svg/DocuMind#readme";
+  `${repositoryUrl}#readme`;
 
 export default function Home() {
   return (
@@ -164,7 +165,7 @@ export default function Home() {
             </p>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-slate-700">
               日本・韓国チーム向けの社内ナレッジ検索システムです。認証、
-              文書処理、セマンティック検索、出典付き回答を安全に扱うための
+              文書処理、セマンティック検索、出典付きの回答を安全に扱うための
               バックエンド重視のMVPです。
             </p>
             <div className="mt-5 max-w-2xl border-l-4 border-blue-600 bg-white/80 px-5 py-4 shadow-sm">
@@ -289,13 +290,13 @@ export default function Home() {
           className={`${ui.container} grid gap-8 py-10 lg:grid-cols-[0.65fr_1.35fr] lg:items-start`}
         >
           <div>
-            <p className={ui.eyebrow}>Future / Not implemented yet</p>
+            <p className={ui.eyebrow}>Future / Planned only</p>
             <h2 className="mt-4 text-2xl font-semibold tracking-normal text-[#080f2f]">
               Intentionally outside the current MVP
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Planned for production hardening; not implemented in the current
-              demo.
+              These items are planned for production hardening and are not
+              implemented in the current demo.
             </p>
           </div>
           <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
@@ -380,7 +381,11 @@ export default function Home() {
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
               What reviewers should test
             </h2>
-            <ul
+            <p className="mt-4 text-sm leading-6 text-slate-600">
+              These steps are available now. Future-only items are separated in
+              the MVP scope section above.
+            </p>
+            <ol
               aria-label="Try the demo steps"
               className="mt-5 grid list-none gap-3 p-0"
             >
@@ -395,11 +400,10 @@ export default function Home() {
                   <span>{step}</span>
                 </li>
               ))}
-            </ul>
+            </ol>
             <p className="mt-5 text-sm leading-6 text-slate-500">
-              The dashboard now includes an owner-scoped audit log view for
-              the signed-in user. Organization-wide admin audit review remains
-              a future production-hardening feature.
+              Implemented now: an owner-scoped audit log view for the
+              signed-in user. Future: organization-wide admin audit review.
             </p>
             <Link
               href="/login?callbackUrl=/dashboard/audit-logs"

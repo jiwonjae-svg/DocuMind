@@ -6,6 +6,8 @@ This repository currently contains the MVP application scaffold with authenticat
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
+Implementation README: [GitHub repository README](https://github.com/jiwonjae-svg/DocuMind#readme)
+
 ## English Summary
 
 DocuMind lets authenticated users upload internal `.txt`, `.md`, and `.pdf` files, process them into searchable chunks, store embeddings in PostgreSQL with pgvector, and ask grounded questions with source citations. It is designed as a clean full-stack MVP that demonstrates secure AI integration, document processing, access control, testing, Docker-backed local infrastructure, and Japan-ready product thinking.
@@ -26,7 +28,7 @@ DocuMind is a secure internal knowledge search MVP for Japanese and Korean teams
 
 Japanese:
 
-DocuMind は、日本・韓国チーム向けの安全な社内ナレッジ検索 MVP です。認証、文書アップロード、文書処理、PostgreSQL/Prisma、pgvector によるセマンティック検索、OpenAI を使った出典付き回答、監査ログ、Docker、CI、エージェント向け API を一つの実用的なプロダクトとしてまとめています。社内文書から根拠のある回答を返し、API キーやアクセス権限を安全に扱うことを重視しています。
+DocuMind は、日本・韓国チーム向けの安全な社内ナレッジ検索 MVP です。認証、文書アップロード、文書処理、PostgreSQL/Prisma、pgvector によるセマンティック検索、OpenAI を使った出典付きの回答、監査ログ、Docker、CI、エージェント向け API を一つの実用的なプロダクトとしてまとめています。社内文書から根拠のある回答を返し、API キーやアクセス権限を安全に扱うことを重視しています。
 
 ## Why This Matters In Agentic Workflows
 
@@ -353,16 +355,16 @@ This default password is intended only for local demo seeding. Production seedin
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
-For a quick reviewer pass, all steps below are implemented in the current demo:
+For a quick reviewer pass, the steps below are implemented in the current demo:
 
 1. Sign in with the seeded demo account.
-2. Open Documents, review existing files, or upload a short `.txt` or `.md` file.
-3. Run semantic search from the Search page and inspect matching chunks and scores.
+2. Open Documents to review existing files or upload a short `.txt` or `.md` file.
+3. Run semantic search from the Search page and inspect matching chunks, snippets, and scores.
 4. Ask a grounded question using content from an uploaded or seeded document.
 5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
 6. Review owner-scoped audit log entries for your activity.
 
-Planned work such as MCP wrapping, enterprise SSO/team RBAC, durable object storage, and organization-wide admin audit review is listed under Future / Production Hardening and is not expected in this demo.
+Future-only work such as MCP wrapping, enterprise SSO/team RBAC, durable object storage, and organization-wide admin audit review is listed under Future / Production Hardening and is not expected in this demo.
 
 ## Audit Logs
 
