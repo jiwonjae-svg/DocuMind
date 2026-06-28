@@ -21,6 +21,9 @@ const allowedMimeTypesByExtension = {
   ".pdf": new Set(["", "application/pdf", "application/octet-stream"]),
 } as const;
 
+const unsafeDisplayFileNameCharacters =
+  /[\u0000-\u001f\u007f-\u009f\p{Cf}]+/gu;
+
 export type AllowedDocumentExtension =
   keyof typeof allowedMimeTypesByExtension;
 
@@ -140,7 +143,7 @@ export function sanitizeDocumentDisplayName(fileName: string) {
   const basename = getBasename(fileName)
     .trim()
     .normalize("NFC")
-    .replace(/[\u0000-\u001f\u007f]+/g, "")
+    .replace(unsafeDisplayFileNameCharacters, "")
     .trim();
 
   return truncateFileName(

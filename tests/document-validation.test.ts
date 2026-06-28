@@ -84,6 +84,23 @@ describe("document upload validation", () => {
     }
   });
 
+  it("removes invisible control and format characters from display names", () => {
+    const result = validateDocumentUpload({
+      name: "../../日本語\u202ecod.exe\u0085한국어.md",
+      size: 128,
+      type: "text/markdown",
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (result.ok) {
+      expect(result.displayName).toBe("日本語cod.exe한국어.md");
+      expect(result.displayName).not.toContain("\u202e");
+      expect(result.displayName).not.toContain("\u0085");
+      expect(result.displayName.endsWith(".md")).toBe(true);
+    }
+  });
+
   it("rejects oversized files", () => {
     const result = validateDocumentUpload({
       name: "large.pdf",
