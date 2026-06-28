@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { getDocumentOperationNotice } from "@/lib/documents/notices";
+import { formatStoredDocumentProcessingError } from "@/lib/documents/processing-errors";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -195,52 +196,62 @@ export default async function DocumentsPage({
             </div>
           ) : (
             <div className="divide-y divide-slate-200">
-              {documents.map((document) => (
-                <div
-                  key={document.id}
-                  className="grid gap-5 px-6 py-5 lg:grid-cols-[1fr_auto]"
-                >
-                  <div className="flex gap-4">
-                    <IconTile accent="blue" icon="document" className="h-12 w-12" />
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="truncate text-base font-semibold text-[#0b1535]">
-                          {document.title}
-                        </h3>
-                        <span
-                          className={`rounded-md px-2.5 py-1 text-xs font-semibold ${statusStyles[document.status]}`}
-                        >
-                          {document.status}
-                        </span>
-                      </div>
-                      <p className="mt-2 truncate text-sm text-slate-600">
-                        {document.originalName}
-                      </p>
-                      <p className="mt-2 text-xs leading-5 text-slate-500">
-                        {formatBytes(document.sizeBytes)} / {document.mimeType} /{" "}
-                        {document._count.chunks} chunks /{" "}
-                        {document.extractedCharCount} characters /{" "}
-                        {document.createdAt.toLocaleDateString("en-US")}
-                      </p>
-                      {document.processingError ? (
-                        <p className="mt-2 text-xs leading-5 text-red-700">
-                          {document.processingError}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-                  <form
-                    action={`/api/documents/${document.id}/delete`}
-                    method="post"
-                    className="flex items-start lg:justify-end"
+              {documents.map((document) => {
+                const processingError = formatStoredDocumentProcessingError(
+                  document.processingError,
+                );
+
+                return (
+                  <div
+                    key={document.id}
+                    className="grid gap-5 px-6 py-5 lg:grid-cols-[1fr_auto]"
                   >
-                    <button type="submit" className={ui.dangerButton}>
-                      <Icon name="trash" className="h-4 w-4" />
-                      Delete
-                    </button>
-                  </form>
-                </div>
-              ))}
+                    <div className="flex gap-4">
+                      <IconTile
+                        accent="blue"
+                        icon="document"
+                        className="h-12 w-12"
+                      />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="truncate text-base font-semibold text-[#0b1535]">
+                            {document.title}
+                          </h3>
+                          <span
+                            className={`rounded-md px-2.5 py-1 text-xs font-semibold ${statusStyles[document.status]}`}
+                          >
+                            {document.status}
+                          </span>
+                        </div>
+                        <p className="mt-2 truncate text-sm text-slate-600">
+                          {document.originalName}
+                        </p>
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          {formatBytes(document.sizeBytes)} / {document.mimeType} /{" "}
+                          {document._count.chunks} chunks /{" "}
+                          {document.extractedCharCount} characters /{" "}
+                          {document.createdAt.toLocaleDateString("en-US")}
+                        </p>
+                        {processingError ? (
+                          <p className="mt-2 text-xs leading-5 text-red-700">
+                            {processingError}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <form
+                      action={`/api/documents/${document.id}/delete`}
+                      method="post"
+                      className="flex items-start lg:justify-end"
+                    >
+                      <button type="submit" className={ui.dangerButton}>
+                        <Icon name="trash" className="h-4 w-4" />
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

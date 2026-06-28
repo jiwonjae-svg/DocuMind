@@ -34,9 +34,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV PORT=3000
 
-COPY --from=builder /app ./
+RUN groupadd --system --gid 1001 nodejs \
+  && useradd --system --uid 1001 --gid nodejs nextjs
 
-RUN mkdir -p /app/uploads/documents
+COPY --from=builder --chown=nextjs:nodejs /app ./
+
+RUN mkdir -p /app/uploads/documents \
+  && chown -R nextjs:nodejs /app/uploads
+
+USER nextjs
 
 EXPOSE 3000
 

@@ -8,6 +8,10 @@ function readIgnoreFile(path: string) {
     .filter((line) => line && !line.startsWith("#"));
 }
 
+function readFile(path: string) {
+  return readFileSync(path, "utf8");
+}
+
 describe("deployment hygiene", () => {
   it("keeps secrets and local deployment state out of Docker build context", () => {
     const patterns = readIgnoreFile(".dockerignore");
@@ -31,5 +35,21 @@ describe("deployment hygiene", () => {
         "uploads",
       ]),
     );
+  });
+
+  it("runs the production container as a non-root user", () => {
+    const dockerfile = readFile("Dockerfile");
+
+    expect(dockerfile).toContain("useradd --system --uid 1001");
+    expect(dockerfile).toContain("COPY --from=builder --chown=nextjs:nodejs");
+    expect(dockerfile).toContain("chown -R nextjs:nodejs /app/uploads");
+    expect(dockerfile).toMatch(/\nUSER nextjs\n/);
+  });
+
+  it("does not prefill the demo password in the client login form", () => {
+    const loginForm = readFile("app/login/login-form.tsx");
+
+    expect(loginForm).not.toContain("defaultValue=\"DocuMindDemo123!\"");
+    expect(loginForm).not.toContain("value=\"DocuMindDemo123!\"");
   });
 });

@@ -19,6 +19,15 @@ const AI_PROVIDER_TEMPORARY_STATUS_CODES = new Set([
   503,
   504,
 ]);
+const DISPLAYABLE_DOCUMENT_PROCESSING_ERRORS = new Set([
+  DOCUMENT_PROCESSING_NO_TEXT_ERROR,
+  DOCUMENT_PROCESSING_UNSUPPORTED_TYPE_ERROR,
+  DOCUMENT_PROCESSING_AI_CONFIGURATION_ERROR,
+  DOCUMENT_PROCESSING_AI_PROVIDER_ERROR,
+  DOCUMENT_PROCESSING_AI_RATE_LIMIT_ERROR,
+  DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR,
+  DOCUMENT_PROCESSING_GENERIC_ERROR,
+]);
 
 function readErrorName(error: unknown) {
   return error instanceof Error ? error.name : null;
@@ -82,4 +91,18 @@ export function normalizeDocumentProcessingError(error: unknown) {
   }
 
   return DOCUMENT_PROCESSING_GENERIC_ERROR;
+}
+
+export function formatStoredDocumentProcessingError(
+  error: string | null | undefined,
+) {
+  const normalizedError = error?.trim();
+
+  if (!normalizedError) {
+    return null;
+  }
+
+  return DISPLAYABLE_DOCUMENT_PROCESSING_ERRORS.has(normalizedError)
+    ? normalizedError
+    : DOCUMENT_PROCESSING_GENERIC_ERROR;
 }

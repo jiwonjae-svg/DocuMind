@@ -32,7 +32,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
     setIsSubmitting(false);
 
     if (!result || result.error) {
-      setError("Use the demo email and password from your local environment.");
+      setError("Use the seeded demo email and password from your local setup.");
       return;
     }
 
@@ -71,7 +71,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           name="password"
           type="password"
           autoComplete="current-password"
-          defaultValue="DocuMindDemo123!"
+          placeholder="Enter the seeded demo password"
           required
           className={`mt-2 ${ui.input}`}
         />

@@ -42,7 +42,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
-- Declared oversized upload requests are rejected before multipart parsing.
+- Upload requests must include a valid `Content-Length`, and declared oversized requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components while preserving Japanese/Korean names.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Baseline security headers and `no-store` caching for API responses.
@@ -67,6 +67,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
 - Docker build context hygiene for secrets, local uploads, and generated outputs.
+- Docker runtime uses a non-root application user.
 - GitHub Actions CI for Prisma generation, lint, tests, and build.
 
 ### Future / Production Hardening
@@ -118,7 +119,7 @@ flowchart LR
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Multipart content-type enforcement and parse-error handling for document uploads
-- Declared oversized upload requests are rejected before multipart body parsing
+- Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
 - Bounded document operation notices for upload/delete redirects
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
 - OpenAI embeddings for document chunks
@@ -135,6 +136,7 @@ flowchart LR
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
+- Production Docker image runs the Next.js app as a non-root `nextjs` user
 - GitHub Actions CI for lint, tests, and build
 - Demo user seed script
 - Health check route at `/api/health`
@@ -235,7 +237,7 @@ docker compose down
 
 The `app` service runs `npx prisma migrate deploy` before `npm run start`. Uploaded development files are stored in the `uploads-data` Docker volume. Set `OPENAI_API_KEY` in your shell or `.env` file before using embeddings, search, ask, or summarize flows that call OpenAI.
 
-The Docker build context is intentionally bounded with `.dockerignore` so local secrets, `.vercel`, `uploads`, dependencies, test coverage, and framework build output are not copied into image builds.
+The Docker build context is intentionally bounded with `.dockerignore` so local secrets, `.vercel`, `uploads`, dependencies, test coverage, and framework build output are not copied into image builds. The production container runs as a non-root `nextjs` user, with the local uploads directory created before startup.
 
 Example `.env` values for Docker:
 
@@ -334,7 +336,7 @@ npm run prisma:seed
 
 ## Demo Login
 
-After running the migration and seed script, sign in at [http://localhost:3000/login](http://localhost:3000/login).
+After running the migration and seed script, sign in at [http://localhost:3000/login](http://localhost:3000/login). The login form pre-fills only the demo email; enter the password from your local seed configuration.
 
 ```text
 Email: demo@documind.local
@@ -387,7 +389,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared size, actual byte size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID, delete lookups include the owner filter before document metadata is read, and stored paths are resolved before the delete transaction runs.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Stored filenames are sanitized and resolved under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID, delete lookups include the owner filter before document metadata is read, and stored paths are resolved before the delete transaction runs.
 
 After upload, documents are processed server-side:
 
@@ -400,7 +402,7 @@ After upload, documents are processed server-side:
 - Existing chunk embeddings are skipped when backfilling missing embeddings.
 - Status changes to `READY` when chunks and embeddings are stored.
 - Status changes to `FAILED` with a processing error when extraction fails or no text is found.
-- Failed processing stores a normalized user-facing error instead of raw provider, parser, or filesystem details.
+- Failed processing stores and displays a normalized user-facing error instead of raw provider, parser, or filesystem details.
 
 ## Semantic Search
 

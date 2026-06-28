@@ -4,6 +4,8 @@ export const MAX_DOCUMENT_UPLOAD_REQUEST_BYTES =
 export const MAX_DOCUMENT_SAFE_FILE_NAME_LENGTH = 180;
 export const MAX_DOCUMENT_DISPLAY_FILE_NAME_LENGTH = 255;
 export const DOCUMENT_UPLOAD_TOO_LARGE_ERROR = "Files must be 10 MB or smaller.";
+export const DOCUMENT_UPLOAD_LENGTH_REQUIRED_ERROR =
+  "Document upload requires a valid Content-Length header.";
 export const DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR =
   "Document upload must use multipart form data.";
 export const DOCUMENT_UPLOAD_PARSE_ERROR = "Document upload could not be parsed.";
@@ -62,6 +64,10 @@ export function isDocumentUploadRequestTooLarge(headers: Headers) {
     contentLength !== null &&
     contentLength > MAX_DOCUMENT_UPLOAD_REQUEST_BYTES
   );
+}
+
+export function hasValidDocumentUploadRequestLength(headers: Headers) {
+  return readContentLength(headers) !== null;
 }
 
 export function isMultipartDocumentUploadRequest(headers: Headers) {

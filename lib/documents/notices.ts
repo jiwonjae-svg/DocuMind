@@ -1,5 +1,6 @@
 import {
   DOCUMENT_UPLOAD_PARSE_ERROR,
+  DOCUMENT_UPLOAD_LENGTH_REQUIRED_ERROR,
   DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
   DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
 } from "./validation";
@@ -15,6 +16,10 @@ const knownDocumentErrors = new Map([
   [
     DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
     "Document upload must use multipart form data.",
+  ],
+  [
+    DOCUMENT_UPLOAD_LENGTH_REQUIRED_ERROR,
+    "Document upload requires a valid Content-Length header.",
   ],
   [DOCUMENT_UPLOAD_PARSE_ERROR, "Document upload could not be parsed."],
   ["Choose a file to upload.", "Choose a file before uploading."],

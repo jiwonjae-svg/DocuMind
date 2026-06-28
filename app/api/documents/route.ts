@@ -12,8 +12,10 @@ import {
 } from "@/lib/documents/storage";
 import {
   DOCUMENT_UPLOAD_PARSE_ERROR,
+  DOCUMENT_UPLOAD_LENGTH_REQUIRED_ERROR,
   DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
   DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
+  hasValidDocumentUploadRequestLength,
   isDocumentUploadRequestTooLarge,
   isMultipartDocumentUploadRequest,
   validateDocumentBytes,
@@ -72,6 +74,12 @@ export async function POST(request: NextRequest) {
   if (!isMultipartDocumentUploadRequest(request.headers)) {
     return redirectToDocuments(request, {
       error: DOCUMENT_UPLOAD_UNSUPPORTED_MEDIA_TYPE_ERROR,
+    });
+  }
+
+  if (!hasValidDocumentUploadRequestLength(request.headers)) {
+    return redirectToDocuments(request, {
+      error: DOCUMENT_UPLOAD_LENGTH_REQUIRED_ERROR,
     });
   }
 

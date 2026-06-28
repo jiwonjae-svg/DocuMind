@@ -7,6 +7,7 @@ import {
   DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR,
   DOCUMENT_PROCESSING_GENERIC_ERROR,
   DOCUMENT_PROCESSING_NO_TEXT_ERROR,
+  formatStoredDocumentProcessingError,
   normalizeDocumentProcessingError,
 } from "../lib/documents/processing-errors";
 
@@ -80,5 +81,17 @@ describe("document processing errors", () => {
         new Error("ENOENT C:/Users/example/uploads/private.txt"),
       ),
     ).toBe(DOCUMENT_PROCESSING_GENERIC_ERROR);
+  });
+
+  it("normalizes stored processing errors again before display", () => {
+    expect(
+      formatStoredDocumentProcessingError(DOCUMENT_PROCESSING_NO_TEXT_ERROR),
+    ).toBe(DOCUMENT_PROCESSING_NO_TEXT_ERROR);
+    expect(
+      formatStoredDocumentProcessingError(
+        "ENOENT C:/Users/example/uploads/private.txt",
+      ),
+    ).toBe(DOCUMENT_PROCESSING_GENERIC_ERROR);
+    expect(formatStoredDocumentProcessingError("   ")).toBeNull();
   });
 });

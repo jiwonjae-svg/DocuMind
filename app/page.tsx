@@ -31,7 +31,7 @@ const implementedFeatures = [
   },
   {
     title: "Demo authentication",
-    body: "Auth.js credentials authentication provides a prefilled reviewer account while keeping session handling on the server.",
+    body: "Auth.js credentials authentication provides a documented reviewer account while keeping session handling on the server.",
     icon: "team",
     accent: "emerald",
   },
@@ -121,7 +121,7 @@ const plannedFeatures = [
 ] as const;
 
 const demoSteps = [
-  "Sign in with the prefilled demo account.",
+  "Sign in with the seeded demo account.",
   "Open Documents, review existing files, or upload a short .txt or .md file.",
   "Run semantic search and inspect top matching chunks and scores.",
   "Ask a grounded question using content from an uploaded or seeded document.",

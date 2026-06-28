@@ -71,7 +71,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Sign in
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              The demo credentials are prefilled for a quick portfolio review.
+              The demo email is prefilled; use the seeded password from your
+              local setup or the reviewer instructions.
             </p>
             <LoginForm callbackUrl={callbackUrl} />
           </div>
