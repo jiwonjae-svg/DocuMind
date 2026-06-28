@@ -206,6 +206,8 @@ Seed the demo user:
 npm run prisma:seed
 ```
 
+The documented demo password is for local portfolio review only. If `npm run prisma:seed` is run with `NODE_ENV=production`, `DEMO_USER_PASSWORD` must be explicitly set to a non-default value or the seed script will fail.
+
 Run the development server:
 
 ```bash
@@ -301,9 +303,11 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tools-response.test.ts`: bounded request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
+- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, and bounded JSON parsing contracts.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests.
 - `tests/next-config.test.ts`: security and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
+- `tests/seed-policy.test.ts`: production seed runs reject the documented default demo password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
@@ -318,8 +322,8 @@ npm run test
 Local verification on 2026-06-28:
 
 ```text
-Test Files  26 passed (26)
-Tests       128 passed (128)
+Test Files  28 passed (28)
+Tests       134 passed (134)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -344,6 +348,8 @@ After running the migration and seed script, sign in at [http://localhost:3000/l
 Email: demo@documind.local
 Password: DocuMindDemo123!
 ```
+
+This default password is intended only for local demo seeding. Production seeding rejects the default password.
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 

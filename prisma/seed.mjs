@@ -2,6 +2,7 @@ import { randomBytes, scrypt as scryptCallback } from "node:crypto";
 import { promisify } from "node:util";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { readDemoSeedCredentials } from "./seed-policy.mjs";
 
 const scrypt = promisify(scryptCallback);
 const keyLength = 64;
@@ -27,12 +28,7 @@ async function main() {
   const adapter = new PrismaPg({ connectionString: requireDatabaseUrl() });
   const prisma = new PrismaClient({ adapter });
 
-  const email = process.env.DEMO_USER_EMAIL ?? "demo@documind.local";
-  const password = process.env.DEMO_USER_PASSWORD ?? "DocuMindDemo123!";
-
-  if (password.length < 12) {
-    throw new Error("DEMO_USER_PASSWORD must be at least 12 characters.");
-  }
+  const { email, password } = readDemoSeedCredentials();
 
   const passwordHash = await hashPassword(password);
 
