@@ -1,10 +1,25 @@
 export const MAX_AUDIT_METADATA_ENTRIES = 4;
 export const MAX_AUDIT_METADATA_VALUE_LENGTH = 80;
 
+const unsafeAuditDisplayCharacters = /[\u0000-\u001f\u007f-\u009f\p{Cf}]+/gu;
+
+function normalizeAuditDisplayText(value: string) {
+  return value
+    .replace(unsafeAuditDisplayCharacters, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function truncateAuditValue(value: string) {
-  return value.length > MAX_AUDIT_METADATA_VALUE_LENGTH
-    ? `${value.slice(0, MAX_AUDIT_METADATA_VALUE_LENGTH - 3)}...`
-    : value;
+  const normalizedValue = normalizeAuditDisplayText(value);
+
+  if (!normalizedValue) {
+    return "";
+  }
+
+  return normalizedValue.length > MAX_AUDIT_METADATA_VALUE_LENGTH
+    ? `${normalizedValue.slice(0, MAX_AUDIT_METADATA_VALUE_LENGTH - 3)}...`
+    : normalizedValue;
 }
 
 export function formatAuditMetadataValue(value: unknown): string {
@@ -37,8 +52,11 @@ export function formatAuditMetadata(metadata: unknown) {
   }
 
   const entries = Object.entries(metadata)
-    .map(([key, value]) => [key, formatAuditMetadataValue(value)] as const)
-    .filter(([, value]) => value.length > 0);
+    .map(
+      ([key, value]) =>
+        [truncateAuditValue(key), formatAuditMetadataValue(value)] as const,
+    )
+    .filter(([key, value]) => key.length > 0 && value.length > 0);
 
   if (entries.length === 0) {
     return null;

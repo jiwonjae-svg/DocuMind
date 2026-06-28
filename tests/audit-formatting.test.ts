@@ -29,6 +29,17 @@ describe("audit metadata formatting", () => {
     expect(formattedObject.endsWith("...")).toBe(true);
   });
 
+  it("removes unsafe control and format characters before display", () => {
+    expect(formatAuditMetadataValue("alpha\r\nbeta\u202egamma\u0085delta")).toBe(
+      "alpha beta gamma delta",
+    );
+    expect(
+      formatAuditMetadata({
+        "bad\r\nkey\u202e": "value\u0000with\u0085controls",
+      }),
+    ).toBe("bad key: value with controls");
+  });
+
   it("returns null for missing or empty metadata", () => {
     expect(formatAuditMetadata(null)).toBeNull();
     expect(formatAuditMetadata([])).toBeNull();
