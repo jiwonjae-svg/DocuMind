@@ -52,6 +52,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
 - Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, disabled framework powered-by header, and `no-store` caching for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
+- Search and ask text inputs are normalized to remove control characters before embedding, persistence, and audit metadata length calculation.
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts.
 - Per-user in-memory rate limiting for document uploads before multipart parsing.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
@@ -128,6 +129,7 @@ flowchart LR
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked
 - Security headers, Content Security Policy without production `unsafe-eval`, disabled Next.js powered-by header, HSTS, and `Cache-Control: no-store` on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
+- Control-character normalization for search and ask inputs before AI-backed work or question persistence
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Multipart content-type enforcement and parse-error handling for document uploads
 - Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
@@ -313,7 +315,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text is capped before chunking/embedding, and failure messages avoid leaking provider or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded audit metadata formatting and raw query/question text avoidance for audit metadata.
-- `tests/search-validation.test.ts`: semantic search query and limit validation.
+- `tests/search-validation.test.ts`: semantic search query normalization, control-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded and control-character-normalized request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures.
@@ -339,7 +341,7 @@ Local verification on 2026-06-28:
 
 ```text
 Test Files  29 passed (29)
-Tests       153 passed (153)
+Tests       154 passed (154)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 

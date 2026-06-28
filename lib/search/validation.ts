@@ -7,7 +7,10 @@ export function normalizeSearchQuery(query: unknown) {
     return null;
   }
 
-  const normalizedQuery = query.replace(/\s+/g, " ").trim();
+  const normalizedQuery = query
+    .replace(/[\u0000-\u001f\u007f-\u009f]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   if (
     !normalizedQuery ||

@@ -14,6 +14,12 @@ describe("search validation", () => {
     );
   });
 
+  it("removes control characters from search and ask inputs", () => {
+    expect(
+      normalizeSearchQuery("policy\u0000launch\u007fnotes\u0085owner"),
+    ).toBe("policy launch notes owner");
+  });
+
   it("rejects invalid search queries", () => {
     expect(normalizeSearchQuery("")).toBeNull();
     expect(normalizeSearchQuery("   \n\t")).toBeNull();
