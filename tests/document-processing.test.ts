@@ -9,6 +9,7 @@ import {
   DOCUMENT_PROCESSING_AI_TEMPORARY_ERROR,
   DOCUMENT_PROCESSING_GENERIC_ERROR,
   DOCUMENT_PROCESSING_NO_TEXT_ERROR,
+  DOCUMENT_PROCESSING_PDF_TOO_MANY_PAGES_ERROR,
   DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR,
   formatStoredDocumentProcessingError,
   normalizeDocumentProcessingError,
@@ -68,6 +69,11 @@ describe("document processing errors", () => {
         new Error(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR),
       ),
     ).toBe(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
+    expect(
+      normalizeDocumentProcessingError(
+        new Error(DOCUMENT_PROCESSING_PDF_TOO_MANY_PAGES_ERROR),
+      ),
+    ).toBe(DOCUMENT_PROCESSING_PDF_TOO_MANY_PAGES_ERROR);
     expect(
       normalizeDocumentProcessingError(new Error(DOCUMENT_UPLOAD_TOO_LARGE_ERROR)),
     ).toBe(DOCUMENT_UPLOAD_TOO_LARGE_ERROR);
@@ -135,6 +141,11 @@ describe("document processing errors", () => {
         DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR,
       ),
     ).toBe(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
+    expect(
+      formatStoredDocumentProcessingError(
+        DOCUMENT_PROCESSING_PDF_TOO_MANY_PAGES_ERROR,
+      ),
+    ).toBe(DOCUMENT_PROCESSING_PDF_TOO_MANY_PAGES_ERROR);
     expect(formatStoredDocumentProcessingError(DOCUMENT_UPLOAD_TOO_LARGE_ERROR))
       .toBe(DOCUMENT_UPLOAD_TOO_LARGE_ERROR);
     expect(

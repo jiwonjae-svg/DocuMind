@@ -50,6 +50,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Bounded display filenames that remove path components, control characters, and Unicode format characters while preserving Japanese/Korean names.
 - Storage path construction re-sanitizes filename segments before resolving local upload paths.
 - Upload writes use exclusive file creation, and stored files are size-checked again before extraction.
+- PDF extraction is capped by page count before text extraction to reduce parser abuse risk.
 - Document IDs are normalized before owner-scoped document mutations.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
@@ -65,7 +66,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links.
 - Password signup accepts duplicate-email submissions with the same public response shape as new-account submissions to reduce account enumeration.
 - Text extraction and chunking with overlap metadata.
-- Extracted document text is capped before chunking and embedding to bound processing cost.
+- Extracted document text and PDF page counts are capped before chunking and embedding to bound processing cost.
 - Document processing status writes remain owner-scoped.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
@@ -148,7 +149,7 @@ flowchart LR
 - Defense-in-depth filename segment sanitization during storage path construction
 - Document IDs are normalized before delete mutations
 - Bounded document operation notices for upload/delete redirects
-- Text extraction and chunking for uploaded text, Markdown, and PDF documents
+- Text extraction and chunking for uploaded text, Markdown, and page-limited PDF documents
 - Stored document files are rechecked for size before text/PDF extraction.
 - OpenAI embeddings for document chunks
 - Authenticated semantic search endpoint at `POST /api/search`
@@ -347,7 +348,8 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded/control-character-normalized snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries and stored-file size checks before extraction.
-- `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text is capped before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
+- `tests/document-extraction-limits.test.ts`: PDF page counts are checked before text extraction and parser resources are released on rejection.
+- `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text and PDF page count limits are enforced before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text and AI model avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query normalization, control-character stripping, and limit validation.
@@ -449,7 +451,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Upload file writes use exclusive file creation, and stored files are rechecked for size before text/PDF extraction. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Upload file writes use exclusive file creation, and stored files are rechecked for size before text/PDF extraction. PDF text extraction rejects documents above the configured page limit before extracting page text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
 
 After upload, documents are processed server-side:
 
@@ -457,7 +459,7 @@ After upload, documents are processed server-side:
 - Processing status updates include the authenticated owner filter.
 - Extracted text is capped at 300,000 characters before chunking and embedding to keep processing and AI cost bounded.
 - `.txt` and `.md` files are read as UTF-8 text.
-- `.pdf` files are parsed with `pdf-parse`.
+- `.pdf` files are parsed with `pdf-parse` after a page-count limit check.
 - Extracted text is split into chunks of about 3,000 characters with about 500 characters of overlap.
 - Chunk metadata stores character offsets, original filename, MIME type, and document title.
 - Chunk embeddings are generated server-side with the OpenAI embeddings API and stored in PostgreSQL using pgvector.

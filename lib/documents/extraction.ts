@@ -6,6 +6,10 @@ import {
   DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
   MAX_DOCUMENT_UPLOAD_BYTES,
 } from "./validation";
+import {
+  DOCUMENT_PROCESSING_PDF_TOO_MANY_PAGES_ERROR,
+  MAX_PDF_DOCUMENT_PAGES,
+} from "./processing-limits";
 
 export type ExtractableDocument = {
   mimeType: string;
@@ -69,7 +73,13 @@ export async function extractPdfText(bytes: Buffer) {
   const parser = new PDFParse({ data: bytes });
 
   try {
-    const result = await parser.getText();
+    const info = await parser.getInfo();
+
+    if (info.total > MAX_PDF_DOCUMENT_PAGES) {
+      throw new Error(DOCUMENT_PROCESSING_PDF_TOO_MANY_PAGES_ERROR);
+    }
+
+    const result = await parser.getText({ first: MAX_PDF_DOCUMENT_PAGES });
 
     return result.text;
   } finally {
