@@ -13,6 +13,14 @@ function readFile(path: string) {
 }
 
 describe("deployment hygiene", () => {
+  it("keeps non-example environment files out of git tracking", () => {
+    const patterns = readIgnoreFile(".gitignore");
+
+    expect(patterns).toEqual(
+      expect.arrayContaining([".env", ".env.*", "!.env.example"]),
+    );
+  });
+
   it("keeps secrets and local deployment state out of Docker build context", () => {
     const patterns = readIgnoreFile(".dockerignore");
 

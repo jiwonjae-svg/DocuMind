@@ -77,7 +77,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Owner-scoped audit log viewer in the dashboard.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
-- Docker build context hygiene for secrets, local uploads, and generated outputs.
+- Docker and Git ignore hygiene for secrets, local uploads, and generated outputs.
 - Docker runtime uses a non-root application user.
 - GitHub Actions CI for Prisma generation, lint, tests, and build.
 
@@ -153,6 +153,7 @@ flowchart LR
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
+- `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
 - Production Docker image runs the Next.js app as a non-root `nextjs` user
 - GitHub Actions CI for lint, tests, and build
 - Demo user seed script
@@ -256,7 +257,7 @@ docker compose down
 
 The `app` service runs `npx prisma migrate deploy` before `npm run start`. Uploaded development files are stored in the `uploads-data` Docker volume. Set `OPENAI_API_KEY` in your shell or `.env` file before using embeddings, search, ask, or summarize flows that call OpenAI.
 
-The Docker build context is intentionally bounded with `.dockerignore` so local secrets, `.vercel`, `uploads`, dependencies, test coverage, and framework build output are not copied into image builds. The production container runs as a non-root `nextjs` user, with the local uploads directory created before startup.
+The Docker build context is intentionally bounded with `.dockerignore` so local secrets, `.vercel`, `uploads`, dependencies, test coverage, and framework build output are not copied into image builds. Git ignore rules also exclude non-example environment files while keeping `.env.example` tracked for reproducible setup. The production container runs as a non-root `nextjs` user, with the local uploads directory created before startup.
 
 Example `.env` values for Docker:
 
@@ -323,7 +324,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
 - `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, cross-origin opener/resource policies, disabled powered-by header, and API cache headers in Next.js configuration.
-- `tests/deployment-hygiene.test.ts`: Docker build context excludes secrets and generated output.
+- `tests/deployment-hygiene.test.ts`: Docker and Git ignore rules exclude secrets and generated output.
 - `tests/seed-policy.test.ts`: production seed runs reject the documented default demo password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
@@ -337,11 +338,11 @@ Run the suite with:
 npm run test
 ```
 
-Local verification on 2026-06-28:
+Local verification on 2026-06-29:
 
 ```text
 Test Files  29 passed (29)
-Tests       164 passed (164)
+Tests       165 passed (165)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 

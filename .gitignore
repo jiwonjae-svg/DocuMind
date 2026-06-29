@@ -5,7 +5,8 @@ out
 dist
 
 .env
-.env*.local
+.env.*
+!.env.example
 
 .next-dev.*
 uploads/
@@ -17,6 +18,3 @@ pnpm-debug.log*
 
 .DS_Store
 Thumbs.db
-
-.vercel
-.env*.local
