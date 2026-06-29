@@ -10,6 +10,10 @@ import { getOAuthProviderName } from "./oauth-providers";
 
 export const OAUTH_ACCOUNT_EMAIL_CONFLICT_ERROR =
   "An account with this email already uses password sign-in. Sign in with your password first.";
+export const MAX_OAUTH_PROVIDER_ACCOUNT_ID_LENGTH = 256;
+
+const unsafeProviderAccountIdCharacters =
+  /[\u0000-\u001f\u007f-\u009f\p{Cf}]+/u;
 
 type OAuthUserInput = {
   account: Account | null;
@@ -65,9 +69,21 @@ function readOAuthEmail(user: User) {
 }
 
 function readProviderAccountId(account: Account | null) {
-  return typeof account?.providerAccountId === "string"
-    ? account.providerAccountId
-    : null;
+  if (typeof account?.providerAccountId !== "string") {
+    return null;
+  }
+
+  const providerAccountId = account.providerAccountId.trim();
+
+  if (
+    !providerAccountId ||
+    providerAccountId.length > MAX_OAUTH_PROVIDER_ACCOUNT_ID_LENGTH ||
+    unsafeProviderAccountIdCharacters.test(providerAccountId)
+  ) {
+    return null;
+  }
+
+  return providerAccountId;
 }
 
 function isUniqueConstraintError(error: unknown) {

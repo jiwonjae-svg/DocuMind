@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  SIGNUP_INVALID_INPUT_ERROR,
   SIGNUP_PASSWORD_TOO_SHORT_ERROR,
   validateSignupInput,
 } from "../lib/auth/signup";
+import { MAX_PASSWORD_CREDENTIAL_LENGTH } from "../lib/auth/credentials";
 import {
   SIGNUP_CLIENT_RATE_LIMIT,
   SIGNUP_EMAIL_RATE_LIMIT,
@@ -68,6 +70,19 @@ describe("signup validation", () => {
       }),
     ).toEqual({
       error: SIGNUP_PASSWORD_TOO_SHORT_ERROR,
+      ok: false,
+    });
+  });
+
+  it("rejects oversized passwords before hashing", () => {
+    expect(
+      validateSignupInput({
+        email: "user@example.com",
+        name: "User",
+        password: "x".repeat(MAX_PASSWORD_CREDENTIAL_LENGTH + 1),
+      }),
+    ).toEqual({
+      error: SIGNUP_INVALID_INPUT_ERROR,
       ok: false,
     });
   });

@@ -23,7 +23,10 @@ vi.mock("../lib/prisma", () => ({
   prisma: prismaMock,
 }));
 
-import { ensureOAuthUser } from "../lib/auth/oauth";
+import {
+  ensureOAuthUser,
+  MAX_OAUTH_PROVIDER_ACCOUNT_ID_LENGTH,
+} from "../lib/auth/oauth";
 
 function oauthAccount(
   provider: string,
@@ -118,6 +121,23 @@ describe("OAuth user provisioning", () => {
     expect(prismaMock.user.create).not.toHaveBeenCalled();
     expect(prismaMock.user.upsert).not.toHaveBeenCalled();
     expect(prismaMock.userAccount.create).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects unsafe provider account IDs before database lookup", async () => {
+    await expect(
+      ensureOAuthUser({
+        account: oauthAccount(
+          "github",
+          `provider\u202e-${"x".repeat(MAX_OAUTH_PROVIDER_ACCOUNT_ID_LENGTH)}`,
+        ),
+        profile: profile({ email_verified: true }),
+        user: oauthUser("victim@example.com"),
+      }),
+    ).resolves.toBeNull();
+
+    expect(prismaMock.userAccount.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 

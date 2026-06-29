@@ -4,6 +4,7 @@ import { prisma } from "../prisma";
 import {
   normalizeAuthDisplayName,
   normalizeEmailCredential,
+  normalizePasswordCredential,
 } from "./credentials";
 
 export const MIN_SIGNUP_PASSWORD_LENGTH = 12;
@@ -40,10 +41,6 @@ type PasswordUserCreationResult = {
   } | null;
 };
 
-function readSignupPassword(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
 export function validateSignupInput(body: unknown): SignupValidationResult {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return {
@@ -55,7 +52,7 @@ export function validateSignupInput(body: unknown): SignupValidationResult {
   const values = body as Record<string, unknown>;
   const email = normalizeEmailCredential(values.email);
   const name = normalizeAuthDisplayName(values.name);
-  const password = readSignupPassword(values.password);
+  const password = normalizePasswordCredential(values.password);
 
   if (!email || name === null || !password) {
     return {

@@ -42,8 +42,9 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 
 - Auth.js email/password signup, credentials sign-in, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
+- OAuth provider account IDs are bounded and reject control/format characters before lookup or linking.
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
-- Public signup is protected with same-origin checks, bounded JSON parsing, password hashing, and in-memory client/email/aggregate rate limiting.
+- Public signup is protected with same-origin checks, bounded JSON parsing, bounded password input validation, password hashing, and in-memory client/email/aggregate rate limiting.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
@@ -65,6 +66,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
 - Signup, OAuth profile, and session display values are bounded and stripped of control/format characters, and OAuth profile images must be HTTPS URLs before storage or display.
+- OAuth provider account identifiers are bounded before user-account lookup or storage.
 - Password signup, verified OAuth user creation, and verified OAuth account linking write audit records in the same database transaction as the account change.
 - OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links, and recovers cleanly when a concurrent sign-in creates the provider link first.
 - Password signup accepts duplicate-email submissions with the same public response shape as new-account submissions to reduce account enumeration.
@@ -135,7 +137,7 @@ flowchart LR
 - Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
-- Bounded signup input validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
+- Bounded signup email/name/password validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
@@ -371,10 +373,10 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-credentials.test.ts`: login credentials, auth display names, and profile image URLs are normalized and bounded before use.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
-- `tests/auth-signup.test.ts`: signup input validation, display-name normalization, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
+- `tests/auth-signup.test.ts`: signup input validation, display-name/password bounds, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
-- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, normalizes provider display values, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
+- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, bounds provider account identifiers, normalizes provider display values, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
 - `tests/client-server-boundary.test.ts`: client components are scanned to prevent value imports from server-only authentication, Prisma, document processing, QA, AI, and password modules.
 
