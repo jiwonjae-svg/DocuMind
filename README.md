@@ -373,6 +373,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
 - `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
+- `tests/client-server-boundary.test.ts`: client components are scanned to prevent value imports from server-only authentication, Prisma, document processing, QA, AI, and password modules.
 
 Run the suite with:
 
