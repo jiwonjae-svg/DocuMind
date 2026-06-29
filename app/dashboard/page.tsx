@@ -70,20 +70,20 @@ export default async function DashboardPage() {
       </AppHeader>
 
       <section className={ui.gradientBand}>
-        <div className={`${ui.container} py-10 sm:py-14`}>
-          <div className={`${ui.card} grid gap-8 p-7 lg:grid-cols-[1fr_auto] lg:items-center`}>
+        <div className={`${ui.container} py-8 sm:py-10`}>
+          <div className={`${ui.card} grid gap-6 p-6 lg:grid-cols-[1fr_auto] lg:items-center`}>
             <div>
               <p className={ui.eyebrow}>Dashboard</p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-normal text-[#080f2f]">
+              <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#080f2f] sm:text-4xl">
                 Knowledge workspace
               </h1>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-700">
+              <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">
                 Upload internal knowledge files, search ready document chunks,
                 and ask grounded questions with citations in one protected
                 workspace.
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Link href="/dashboard/documents" className={ui.primaryButton}>
                 <Icon name="document" className="h-4 w-4" />
                 Manage documents
@@ -105,7 +105,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className={`${ui.container} py-10`}>
+      <section className={`${ui.container} py-8`}>
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {workspaceCards.map((card) => (
             <article key={card.title} className={`${ui.subtleCard} p-6`}>

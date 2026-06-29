@@ -30,7 +30,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <AppHeader>
         <Link href="/" className={ui.secondaryButton}>
           <Icon name="home" className="h-4 w-4 text-blue-700" />
-              Home
+          Home
         </Link>
         <Link
           href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
@@ -42,8 +42,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </AppHeader>
 
       <section className={`${ui.gradientBand} min-h-[calc(100vh-64px)]`}>
-        <div className={`${ui.container} grid gap-10 py-12 sm:py-16 lg:grid-cols-[1fr_480px] lg:py-20`}>
-          <div className="flex flex-col justify-center">
+        <div className={`${ui.container} grid gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_480px] lg:py-16`}>
+          <div className="order-2 flex flex-col justify-center lg:order-1">
             <p className={ui.eyebrow}>Secure access</p>
             <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-normal text-[#080f2f] sm:text-5xl">
               Sign in to a secure knowledge workspace
@@ -75,7 +75,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           </div>
 
-          <div className={`${ui.card} self-center p-7`}>
+          <div className={`${ui.card} order-1 self-center p-6 sm:p-7 lg:order-2`}>
             <p className={ui.eyebrow}>DocuMind</p>
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
               Sign in

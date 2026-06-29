@@ -59,23 +59,23 @@ export const accentClasses: Record<
 
 export const ui = {
   page:
-    "min-h-screen overflow-hidden bg-[#f7fafe] text-[#0b1535]",
+    "min-h-screen overflow-x-hidden bg-[#f7fafe] text-[#0b1535]",
   gradientBand:
     "relative border-b border-slate-200/80 bg-[linear-gradient(135deg,#fbfdff_0%,#eef6ff_48%,#f8fbff_100%)]",
   container: "mx-auto max-w-7xl px-5 sm:px-6 lg:px-8",
   section: "mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8",
   card:
-    "rounded-2xl border border-slate-200 bg-white/88 shadow-[0_18px_48px_rgba(15,23,42,0.08)] backdrop-blur",
+    "rounded-lg border border-slate-200 bg-white/88 shadow-[0_18px_44px_rgba(15,23,42,0.08)] backdrop-blur",
   subtleCard:
-    "rounded-xl border border-slate-200 bg-white shadow-[0_14px_36px_rgba(15,23,42,0.06)]",
+    "rounded-lg border border-slate-200 bg-white shadow-[0_14px_32px_rgba(15,23,42,0.06)]",
   primaryButton:
-    "inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#080f2f] px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(8,15,47,0.22)] transition hover:bg-[#111a44] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none",
+    "inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#080f2f] px-4 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(8,15,47,0.2)] transition hover:bg-[#111a44] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none sm:h-12 sm:px-5",
   secondaryButton:
-    "inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 text-sm font-semibold text-[#10204b] shadow-sm transition hover:border-slate-400 hover:bg-white",
+    "inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-[#10204b] shadow-sm transition hover:border-slate-400 hover:bg-white sm:h-12 sm:px-5",
   dangerButton:
-    "inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-50",
+    "inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-50",
   input:
-    "w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-700 focus:ring-2 focus:ring-blue-100",
+    "w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-700 focus:ring-2 focus:ring-blue-100",
   label: "text-sm font-semibold text-[#0b1535]",
   eyebrow:
     "text-sm font-bold uppercase tracking-[0.14em] text-blue-700",
@@ -273,7 +273,7 @@ export function LogoMark() {
   return (
     <span
       aria-hidden="true"
-      className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-[#0b1b4f] shadow-[0_12px_24px_rgba(9,28,78,0.18)] sm:h-10 sm:w-10"
+      className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-lg bg-[#0b1b4f] shadow-[0_12px_24px_rgba(9,28,78,0.18)] sm:h-10 sm:w-10"
     >
       <span className="absolute inset-0 bg-[linear-gradient(135deg,#26c6d7_0%,#2563eb_58%,#0b1b4f_58%)]" />
       <span className="relative h-5 w-5 rounded-r-full rounded-tl-sm bg-white/90" />
@@ -290,7 +290,7 @@ export function AppHeader({
 }) {
   return (
     <header className="border-b border-slate-200/80 bg-white/92 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-[76px] sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-2 sm:min-h-[76px] sm:px-6 lg:px-8">
         <Link
           href="/"
           className="inline-flex min-w-0 items-center gap-2 text-xl font-semibold text-[#0b1535] sm:gap-3 sm:text-2xl"
@@ -299,7 +299,7 @@ export function AppHeader({
           <LogoMark />
           <span className="truncate">DocuMind</span>
         </Link>
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
           {userName ? (
             <span className="hidden max-w-44 truncate text-sm font-medium text-slate-600 md:block">
               {userName}
@@ -325,7 +325,7 @@ export function IconTile({
 
   return (
     <div
-      className={`grid h-14 w-14 shrink-0 place-items-center rounded-xl border ${colors.tile} ${colors.icon} ${colors.glow} ${className}`}
+      className={`grid h-14 w-14 shrink-0 place-items-center rounded-lg border ${colors.tile} ${colors.icon} ${colors.glow} ${className}`}
     >
       <Icon name={icon} className="h-6 w-6" />
     </div>

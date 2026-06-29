@@ -74,8 +74,8 @@ export default async function DocumentsPage({
       </AppHeader>
 
       <section className={ui.gradientBand}>
-        <div className={`${ui.container} py-10 sm:py-14`}>
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className={`${ui.container} py-6 sm:py-10`}>
+          <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-900"
@@ -83,7 +83,7 @@ export default async function DocumentsPage({
               <Icon name="arrow" className="h-4 w-4 rotate-180" />
               Back to dashboard
             </Link>
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-wrap gap-2 sm:justify-end">
               <Link href="/dashboard/search" className={ui.secondaryButton}>
                 <Icon name="search" className="h-4 w-4 text-blue-700" />
                 Search
@@ -99,19 +99,19 @@ export default async function DocumentsPage({
             </div>
           </div>
 
-          <div className={`${ui.card} grid gap-8 p-7 lg:grid-cols-[1fr_380px]`}>
+          <div className={`${ui.card} grid gap-6 p-6 lg:grid-cols-[1fr_380px]`}>
             <div>
               <p className={ui.eyebrow}>Documents</p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-normal text-[#080f2f]">
+              <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#080f2f] sm:text-4xl">
                 Upload and manage knowledge files
               </h1>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-700">
+              <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">
                 Add text, Markdown, or PDF files to your private workspace.
                 Every list and delete action is scoped to the signed-in user.
               </p>
             </div>
 
-            <div className={`${ui.subtleCard} p-5`}>
+            <div className={`${ui.subtleCard} hidden p-5 lg:block`}>
               <IconTile accent="blue" icon="upload" />
               <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
                 Development storage
@@ -125,10 +125,10 @@ export default async function DocumentsPage({
         </div>
       </section>
 
-      <section className={`${ui.container} py-10`}>
+      <section className={`${ui.container} py-4 sm:py-8`}>
         {notice ? (
           <div
-            className={`mb-6 rounded-xl border px-4 py-3 text-sm font-medium ${
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm font-medium ${
               notice.tone === "success"
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-red-200 bg-red-50 text-red-700"
@@ -155,7 +155,7 @@ export default async function DocumentsPage({
                 type="file"
                 accept=".txt,.md,.pdf,text/plain,text/markdown,application/pdf"
                 required
-                className={`mt-2 block ${ui.input} file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-blue-700`}
+                className={`mt-2 block ${ui.input} file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-blue-700`}
               />
               <p className="mt-2 text-xs text-slate-500">
                 Accepted formats: .txt, .md, .pdf. Maximum size: 10 MB.

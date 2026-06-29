@@ -137,7 +137,10 @@ export default function Home() {
   return (
     <main className={ui.page}>
       <AppHeader>
-        <nav aria-label="Primary navigation" className="flex items-center gap-3">
+        <nav
+          aria-label="Primary navigation"
+          className="flex flex-wrap items-center justify-end gap-2 sm:gap-3"
+        >
           <Link href="/dashboard" className={ui.secondaryButton}>
             Dashboard
           </Link>
@@ -151,13 +154,12 @@ export default function Home() {
       </AppHeader>
 
       <section className={ui.gradientBand}>
-        <div className="absolute bottom-8 left-0 hidden h-36 w-40 bg-[radial-gradient(#c7d9ef_1.1px,transparent_1.1px)] [background-size:18px_18px] md:block" />
         <div
-          className={`${ui.container} grid min-w-0 grid-cols-1 gap-12 py-14 sm:py-18 lg:grid-cols-[0.95fr_1.05fr] lg:py-20`}
+          className={`${ui.container} grid min-w-0 grid-cols-1 gap-10 py-10 sm:py-14 lg:grid-cols-[0.95fr_1.05fr] lg:py-16`}
         >
           <div className="flex flex-col justify-center">
             <p className={ui.eyebrow}>Agent-ready knowledge search</p>
-            <h1 className="mt-6 max-w-3xl text-5xl font-semibold tracking-normal text-[#080f2f] sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-normal text-[#080f2f] sm:text-6xl lg:text-7xl">
               DocuMind
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
@@ -171,17 +173,7 @@ export default function Home() {
               文書処理、セマンティック検索、出典付き回答を安全に扱うための
               バックエンド重視のMVPです。
             </p>
-            <div className="mt-5 max-w-2xl border-l-4 border-blue-600 bg-white/80 px-5 py-4 shadow-sm">
-              <p className="text-sm font-semibold leading-6 text-[#10204b]">
-                Built with Next.js, TypeScript, PostgreSQL, Prisma, pgvector,
-                Auth.js, OpenAI API, and Vercel.
-              </p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Next.js / TypeScript / PostgreSQL / pgvector / OpenAI API
-                を使用。
-              </p>
-            </div>
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/dashboard"
                 className={`${ui.primaryButton} w-full sm:w-auto`}
@@ -201,6 +193,16 @@ export default function Home() {
                 <Icon name="view" className="h-5 w-5 text-blue-700" />
                 View implementation
               </a>
+            </div>
+            <div className="mt-5 max-w-2xl border-l-4 border-blue-600 bg-white/80 px-5 py-4 shadow-sm">
+              <p className="text-sm font-semibold leading-6 text-[#10204b]">
+                Built with Next.js, TypeScript, PostgreSQL, Prisma, pgvector,
+                Auth.js, OpenAI API, and Vercel.
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Next.js / TypeScript / PostgreSQL / pgvector / OpenAI API
+                を使用。
+              </p>
             </div>
           </div>
 
@@ -371,7 +373,7 @@ export default function Home() {
               API boundaries instead of bypassing application logic or reading
               the database directly.
             </p>
-            <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
+            <p className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
               DocuMindは単なるチャットUIではありません。人と将来のAI
               エージェントが、認証・所有者スコープ・監査可能なAPI境界を
               通じて社内ナレッジへアクセスするための制御レイヤーです。

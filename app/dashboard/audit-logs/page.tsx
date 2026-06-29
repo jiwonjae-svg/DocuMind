@@ -68,8 +68,8 @@ export default async function AuditLogsPage() {
       </AppHeader>
 
       <section className={ui.gradientBand}>
-        <div className={`${ui.container} py-10 sm:py-14`}>
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className={`${ui.container} py-6 sm:py-10`}>
+          <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-900"
@@ -77,7 +77,7 @@ export default async function AuditLogsPage() {
               <Icon name="arrow" className="h-4 w-4 rotate-180" />
               Back to dashboard
             </Link>
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-wrap gap-2 sm:justify-end">
               <Link href="/dashboard/documents" className={ui.secondaryButton}>
                 <Icon name="document" className="h-4 w-4 text-blue-700" />
                 Documents
@@ -93,20 +93,20 @@ export default async function AuditLogsPage() {
             </div>
           </div>
 
-          <div className={`${ui.card} grid gap-8 p-7 lg:grid-cols-[1fr_360px]`}>
+          <div className={`${ui.card} grid gap-6 p-6 lg:grid-cols-[1fr_360px]`}>
             <div>
               <p className={ui.eyebrow}>Audit logs</p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-normal text-[#080f2f]">
+              <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#080f2f] sm:text-4xl">
                 Review your account activity
               </h1>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-slate-700">
+              <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">
                 This view shows only audit records created by the signed-in
                 user. It helps you verify document, search, ask, and agent tool
                 activity without exposing logs from other users.
               </p>
             </div>
 
-            <div className={`${ui.subtleCard} p-5`}>
+            <div className={`${ui.subtleCard} hidden p-5 lg:block`}>
               <IconTile accent="violet" icon="shield" />
               <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
                 Owner-scoped visibility
@@ -120,7 +120,7 @@ export default async function AuditLogsPage() {
         </div>
       </section>
 
-      <section className={`${ui.container} py-10`}>
+      <section className={`${ui.container} py-4 sm:py-8`}>
         <div className={`${ui.card} overflow-hidden`}>
           <div className="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>

@@ -103,8 +103,8 @@ export function SearchForm() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             maxLength={MAX_SEARCH_QUERY_LENGTH}
-            rows={5}
-            className={`mt-2 block min-h-36 resize-y leading-6 ${ui.input}`}
+            rows={3}
+            className={`mt-2 block min-h-28 resize-y leading-6 ${ui.input}`}
             placeholder="Search policies, onboarding guides, and project notes..."
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -114,7 +114,7 @@ export function SearchForm() {
             <button
               type="submit"
               disabled={isPending}
-              className={ui.primaryButton}
+              className={`${ui.primaryButton} w-full sm:w-auto`}
             >
               <Icon name="search" className="h-4 w-4" />
               {isPending ? "Searching..." : "Search"}
@@ -123,7 +123,7 @@ export function SearchForm() {
         </form>
 
         {error ? (
-          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
           </div>
         ) : null}
@@ -151,7 +151,7 @@ export function SearchForm() {
                 {results.map((result, index) => (
                   <article
                     key={`${result.documentTitle}-${result.chunkIndex}-${index}`}
-                    className="rounded-xl border border-slate-200 bg-white p-4"
+                    className="rounded-lg border border-slate-200 bg-white p-4"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">

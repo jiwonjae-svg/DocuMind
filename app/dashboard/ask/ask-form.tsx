@@ -134,8 +134,8 @@ export function AskForm() {
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             maxLength={MAX_SEARCH_QUERY_LENGTH}
-            rows={7}
-            className={`mt-2 block min-h-44 resize-y leading-6 ${ui.input}`}
+            rows={4}
+            className={`mt-2 block min-h-32 resize-y leading-6 ${ui.input}`}
             placeholder="What does the onboarding guide say about approval steps?"
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -145,7 +145,7 @@ export function AskForm() {
             <button
               type="submit"
               disabled={isPending}
-              className={ui.primaryButton}
+              className={`${ui.primaryButton} w-full sm:w-auto`}
             >
               <Icon name="question" className="h-4 w-4" />
               {isPending ? "Asking..." : "Ask"}
@@ -154,7 +154,7 @@ export function AskForm() {
         </form>
 
         {error ? (
-          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
           </div>
         ) : null}
@@ -194,7 +194,7 @@ export function AskForm() {
               {result.citations.map((citation, index) => (
                 <div
                   key={`${citation.documentTitle}-${citation.chunkIndex}-${index}`}
-                  className="rounded-xl border border-slate-200 bg-white p-4"
+                  className="rounded-lg border border-slate-200 bg-white p-4"
                 >
                   <p className="text-sm font-semibold text-[#0b1535]">
                     {citation.documentTitle}
@@ -230,7 +230,7 @@ export function AskForm() {
               {result.matchedSnippets.map((snippet, index) => (
                 <div
                   key={`${snippet.documentTitle}-${snippet.chunkIndex}-${index}`}
-                  className="rounded-xl border border-slate-200 bg-white p-4"
+                  className="rounded-lg border border-slate-200 bg-white p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
