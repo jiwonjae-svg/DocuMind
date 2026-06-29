@@ -101,7 +101,6 @@ describe("grounded answer persistence", () => {
             citationCount: 1,
             insufficientInformation: false,
             matchedSnippetCount: 1,
-            model: "test-model",
             questionLength: 28,
           },
           resourceId: "question-1",
@@ -112,5 +111,6 @@ describe("grounded answer persistence", () => {
     expect(JSON.stringify(createdPayloads[2])).not.toContain(
       "What is the private roadmap?",
     );
+    expect(JSON.stringify(createdPayloads[2])).not.toContain("test-model");
   });
 });

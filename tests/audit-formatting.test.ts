@@ -8,6 +8,7 @@ import {
 import {
   buildAnswerAuditMetadata,
   buildSearchAuditMetadata,
+  buildSummaryAuditMetadata,
 } from "../lib/audit/metadata";
 
 describe("audit metadata formatting", () => {
@@ -76,13 +77,12 @@ describe("audit metadata formatting", () => {
     expect(Object.values(metadata)).not.toContain("confidential launch policy");
   });
 
-  it("builds answer audit metadata without storing the question text", () => {
+  it("builds answer audit metadata without storing the question text or model", () => {
     const metadata = buildAnswerAuditMetadata({
       answerId: "answer-1",
       citationCount: 1,
       insufficientInformation: false,
       matchedSnippetCount: 3,
-      model: "test-model",
       question: "What is the private roadmap?",
     });
 
@@ -91,11 +91,28 @@ describe("audit metadata formatting", () => {
       citationCount: 1,
       insufficientInformation: false,
       matchedSnippetCount: 3,
-      model: "test-model",
       answerId: "answer-1",
     });
     expect(Object.values(metadata)).not.toContain(
       "What is the private roadmap?",
     );
+    expect(Object.keys(metadata)).not.toContain("model");
+  });
+
+  it("builds summary audit metadata without storing the answer model", () => {
+    const metadata = buildSummaryAuditMetadata({
+      citationCount: 2,
+      insufficientInformation: false,
+      matchedSnippetCount: 4,
+      truncated: true,
+    });
+
+    expect(metadata).toEqual({
+      citationCount: 2,
+      insufficientInformation: false,
+      matchedSnippetCount: 4,
+      truncated: true,
+    });
+    expect(Object.keys(metadata)).not.toContain("model");
   });
 });

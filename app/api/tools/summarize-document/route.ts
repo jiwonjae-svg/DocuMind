@@ -12,6 +12,7 @@ import {
 import {
   readJsonBodyResult,
 } from "@/lib/api/json-body";
+import { buildSummaryAuditMetadata } from "@/lib/audit/metadata";
 import { prisma } from "@/lib/prisma";
 import {
   normalizeDocumentId,
@@ -111,13 +112,12 @@ export async function POST(request: NextRequest) {
         action: "agent_tool_summarize_document",
         actorId: session.user.id,
         ipAddress: readIpAddress(request),
-        metadata: {
+        metadata: buildSummaryAuditMetadata({
           citationCount: result.citations.length,
           insufficientInformation: result.insufficientInformation,
           matchedSnippetCount: result.matchedSnippets.length,
-          model: result.model,
           truncated: result.truncated,
-        },
+        }),
         resourceId: document.id,
         resourceType: "Document",
         userAgent: readUserAgent(request),

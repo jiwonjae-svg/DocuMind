@@ -75,7 +75,6 @@ export async function persistGroundedAnswer({
           citationCount: result.citations.length,
           insufficientInformation: result.insufficientInformation,
           matchedSnippetCount: result.matchedSnippets.length,
-          model: result.model,
           question,
         }),
         resourceId: questionRecord.id,

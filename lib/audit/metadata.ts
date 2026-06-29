@@ -9,8 +9,14 @@ type AnswerAuditMetadataInput = {
   citationCount: number;
   insufficientInformation: boolean;
   matchedSnippetCount: number;
-  model: string | null;
   question: string;
+};
+
+type SummaryAuditMetadataInput = {
+  citationCount: number;
+  insufficientInformation: boolean;
+  matchedSnippetCount: number;
+  truncated: boolean;
 };
 
 export function buildSearchAuditMetadata({
@@ -30,7 +36,6 @@ export function buildAnswerAuditMetadata({
   citationCount,
   insufficientInformation,
   matchedSnippetCount,
-  model,
   question,
 }: AnswerAuditMetadataInput) {
   return {
@@ -38,7 +43,20 @@ export function buildAnswerAuditMetadata({
     citationCount,
     insufficientInformation,
     matchedSnippetCount,
-    model,
     answerId,
+  };
+}
+
+export function buildSummaryAuditMetadata({
+  citationCount,
+  insufficientInformation,
+  matchedSnippetCount,
+  truncated,
+}: SummaryAuditMetadataInput) {
+  return {
+    citationCount,
+    insufficientInformation,
+    matchedSnippetCount,
+    truncated,
   };
 }

@@ -315,7 +315,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
 - `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text is capped before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
-- `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text avoidance for audit metadata.
+- `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text and AI model avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query normalization, control-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded, control-character-normalized, valid-IP-filtered request metadata captured for audit logs.
@@ -342,7 +342,7 @@ Local verification on 2026-06-29:
 
 ```text
 Test Files  29 passed (29)
-Tests       165 passed (165)
+Tests       166 passed (166)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -392,7 +392,7 @@ The page is intentionally owner-scoped for the MVP:
 - It authenticates the user with Auth.js before querying.
 - It filters `AuditLog.actorId` to the current session user.
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
-- Metadata display is normalized and capped to keep control characters, long filenames, provider details, or nested values from dominating the audit screen.
+- Metadata display is normalized and capped to keep control characters, long filenames, provider/model details, or nested values from dominating the audit screen.
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
 - Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control characters normalized and IP metadata validated before persistence.
 - Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
