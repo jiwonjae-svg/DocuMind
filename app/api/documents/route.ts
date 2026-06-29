@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
   const resolvedStoragePath = resolveStoragePath(relativeStoragePath);
 
   await mkdir(path.dirname(resolvedStoragePath), { recursive: true });
-  await writeFile(resolvedStoragePath, bytes);
+  await writeFile(resolvedStoragePath, bytes, { flag: "wx" });
 
   try {
     await prisma.$transaction([

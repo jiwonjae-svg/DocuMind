@@ -66,7 +66,7 @@ export default async function SearchPage() {
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Results include document title, chunk index, snippet, and a
-                similarity score for fast reviewer validation.
+                similarity score for fast validation.
               </p>
             </div>
           </div>

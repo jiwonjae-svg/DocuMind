@@ -1,5 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+import type { Provider } from "next-auth/providers";
 import {
   normalizeEmailCredential,
   normalizePasswordCredential,
@@ -9,6 +12,11 @@ import {
   buildUserLoginFailureAuditData,
 } from "@/lib/auth/login-audit";
 import { checkLoginAttemptRateLimit } from "@/lib/auth/login-rate-limit";
+import { isOAuthProviderEnabled } from "@/lib/auth/oauth-providers";
+import {
+  ensureOAuthUser,
+  findUserIdForOAuthAccount,
+} from "@/lib/auth/oauth";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 
@@ -26,6 +34,70 @@ async function auditFailedLogin(request: Request, userId?: string | null) {
     .catch(() => {});
 }
 
+const authProviders: Provider[] = [
+  Credentials({
+    name: "Email and password",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials, request) {
+      const email = normalizeEmailCredential(credentials?.email);
+      const password = normalizePasswordCredential(credentials?.password);
+      const rateLimit = checkLoginAttemptRateLimit({
+        email,
+        request,
+      });
+
+      if (!rateLimit.allowed) {
+        return null;
+      }
+
+      if (!email || !password) {
+        await auditFailedLogin(request);
+
+        return null;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          passwordHash: true,
+        },
+      });
+
+      const passwordMatches = await verifyPassword(
+        password,
+        user?.passwordHash ?? DUMMY_PASSWORD_HASH,
+      );
+
+      if (!user || !passwordMatches) {
+        await auditFailedLogin(request, user?.id);
+
+        return null;
+      }
+
+      await prisma.auditLog.create({
+        data: buildUserLoginAuditData({
+          request,
+          userId: user.id,
+        }),
+      });
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      };
+    },
+  }),
+  ...(isOAuthProviderEnabled("google") ? [Google] : []),
+  ...(isOAuthProviderEnabled("github") ? [GitHub] : []),
+];
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
@@ -36,70 +108,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost:
     process.env.AUTH_TRUST_HOST === "true" ||
     process.env.NODE_ENV === "development",
-  providers: [
-    Credentials({
-      name: "Email and password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials, request) {
-        const email = normalizeEmailCredential(credentials?.email);
-        const password = normalizePasswordCredential(credentials?.password);
-        const rateLimit = checkLoginAttemptRateLimit({
-          email,
-          request,
-        });
-
-        if (!rateLimit.allowed) {
-          return null;
-        }
-
-        if (!email || !password) {
-          await auditFailedLogin(request);
-
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            passwordHash: true,
-          },
-        });
-
-        const passwordMatches = await verifyPassword(
-          password,
-          user?.passwordHash ?? DUMMY_PASSWORD_HASH,
-        );
-
-        if (!user || !passwordMatches) {
-          await auditFailedLogin(request, user?.id);
-
-          return null;
-        }
-
-        await prisma.auditLog.create({
-          data: buildUserLoginAuditData({
-            request,
-            userId: user.id,
-          }),
-        });
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
-      },
-    }),
-  ],
+  providers: authProviders,
   callbacks: {
-    jwt({ token, user }) {
-      if (user) {
+    async signIn({ account, profile, user }) {
+      if (!account || account.provider === "credentials") {
+        return true;
+      }
+
+      const localUser = await ensureOAuthUser({ account, profile, user });
+
+      return Boolean(localUser);
+    },
+    async jwt({ account, token, user }) {
+      if (account && account.provider !== "credentials") {
+        const localUserId = await findUserIdForOAuthAccount(account);
+
+        if (localUserId) {
+          token.sub = localUserId;
+        }
+      } else if (user) {
         token.sub = user.id;
       }
 

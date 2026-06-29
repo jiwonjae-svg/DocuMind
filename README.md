@@ -2,7 +2,7 @@
 
 DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams.
 
-This repository currently contains the MVP application scaffold with authentication, document upload and processing, OpenAI embeddings, owner-scoped semantic search, and grounded question answering.
+This repository contains a usable MVP with email/password signup, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, owner-scoped semantic search, and grounded question answering.
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
@@ -36,17 +36,20 @@ Agentic systems need reliable tools, not just chat UI. DocuMind prepares the cor
 
 ## Implemented vs Future Scope
 
-DocuMind is presented as an MVP portfolio project. The distinction below is intentional so reviewers can clearly see what is already implemented and what is planned for production hardening. Items under Future are not advertised as working demo features.
+DocuMind is a practical MVP rather than a throwaway demo. The distinction below separates what is implemented now from production-hardening work that is intentionally still future scope.
 
 ### Implemented
 
-- Auth.js credentials authentication and protected dashboard routes.
+- Auth.js email/password signup, credentials sign-in, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
+- OAuth sign-ins create or link a local Prisma user so document ownership continues to use the internal user ID.
+- Public signup is protected with same-origin checks, bounded JSON parsing, password hashing, and in-memory client/email rate limiting.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
 - Upload requests must include a valid `Content-Length`, and declared oversized requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components, control characters, and Unicode format characters while preserving Japanese/Korean names.
 - Storage path construction re-sanitizes filename segments before resolving local upload paths.
+- Upload writes use exclusive file creation, and stored files are size-checked again before extraction.
 - Document IDs are normalized before owner-scoped document mutations.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
@@ -54,9 +57,11 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Search and ask text inputs are normalized to remove control characters before embedding, persistence, and audit metadata length calculation.
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts, with aggregate denial short-circuiting before new client/email buckets are created.
+- Per-client and per-email in-memory rate limiting for account creation.
 - Per-user in-memory rate limiting for document uploads before multipart parsing and document deletes before delete lookup.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
+- Password signup, OAuth user creation, and OAuth account linking write audit records.
 - Text extraction and chunking with overlap metadata.
 - Extracted document text is capped before chunking and embedding to bound processing cost.
 - Document processing status writes remain owner-scoped.
@@ -119,9 +124,11 @@ flowchart LR
 - TypeScript
 - Tailwind CSS
 - Responsive landing page
-- Auth.js credentials authentication
+- Auth.js email/password signup and credentials authentication
+- Optional Google and GitHub OAuth authentication through Auth.js
 - App-relative login callback URL normalization
-- Bounded server-side credential normalization, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown users
+- Bounded server-side credential normalization, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
+- Bounded signup input validation, server-side scrypt password hashing, and signup rate limiting
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
@@ -140,6 +147,7 @@ flowchart LR
 - Document IDs are normalized before delete mutations
 - Bounded document operation notices for upload/delete redirects
 - Text extraction and chunking for uploaded text, Markdown, and PDF documents
+- Stored document files are rechecked for size before text/PDF extraction.
 - OpenAI embeddings for document chunks
 - Authenticated semantic search endpoint at `POST /api/search`
 - Dashboard semantic search UI at `/dashboard/search`
@@ -152,13 +160,14 @@ flowchart LR
 - Question ask audit logs
 - Agent tool usage audit logs
 - Failed credentials sign-in audit logs without raw credential values
+- Signup and OAuth account audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
 - Production Docker image runs the Next.js app as a non-root `nextjs` user
 - GitHub Actions CI for lint, tests, and build
-- Demo user seed script
+- Optional local bootstrap user seed script
 - Health check route at `/api/health`
 - Local environment example in `.env.example`
 
@@ -187,7 +196,7 @@ Create a local environment file:
 Copy-Item .env.example .env.local
 ```
 
-Edit `.env.local` and set a strong `AUTH_SECRET` for non-demo use. The default local database URL matches `docker-compose.yml`.
+Edit `.env.local` and set a strong `AUTH_SECRET`. The default local database URL matches `docker-compose.yml`.
 
 Required environment variables:
 
@@ -201,6 +210,22 @@ OPENAI_ANSWER_MODEL=gpt-5-mini
 ```
 
 `OPENAI_API_KEY` is only read in server-side document processing, search, and ask code. Do not expose it with a `NEXT_PUBLIC_` prefix.
+
+Optional OAuth variables:
+
+```text
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+AUTH_GITHUB_ID=
+AUTH_GITHUB_SECRET=
+```
+
+Google and GitHub buttons are shown only when both the provider ID and secret are configured. Add callback URLs in the provider console that match the deployment host, for example:
+
+```text
+http://localhost:3000/api/auth/callback/google
+http://localhost:3000/api/auth/callback/github
+```
 
 Start PostgreSQL with pgvector support:
 
@@ -220,13 +245,13 @@ Apply Prisma migrations:
 npm run prisma:migrate
 ```
 
-Seed the demo user:
+Optionally seed a local bootstrap user:
 
 ```bash
 npm run prisma:seed
 ```
 
-The documented demo password is for local portfolio review only. If `npm run prisma:seed` is run with `NODE_ENV=production`, `DEMO_USER_PASSWORD` must be explicitly set to a non-default value or the seed script will fail.
+The seed script is optional because users can now create accounts at `/signup`. If `npm run prisma:seed` is run with `NODE_ENV=production`, `SEED_USER_PASSWORD` must be explicitly set to a non-default value or the seed script will fail.
 
 Run the development server:
 
@@ -268,6 +293,11 @@ AUTH_SECRET=replace-with-a-strong-random-secret
 OPENAI_API_KEY=replace-with-openai-api-key
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 OPENAI_ANSWER_MODEL=gpt-5-mini
+# Optional:
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+AUTH_GITHUB_ID=
+AUTH_GITHUB_SECRET=
 ```
 
 ## AWS Deployment Plan
@@ -314,7 +344,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed and oversized embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded/control-character-normalized snippets, and non-empty summary context selection.
-- `tests/document-extraction.test.ts`: text/PDF extraction boundaries.
+- `tests/document-extraction.test.ts`: text/PDF extraction boundaries and stored-file size checks before extraction.
 - `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text is capped before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text and AI model avoidance for audit metadata.
@@ -323,16 +353,19 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/tools-response.test.ts`: bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
-- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
+- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, exclusive upload file writes, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
 - `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, cross-origin opener/resource policies, disabled powered-by header, and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker and Git ignore rules exclude secrets and generated output.
-- `tests/seed-policy.test.ts`: production seed runs reject the documented default demo password.
+- `tests/seed-policy.test.ts`: production seed runs reject the documented default bootstrap password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
+- `tests/auth-signup.test.ts`: signup input validation and client/email account-creation rate limits.
+- `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
+- `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
 
 Run the suite with:
 
@@ -343,8 +376,8 @@ npm run test
 Local verification on 2026-06-29:
 
 ```text
-Test Files  29 passed (29)
-Tests       169 passed (169)
+Test Files  32 passed (32)
+Tests       186 passed (186)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -361,29 +394,22 @@ npm run prisma:migrate
 npm run prisma:seed
 ```
 
-## Demo Login
+## Account Setup
 
-After running the migration and seed script, sign in at [http://localhost:3000/login](http://localhost:3000/login). The login form pre-fills only the demo email; enter the password from your local seed configuration.
-
-```text
-Email: demo@documind.local
-Password: DocuMindDemo123!
-```
-
-This default password is intended only for local demo seeding. Production seeding rejects the default password.
+After running migrations, create an account at [http://localhost:3000/signup](http://localhost:3000/signup). Email/password signup hashes the password on the server and then signs the new user in. If Google or GitHub OAuth variables are configured, the signup and login pages also show OAuth buttons.
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
-For a quick reviewer pass, the steps below are implemented in the current demo:
+Recommended local verification flow:
 
-1. Sign in with the seeded demo account.
-2. Open Documents to review existing files or upload a short `.txt`, `.md`, or `.pdf` file.
+1. Create an account with email/password or continue with a configured OAuth provider.
+2. Open Documents and upload a short `.txt`, `.md`, or `.pdf` file.
 3. Run semantic search from the Search page and inspect matching chunks, snippets, and scores.
-4. Ask a grounded question using content from an uploaded or seeded document.
+4. Ask a grounded question using content from an uploaded document.
 5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
 6. Review owner-scoped audit log entries for your activity.
 
-Future-only work such as MCP wrapping, enterprise SSO/team RBAC, durable object storage, and organization-wide admin audit review is listed under Future / Production Hardening and is not expected in this demo.
+The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use.
 
 ## Audit Logs
 
@@ -419,7 +445,7 @@ Uploaded files are stored locally under:
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Upload file writes use exclusive file creation, and stored files are rechecked for size before text/PDF extraction. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
 
 After upload, documents are processed server-side:
 
@@ -617,17 +643,20 @@ prisma/migrations/20260602015000_init/migration.sql
 prisma/migrations/20260602030500_document_uploads/migration.sql
 prisma/migrations/20260602042500_document_processing/migration.sql
 prisma/migrations/20260602054500_embeddings_semantic_search/migration.sql
+prisma/migrations/20260603122222_deploy_managed_postgres/migration.sql
+prisma/migrations/20260603123000_restore_pgvector_hnsw_index/migration.sql
+prisma/migrations/20260629083000_signup_oauth_accounts/migration.sql
 ```
 
-The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer` for document access control. `AuditLog` records actor and resource fields for security-relevant events.
+The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer` for document access control. `UserAccount` stores OAuth provider links for stable local user IDs, and `AuditLog` records actor and resource fields for security-relevant events.
 
 ## Known Limitations
 
 - Local file storage is intended for development; production should use object storage such as S3 or GCS.
-- AI-backed search, answer, and credentials sign-in endpoints use in-memory rate limiters, which are not shared across multiple app instances.
+- AI-backed search, answer, signup, and credentials sign-in endpoints use in-memory rate limiters, which are not shared across multiple app instances.
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
-- Authentication is credentials-based for demo purposes; enterprise SSO is not implemented.
+- OAuth account-linking settings and enterprise SSO are not implemented yet.
 - MCP is not implemented yet; `/api/tools/*` endpoints are prepared so they can be wrapped later.
 - There is no organization-wide admin audit review UI yet; the MVP exposes only owner-scoped user audit logs.
 
@@ -635,13 +664,13 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 
 - Add S3/GCS storage and signed upload/download URLs.
 - Move document processing and embedding generation to a job queue.
-- Add team/workspace membership and role-based access control.
+- Add account-linking settings, team/workspace membership, and role-based access control.
 - Add organization-wide admin audit review and export controls.
 - Add Japanese/Korean/English i18n routing and localized dashboard copy.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.
 - Add production-grade rate limiting with Redis.
 - Wrap the scoped tool endpoints with MCP once the HTTP tool surface is stable.
-- Add screenshot assets and a short demo video for portfolio presentation.
+- Add screenshot assets and a short product walkthrough video for portfolio presentation.
 
 ## Health Check
 

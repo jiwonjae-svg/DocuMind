@@ -11,15 +11,19 @@ const auditActionLabels: Record<string, string> = {
   agent_tool_ask_with_citations: "Agent ask with citations",
   agent_tool_search_documents: "Agent document search",
   agent_tool_summarize_document: "Agent document summary",
-  demo_user_seeded: "Demo user seeded",
+  demo_user_seeded: "Legacy bootstrap user seeded",
   document_search: "Document search",
   document_delete: "Document deleted",
   document_process_failed: "Document processing failed",
   document_process_ready: "Document processing ready",
   document_upload: "Document uploaded",
+  oauth_account_linked: "OAuth account linked",
+  oauth_user_created: "OAuth user created",
   question_ask: "Question asked",
+  seed_user_created: "Bootstrap user seeded",
   user_login: "User signed in",
   user_login_failed: "User sign-in failed",
+  user_signed_up: "User signed up",
 };
 
 function formatAction(action: string) {
@@ -97,9 +101,8 @@ export default async function AuditLogsPage() {
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-700">
                 This view shows only audit records created by the signed-in
-                user. It helps reviewers verify that document, search, ask, and
-                agent tool actions are recorded without exposing logs from other
-                users.
+                user. It helps you verify document, search, ask, and agent tool
+                activity without exposing logs from other users.
               </p>
             </div>
 

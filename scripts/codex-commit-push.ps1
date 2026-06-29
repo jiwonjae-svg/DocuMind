@@ -110,7 +110,8 @@ if ($stagedFiles.Count -eq 0) {
 }
 
 $forbiddenPatterns = @(
-  "(^|/)\.env($|[./])",
+  "(^|/)\.env$",
+  "(^|/)\.env\.(?!example$)",
   "(^|/)\.vercel/",
   "(^|/)\.next/",
   "(^|/)node_modules/",

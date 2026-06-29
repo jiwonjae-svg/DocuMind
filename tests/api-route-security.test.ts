@@ -1,10 +1,11 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const apiRoot = path.join(process.cwd(), "app", "api");
 const publicRouteSuffixes = [
   path.join("auth", "[...nextauth]", "route.ts"),
+  path.join("auth", "signup", "route.ts"),
   path.join("health", "route.ts"),
 ];
 const jsonPostRouteSuffixes = [
@@ -76,6 +77,26 @@ describe("API route security contracts", () => {
     }
   });
 
+  it("keeps public signup constrained when present", () => {
+    const signupRoutePath = path.join(apiRoot, "auth", "signup", "route.ts");
+
+    if (!existsSync(signupRoutePath)) {
+      return;
+    }
+
+    const source = readRoute(signupRoutePath);
+    const clientRateLimitIndex = source.indexOf("const clientRateLimit");
+    const jsonBodyIndex = source.indexOf("readJsonBodyResult(request)");
+    const emailRateLimitIndex = source.indexOf("const emailRateLimit");
+    const createUserIndex = source.indexOf("const result = await createPasswordUser");
+
+    expect(source).toContain("isSameOriginRequest(request)");
+    expect(clientRateLimitIndex).toBeGreaterThanOrEqual(0);
+    expect(jsonBodyIndex).toBeGreaterThan(clientRateLimitIndex);
+    expect(emailRateLimitIndex).toBeGreaterThan(jsonBodyIndex);
+    expect(createUserIndex).toBeGreaterThan(emailRateLimitIndex);
+  });
+
   it("keeps document uploads rate-limited before multipart parsing", () => {
     const source = readRoute(path.join(apiRoot, "documents", "route.ts"));
     const rateLimitIndex = source.indexOf("checkDocumentUploadRateLimit");
@@ -83,6 +104,14 @@ describe("API route security contracts", () => {
 
     expect(rateLimitIndex).toBeGreaterThanOrEqual(0);
     expect(formDataIndex).toBeGreaterThan(rateLimitIndex);
+  });
+
+  it("keeps document upload file writes exclusive", () => {
+    const source = readRoute(path.join(apiRoot, "documents", "route.ts"));
+
+    expect(source).toContain(
+      'writeFile(resolvedStoragePath, bytes, { flag: "wx" })',
+    );
   });
 
   it("keeps document deletes rate-limited before delete lookup", () => {

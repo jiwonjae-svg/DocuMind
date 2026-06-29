@@ -30,8 +30,8 @@ const implementedFeatures = [
     accent: "blue",
   },
   {
-    title: "Demo authentication",
-    body: "Auth.js credentials authentication provides a documented reviewer account while keeping session handling on the server.",
+    title: "Signup and OAuth authentication",
+    body: "Auth.js supports password accounts and configured Google or GitHub OAuth providers while keeping session handling on the server.",
     icon: "team",
     accent: "emerald",
   },
@@ -113,18 +113,18 @@ const architectureFlow = [
 ] as const;
 
 const plannedFeatures = [
-  "Enterprise SSO and team/workspace RBAC",
+  "Enterprise SSO, account-linking settings, and team/workspace RBAC",
   "Durable object storage and background processing",
   "Organization-wide admin audit review",
   "Full EN/KO/JA route-level localization",
   "MCP wrapper around the existing tool endpoints",
 ] as const;
 
-const demoSteps = [
-  "Sign in with the seeded demo account.",
+const productSteps = [
+  "Create an account with email/password or continue with a configured OAuth provider.",
   "Open Documents to review existing files or upload a short .txt, .md, or .pdf file.",
   "Run semantic search from Search and inspect matching chunks, snippets, and scores.",
-  "Ask a grounded question using content from an uploaded or seeded document.",
+  "Ask a grounded question using content from an uploaded document.",
   "Check the answer, citations, matched snippets, and insufficient-information behavior.",
   "Review owner-scoped audit log entries for your activity.",
 ] as const;
@@ -140,6 +140,9 @@ export default function Home() {
         <nav aria-label="Primary navigation" className="flex items-center gap-3">
           <Link href="/dashboard" className={ui.secondaryButton}>
             Dashboard
+          </Link>
+          <Link href="/signup" className={ui.secondaryButton}>
+            Sign up
           </Link>
           <Link href="/login" className={ui.primaryButton}>
             Sign in
@@ -266,7 +269,7 @@ export default function Home() {
             The MVP focuses on secure retrieval-augmented document workflows:
             authentication, ownership checks, document processing, vector
             search, grounded answers, and auditable tool APIs. Everything in
-            this section is implemented in the current demo; planned work is
+            this section is implemented in the current product; planned work is
             separated below.
           </p>
         </div>
@@ -296,7 +299,7 @@ export default function Home() {
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
               These items are planned for production hardening and are not
-              implemented in the current demo.
+              implemented yet.
             </p>
           </div>
           <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
@@ -377,22 +380,22 @@ export default function Home() {
 
           <article className={`${ui.card} p-7`}>
             <IconTile accent="blue" icon="check" />
-            <p className={`${ui.eyebrow} mt-5`}>Try the demo</p>
+            <p className={`${ui.eyebrow} mt-5`}>Use the product</p>
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
-              What reviewers should test
+              What a workspace user can do
             </h2>
             <p className="mt-4 text-sm leading-6 text-slate-600">
-              Every step below is implemented in the current demo. Planned-only
-              items, including MCP wrapping, team RBAC, and
+              Every step below is implemented now. Planned-only items,
+              including MCP wrapping, team RBAC, and
               organization-wide audit review, are intentionally separated in
               the MVP scope section above.
             </p>
             <ol
               role="list"
-              aria-label="Try the demo steps"
+              aria-label="DocuMind workflow steps"
               className="mt-5 grid list-none gap-3 p-0"
             >
-              {demoSteps.map((step, index) => (
+              {productSteps.map((step, index) => (
                 <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700">
                   <span
                     aria-hidden="true"
@@ -410,11 +413,11 @@ export default function Home() {
               review.
             </p>
             <Link
-              href="/login?callbackUrl=/dashboard/audit-logs"
+              href="/signup?callbackUrl=/dashboard"
               className={`${ui.primaryButton} mt-6 w-full sm:w-auto`}
             >
               <Icon name="compass" className="h-4 w-4" />
-              Start demo
+              Start now
             </Link>
           </article>
         </div>

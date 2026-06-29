@@ -1,7 +1,11 @@
-import { readFile } from "node:fs/promises";
+import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { resolveStoragePath } from "./storage";
+import {
+  DOCUMENT_UPLOAD_TOO_LARGE_ERROR,
+  MAX_DOCUMENT_UPLOAD_BYTES,
+} from "./validation";
 
 export type ExtractableDocument = {
   mimeType: string;
@@ -35,6 +39,21 @@ function shouldReadAsPdf(document: ExtractableDocument) {
   );
 }
 
+async function readStoredDocumentBytes(storagePath: string) {
+  const resolvedPath = resolveStoragePath(storagePath);
+  const fileStats = await lstat(resolvedPath);
+
+  if (!fileStats.isFile()) {
+    throw new Error("Stored document path must point to a file.");
+  }
+
+  if (fileStats.size > MAX_DOCUMENT_UPLOAD_BYTES) {
+    throw new Error(DOCUMENT_UPLOAD_TOO_LARGE_ERROR);
+  }
+
+  return readFile(resolvedPath);
+}
+
 export async function extractPdfText(bytes: Buffer) {
   const { PDFParse } = await import("pdf-parse");
 
@@ -59,7 +78,7 @@ export async function extractPdfText(bytes: Buffer) {
 }
 
 export async function extractDocumentText(document: ExtractableDocument) {
-  const bytes = await readFile(resolveStoragePath(document.storagePath));
+  const bytes = await readStoredDocumentBytes(document.storagePath);
 
   if (shouldReadAsText(document)) {
     return stripByteOrderMark(bytes.toString("utf8"));

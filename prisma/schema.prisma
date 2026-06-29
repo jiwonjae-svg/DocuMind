@@ -17,17 +17,35 @@ model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String?
-  passwordHash String
+  image        String?
+  passwordHash String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  documents Document[]      @relation("DocumentOwner")
+  accounts  UserAccount[]  @relation("UserAccountOwner")
+  documents Document[]     @relation("DocumentOwner")
   chunks    DocumentChunk[] @relation("DocumentChunkOwner")
-  questions Question[]      @relation("QuestionOwner")
-  answers   Answer[]        @relation("AnswerOwner")
-  auditLogs AuditLog[]      @relation("AuditLogActor")
+  questions Question[]     @relation("QuestionOwner")
+  answers   Answer[]       @relation("AnswerOwner")
+  auditLogs AuditLog[]     @relation("AuditLogActor")
 
   @@map("users")
+}
+
+model UserAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  type              String   @default("oauth")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation("UserAccountOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("user_accounts")
 }
 
 model Document {

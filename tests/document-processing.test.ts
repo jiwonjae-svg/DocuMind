@@ -17,6 +17,7 @@ import {
   MAX_EXTRACTED_DOCUMENT_TEXT_CHARS,
   readProcessableExtractedTextLength,
 } from "../lib/documents/processing-limits";
+import { DOCUMENT_UPLOAD_TOO_LARGE_ERROR } from "../lib/documents/validation";
 
 function namedError(name: string, message: string, status?: number) {
   const error = new Error(message);
@@ -67,6 +68,9 @@ describe("document processing errors", () => {
         new Error(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR),
       ),
     ).toBe(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
+    expect(
+      normalizeDocumentProcessingError(new Error(DOCUMENT_UPLOAD_TOO_LARGE_ERROR)),
+    ).toBe(DOCUMENT_UPLOAD_TOO_LARGE_ERROR);
   });
 
   it("maps AI configuration failures without leaking configuration details", () => {
@@ -131,6 +135,8 @@ describe("document processing errors", () => {
         DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR,
       ),
     ).toBe(DOCUMENT_PROCESSING_TEXT_TOO_LARGE_ERROR);
+    expect(formatStoredDocumentProcessingError(DOCUMENT_UPLOAD_TOO_LARGE_ERROR))
+      .toBe(DOCUMENT_UPLOAD_TOO_LARGE_ERROR);
     expect(
       formatStoredDocumentProcessingError(
         "ENOENT C:/Users/example/uploads/private.txt",

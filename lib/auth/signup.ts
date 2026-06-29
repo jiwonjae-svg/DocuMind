@@ -1,0 +1,155 @@
+import { Prisma } from "@prisma/client";
+import { hashPassword } from "../password";
+import { prisma } from "../prisma";
+import { normalizeEmailCredential } from "./credentials";
+
+export const MIN_SIGNUP_PASSWORD_LENGTH = 12;
+export const MAX_SIGNUP_NAME_LENGTH = 80;
+export const SIGNUP_INVALID_INPUT_ERROR =
+  "Enter a valid email, name, and password.";
+export const SIGNUP_PASSWORD_TOO_SHORT_ERROR =
+  "Password must be at least 12 characters.";
+export const SIGNUP_EMAIL_EXISTS_ERROR =
+  "An account already exists for this email.";
+
+type SignupValidationResult =
+  | {
+      data: {
+        email: string;
+        name: string | null;
+        password: string;
+      };
+      ok: true;
+    }
+  | {
+      error: string;
+      ok: false;
+    };
+
+function readString(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeSignupName(value: unknown) {
+  const name = readString(value).replace(/\s+/g, " ");
+
+  if (!name) {
+    return null;
+  }
+
+  return name.length <= MAX_SIGNUP_NAME_LENGTH ? name : null;
+}
+
+function readSignupPassword(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+export function validateSignupInput(body: unknown): SignupValidationResult {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return {
+      error: SIGNUP_INVALID_INPUT_ERROR,
+      ok: false,
+    };
+  }
+
+  const values = body as Record<string, unknown>;
+  const email = normalizeEmailCredential(values.email);
+  const name = normalizeSignupName(values.name);
+  const password = readSignupPassword(values.password);
+
+  if (!email || name === null || !password) {
+    return {
+      error: SIGNUP_INVALID_INPUT_ERROR,
+      ok: false,
+    };
+  }
+
+  if (password.length < MIN_SIGNUP_PASSWORD_LENGTH) {
+    return {
+      error: SIGNUP_PASSWORD_TOO_SHORT_ERROR,
+      ok: false,
+    };
+  }
+
+  return {
+    data: {
+      email,
+      name,
+      password,
+    },
+    ok: true,
+  };
+}
+
+export async function createPasswordUser({
+  email,
+  name,
+  password,
+}: {
+  email: string;
+  name: string | null;
+  password: string;
+}) {
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingUser) {
+    return {
+      error: SIGNUP_EMAIL_EXISTS_ERROR,
+      ok: false as const,
+    };
+  }
+
+  const passwordHash = await hashPassword(password);
+  let user: { email: string; id: string; name: string | null };
+
+  try {
+    user = await prisma.user.create({
+      data: {
+        email,
+        name,
+        passwordHash,
+      },
+      select: {
+        email: true,
+        id: true,
+        name: true,
+      },
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return {
+        error: SIGNUP_EMAIL_EXISTS_ERROR,
+        ok: false as const,
+      };
+    }
+
+    throw error;
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: user.id,
+      action: "user_signed_up",
+      resourceType: "User",
+      resourceId: user.id,
+      metadata: {
+        method: "password",
+      },
+    },
+  });
+
+  return {
+    ok: true as const,
+    user,
+  };
+}

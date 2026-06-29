@@ -2,7 +2,7 @@ import { randomBytes, scrypt as scryptCallback } from "node:crypto";
 import { promisify } from "node:util";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { readDemoSeedCredentials } from "./seed-policy.mjs";
+import { readSeedCredentials } from "./seed-policy.mjs";
 
 const scrypt = promisify(scryptCallback);
 const keyLength = 64;
@@ -28,19 +28,19 @@ async function main() {
   const adapter = new PrismaPg({ connectionString: requireDatabaseUrl() });
   const prisma = new PrismaClient({ adapter });
 
-  const { email, password } = readDemoSeedCredentials();
+  const { email, password } = readSeedCredentials();
 
   const passwordHash = await hashPassword(password);
 
   const user = await prisma.user.upsert({
     where: { email },
     update: {
-      name: "Demo User",
+      name: "Seed User",
       passwordHash,
     },
     create: {
       email,
-      name: "Demo User",
+      name: "Seed User",
       passwordHash,
     },
     select: {
@@ -52,7 +52,7 @@ async function main() {
   await prisma.auditLog.create({
     data: {
       actorId: user.id,
-      action: "demo_user_seeded",
+      action: "seed_user_created",
       resourceType: "User",
       resourceId: user.id,
       metadata: {
@@ -62,7 +62,7 @@ async function main() {
   });
 
   await prisma.$disconnect();
-  console.log(`Seeded demo user: ${user.email}`);
+  console.log(`Seeded bootstrap user: ${user.email}`);
 }
 
 main().catch((error) => {
