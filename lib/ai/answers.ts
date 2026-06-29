@@ -12,6 +12,11 @@ export const INSUFFICIENT_INFORMATION_ANSWER =
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_ANSWER_OUTPUT_TOKENS = 1600;
 export const MAX_GROUNDED_ANSWER_CHARS = 8_000;
+export const MAX_ANSWER_RESPONSE_TEXT_CHARS = 32_000;
+const MAX_RESPONSE_OUTPUT_ITEMS = 50;
+const MAX_RESPONSE_CONTENT_ITEMS = 50;
+const MAX_RESPONSE_TEXT_SEARCH_DEPTH = 12;
+const MAX_RESPONSE_TEXT_SEARCH_NODES = 300;
 const TRANSIENT_STATUS_CODES = new Set([408, 409, 429, 500, 502, 503, 504]);
 const unsafeAnswerCharacters =
   /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\p{Cf}]+/gu;
@@ -198,6 +203,20 @@ function normalizeCitationIndexes(value: unknown, sourceCount: number) {
   return Array.from(new Set(indexes));
 }
 
+function normalizeResponseText(text: string) {
+  const trimmed = text.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (trimmed.length > MAX_ANSWER_RESPONSE_TEXT_CHARS) {
+    throw new AnswerApiError("OpenAI answer response exceeded maximum size.");
+  }
+
+  return trimmed;
+}
+
 export function normalizeGroundedAnswerText(answer: string) {
   return answer
     .replace(/\r\n?/g, "\n")
@@ -212,6 +231,10 @@ export function parseGroundedAnswerPayload(
   text: string,
   sourceCount: number,
 ): Omit<GroundedAnswerResult, "model"> {
+  if (text.length > MAX_ANSWER_RESPONSE_TEXT_CHARS) {
+    throw new AnswerApiError("OpenAI answer response exceeded maximum size.");
+  }
+
   let parsed: {
     answer?: unknown;
     citationIndexes?: unknown;
@@ -256,14 +279,32 @@ export function parseGroundedAnswerPayload(
   };
 }
 
-function findNestedText(value: unknown, allowString = false): string | null {
+type ResponseTextSearchState = {
+  visitedNodeCount: number;
+};
+
+function findNestedText(
+  value: unknown,
+  allowString = false,
+  depth = 0,
+  state: ResponseTextSearchState = { visitedNodeCount: 0 },
+): string | null {
+  state.visitedNodeCount += 1;
+
+  if (
+    depth > MAX_RESPONSE_TEXT_SEARCH_DEPTH ||
+    state.visitedNodeCount > MAX_RESPONSE_TEXT_SEARCH_NODES
+  ) {
+    return null;
+  }
+
   if (typeof value === "string") {
-    return allowString && value.trim() ? value.trim() : null;
+    return allowString ? normalizeResponseText(value) : null;
   }
 
   if (Array.isArray(value)) {
-    for (const item of value) {
-      const found = findNestedText(item, allowString);
+    for (const item of value.slice(0, MAX_RESPONSE_CONTENT_ITEMS)) {
+      const found = findNestedText(item, allowString, depth + 1, state);
 
       if (found) {
         return found;
@@ -279,16 +320,24 @@ function findNestedText(value: unknown, allowString = false): string | null {
 
   const record = value as Record<string, unknown>;
 
-  if (typeof record.output_text === "string" && record.output_text.trim()) {
-    return record.output_text.trim();
+  if (typeof record.output_text === "string") {
+    const normalized = normalizeResponseText(record.output_text);
+
+    if (normalized) {
+      return normalized;
+    }
   }
 
-  if (typeof record.text === "string" && record.text.trim()) {
-    return record.text.trim();
+  if (typeof record.text === "string") {
+    const normalized = normalizeResponseText(record.text);
+
+    if (normalized) {
+      return normalized;
+    }
   }
 
   if ("text" in record) {
-    const found = findNestedText(record.text, true);
+    const found = findNestedText(record.text, true, depth + 1, state);
 
     if (found) {
       return found;
@@ -297,7 +346,12 @@ function findNestedText(value: unknown, allowString = false): string | null {
 
   for (const key of ["content", "output", "message", "messages", "data"]) {
     if (key in record) {
-      const found = findNestedText(record[key], key === "content");
+      const found = findNestedText(
+        record[key],
+        key === "content",
+        depth + 1,
+        state,
+      );
 
       if (found) {
         return found;
@@ -309,14 +363,25 @@ function findNestedText(value: unknown, allowString = false): string | null {
 }
 
 export function extractResponseText(body: ResponsesApiBody) {
-  if (typeof body.output_text === "string" && body.output_text.trim()) {
-    return body.output_text.trim();
+  if (typeof body.output_text === "string") {
+    const normalized = normalizeResponseText(body.output_text);
+
+    if (normalized) {
+      return normalized;
+    }
   }
 
-  for (const output of body.output ?? []) {
-    for (const content of output.content ?? []) {
-      if (typeof content.text === "string" && content.text.trim()) {
-        return content.text.trim();
+  for (const output of (body.output ?? []).slice(0, MAX_RESPONSE_OUTPUT_ITEMS)) {
+    for (const content of (output.content ?? []).slice(
+      0,
+      MAX_RESPONSE_CONTENT_ITEMS,
+    )) {
+      if (typeof content.text === "string") {
+        const normalized = normalizeResponseText(content.text);
+
+        if (normalized) {
+          return normalized;
+        }
       }
     }
   }

@@ -6,7 +6,9 @@ import {
   AnswerApiError,
   buildGroundedAnswerRequestBody,
   createGroundedAnswer,
+  extractResponseText,
   INSUFFICIENT_INFORMATION_ANSWER,
+  MAX_ANSWER_RESPONSE_TEXT_CHARS,
   MAX_GROUNDED_ANSWER_CHARS,
   parseGroundedAnswerPayload,
 } from "../lib/ai/answers";
@@ -79,6 +81,41 @@ describe("grounded answer generation", () => {
         1,
       ),
     ).toThrow("OpenAI answer response exceeded maximum length.");
+  });
+
+  it("rejects oversized answer response text before JSON parsing", () => {
+    expect(() =>
+      parseGroundedAnswerPayload(
+        "x".repeat(MAX_ANSWER_RESPONSE_TEXT_CHARS + 1),
+        1,
+      ),
+    ).toThrow("OpenAI answer response exceeded maximum size.");
+
+    expect(() =>
+      extractResponseText({
+        output_text: "x".repeat(MAX_ANSWER_RESPONSE_TEXT_CHARS + 1),
+      }),
+    ).toThrow("OpenAI answer response exceeded maximum size.");
+  });
+
+  it("bounds nested answer response text traversal", () => {
+    let nested: unknown = {
+      output_text: JSON.stringify({
+        answer: "Manager review is required.",
+        citationIndexes: [1],
+        insufficientInformation: false,
+      }),
+    };
+
+    for (let index = 0; index < 20; index += 1) {
+      nested = { data: [nested] };
+    }
+
+    expect(() =>
+      extractResponseText({
+        output: [nested as { content?: Array<{ text?: unknown }> }],
+      }),
+    ).toThrow("OpenAI answer response did not include text.");
   });
 
   it("maps malformed answer JSON to a stable provider error", () => {

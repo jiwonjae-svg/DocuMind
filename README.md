@@ -68,6 +68,7 @@ DocuMind is presented as an MVP portfolio project. The distinction below is inte
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
 - Question, answer, and ask audit records are persisted in a single database transaction.
 - OpenAI embedding and answer requests use bounded timeouts with retry handling for transient failures.
+- OpenAI answer response parsing is bounded by text size and nested traversal limits before persistence.
 - Shared per-user in-memory rate limiting for AI search and answer generation across app and agent tool endpoints.
 - AI rate limits are applied after request validation and immediately before AI-backed work.
 - Document processing failure messages are normalized before being stored or shown in the dashboard.
@@ -307,7 +308,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text while allowing known rate-limit notices.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
-- `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, unsafe answer character normalization, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, and timed-out answer retries.
+- `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, unsafe answer character normalization, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, bounded answer response extraction, and timed-out answer retries.
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, and expired bucket cleanup.
