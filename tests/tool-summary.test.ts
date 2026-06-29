@@ -51,6 +51,9 @@ describe("agent tool summary helpers", () => {
 
   it("creates concise snippets", () => {
     expect(createSnippet("  alpha   beta  ", 20)).toBe("alpha beta");
+    expect(createSnippet("alpha\u0000beta\u202egamma\u0085delta", 40)).toBe(
+      "alpha beta gamma delta",
+    );
     expect(createSnippet("a".repeat(30), 10)).toBe("aaaaaaa...");
     expect(createSnippet("a".repeat(30), 10)).toHaveLength(10);
     expect(createSnippet("abcdef", 2)).toBe("..");

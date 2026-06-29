@@ -1,6 +1,7 @@
 export const DEFAULT_SNIPPET_LENGTH = 320;
 
 const ELLIPSIS = "...";
+const unsafeSnippetCharacters = /[\u0000-\u001f\u007f-\u009f\p{Cf}]+/gu;
 
 function normalizeSnippetLength(length: number) {
   return Number.isFinite(length)
@@ -9,7 +10,10 @@ function normalizeSnippetLength(length: number) {
 }
 
 export function createSnippet(content: string, length = DEFAULT_SNIPPET_LENGTH) {
-  const normalizedContent = content.replace(/\s+/g, " ").trim();
+  const normalizedContent = content
+    .replace(unsafeSnippetCharacters, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   const normalizedLength = normalizeSnippetLength(length);
 
   if (normalizedContent.length <= normalizedLength) {
