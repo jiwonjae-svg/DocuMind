@@ -1,4 +1,5 @@
 export const DEFAULT_LOGIN_CALLBACK_URL = "/dashboard";
+export const MAX_AUTH_REDIRECT_URL_LENGTH = 512;
 
 const LOGIN_CALLBACK_ORIGIN = "https://documind.local";
 
@@ -20,7 +21,7 @@ function hasEncodedPathSeparator(pathname: string) {
 }
 
 function hasUnsafeRedirectCharacters(value: string) {
-  return value.includes("\\") || /[\u0000-\u001f\u007f]/.test(value);
+  return value.includes("\\") || /[\u0000-\u001f\u007f-\u009f\p{Cf}]/u.test(value);
 }
 
 export function normalizeLoginCallbackUrl(value: unknown) {
@@ -32,6 +33,7 @@ export function normalizeLoginCallbackUrl(value: unknown) {
 
   if (
     !callbackUrl ||
+    callbackUrl.length > MAX_AUTH_REDIRECT_URL_LENGTH ||
     !callbackUrl.startsWith("/") ||
     callbackUrl.startsWith("//") ||
     hasUnsafeRedirectCharacters(callbackUrl)
@@ -73,13 +75,19 @@ export function normalizeAuthRedirectUrl({
 }) {
   const fallbackUrl = buildAuthRedirectUrl(baseUrl, DEFAULT_LOGIN_CALLBACK_URL);
 
-  if (!url.trim() || hasUnsafeRedirectCharacters(url)) {
+  const redirectUrl = url.trim();
+
+  if (
+    !redirectUrl ||
+    redirectUrl.length > MAX_AUTH_REDIRECT_URL_LENGTH ||
+    hasUnsafeRedirectCharacters(redirectUrl)
+  ) {
     return fallbackUrl;
   }
 
   try {
     const base = new URL(baseUrl);
-    const parsed = new URL(url, base);
+    const parsed = new URL(redirectUrl, base);
 
     if (
       parsed.origin !== base.origin ||

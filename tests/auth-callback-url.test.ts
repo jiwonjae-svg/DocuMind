@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_LOGIN_CALLBACK_URL,
+  MAX_AUTH_REDIRECT_URL_LENGTH,
   normalizeAuthRedirectUrl,
   normalizeLoginCallbackUrl,
 } from "../lib/auth/callback-url";
@@ -52,6 +53,14 @@ describe("login callback URL normalization", () => {
     expect(normalizeLoginCallbackUrl("/dashboard\nSet-Cookie: bad=1")).toBe(
       DEFAULT_LOGIN_CALLBACK_URL,
     );
+    expect(normalizeLoginCallbackUrl("/dashboard/\u202eadmin")).toBe(
+      DEFAULT_LOGIN_CALLBACK_URL,
+    );
+    expect(
+      normalizeLoginCallbackUrl(
+        `/dashboard/${"x".repeat(MAX_AUTH_REDIRECT_URL_LENGTH)}`,
+      ),
+    ).toBe(DEFAULT_LOGIN_CALLBACK_URL);
     expect(normalizeLoginCallbackUrl("")).toBe(DEFAULT_LOGIN_CALLBACK_URL);
     expect(normalizeLoginCallbackUrl(null)).toBe(DEFAULT_LOGIN_CALLBACK_URL);
   });
@@ -104,6 +113,18 @@ describe("login callback URL normalization", () => {
       normalizeAuthRedirectUrl({
         baseUrl,
         url: "/dashboard\\evil",
+      }),
+    ).toBe(fallbackUrl);
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: "/dashboard/\u202eadmin",
+      }),
+    ).toBe(fallbackUrl);
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: `/dashboard/${"x".repeat(MAX_AUTH_REDIRECT_URL_LENGTH)}`,
       }),
     ).toBe(fallbackUrl);
   });

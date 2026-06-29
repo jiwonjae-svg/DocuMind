@@ -42,7 +42,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 
 - Auth.js email/password signup, credentials sign-in, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
-- Auth.js redirect callbacks are constrained to the landing page, login/signup pages, and dashboard paths.
+- Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
 - Public signup is protected with same-origin checks, bounded JSON parsing, password hashing, and in-memory client/email/aggregate rate limiting.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
