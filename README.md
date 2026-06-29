@@ -374,7 +374,7 @@ The dashboard at `/dashboard` is protected. Unauthenticated users are redirected
 For a quick reviewer pass, the steps below are implemented in the current demo:
 
 1. Sign in with the seeded demo account.
-2. Open Documents to review existing files or upload a short `.txt` or `.md` file.
+2. Open Documents to review existing files or upload a short `.txt`, `.md`, or `.pdf` file.
 3. Run semantic search from the Search page and inspect matching chunks, snippets, and scores.
 4. Ask a grounded question using content from an uploaded or seeded document.
 5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.

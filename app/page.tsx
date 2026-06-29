@@ -122,7 +122,7 @@ const plannedFeatures = [
 
 const demoSteps = [
   "Sign in with the seeded demo account.",
-  "Open Documents to review existing files or upload a short .txt or .md file.",
+  "Open Documents to review existing files or upload a short .txt, .md, or .pdf file.",
   "Run semantic search from Search and inspect matching chunks, snippets, and scores.",
   "Ask a grounded question using content from an uploaded or seeded document.",
   "Check the answer, citations, matched snippets, and insufficient-information behavior.",
@@ -382,12 +382,12 @@ export default function Home() {
               What reviewers should test
             </h2>
             <p className="mt-4 text-sm leading-6 text-slate-600">
-              Use the flow below; each step is implemented in the current
-              demo. Planned-only items, including MCP wrapping, team RBAC, and
+              Every step below is implemented in the current demo. Planned-only
+              items, including MCP wrapping, team RBAC, and
               organization-wide audit review, are intentionally separated in
               the MVP scope section above.
             </p>
-            <ul
+            <ol
               role="list"
               aria-label="Try the demo steps"
               className="mt-5 grid list-none gap-3 p-0"
@@ -400,13 +400,10 @@ export default function Home() {
                   >
                     {index + 1}
                   </span>
-                  <span>
-                    <span className="sr-only">Step {index + 1}: </span>
-                    {step}
-                  </span>
+                  <span>{step}</span>
                 </li>
               ))}
-            </ul>
+            </ol>
             <p className="mt-5 text-sm leading-6 text-slate-500">
               Implemented now: an owner-scoped audit log view for the
               signed-in user. Planned only: organization-wide admin audit
