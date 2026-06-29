@@ -68,7 +68,11 @@ describe("Next.js security headers", () => {
     const apiRoutes = headers.find((rule) => rule.source === "/api/:path*");
 
     expect(apiRoutes?.headers).toEqual(
-      expect.arrayContaining([{ key: "Cache-Control", value: "no-store" }]),
+      expect.arrayContaining([
+        { key: "Cache-Control", value: "private, no-store, max-age=0" },
+        { key: "Pragma", value: "no-cache" },
+        { key: "Expires", value: "0" },
+      ]),
     );
   });
 });

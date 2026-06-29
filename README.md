@@ -55,7 +55,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Document IDs are normalized before owner-scoped document mutations.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
-- Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, cross-origin opener/resource policies, disabled framework powered-by header, and `no-store` caching for API responses.
+- Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, cross-origin opener/resource policies, disabled framework powered-by header, and private `no-store` caching headers for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
 - Search and ask text inputs are normalized to remove control characters before embedding, persistence, and audit metadata length calculation.
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts, with aggregate denial short-circuiting before new client/email buckets are created.
@@ -142,7 +142,7 @@ flowchart LR
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked
-- Security headers, Content Security Policy without production `unsafe-eval`, cross-origin opener/resource policies, disabled Next.js powered-by header, HSTS, and `Cache-Control: no-store` on API routes
+- Security headers, Content Security Policy without production `unsafe-eval`, cross-origin opener/resource policies, disabled Next.js powered-by header, HSTS, and private `no-store` caching headers on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Control-character normalization for search and ask inputs before AI-backed work or question persistence
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
