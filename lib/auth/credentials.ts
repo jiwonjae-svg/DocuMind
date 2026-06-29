@@ -4,6 +4,8 @@ export const MAX_AUTH_IMAGE_URL_LENGTH = 2048;
 export const MAX_PASSWORD_CREDENTIAL_LENGTH = 1024;
 
 const unsafeAuthDisplayCharacters = /[\u0000-\u001f\u007f-\u009f\p{Cf}]+/gu;
+const unsafeEmailCredentialCharacters =
+  /[\u0000-\u001f\u007f-\u009f\p{Cf}]/u;
 
 function readStringCredential(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -15,6 +17,7 @@ export function normalizeEmailCredential(value: unknown) {
   if (
     !email ||
     email.length > MAX_EMAIL_CREDENTIAL_LENGTH ||
+    unsafeEmailCredentialCharacters.test(email) ||
     /\s/.test(email)
   ) {
     return null;

@@ -20,6 +20,8 @@ describe("auth credential normalization", () => {
     expect(normalizeEmailCredential("not-an-email")).toBeNull();
     expect(normalizeEmailCredential("demo@@documind.local")).toBeNull();
     expect(normalizeEmailCredential("demo @documind.local")).toBeNull();
+    expect(normalizeEmailCredential("demo\u0000@documind.local")).toBeNull();
+    expect(normalizeEmailCredential("demo\u202e@documind.local")).toBeNull();
     expect(normalizeEmailCredential(null)).toBeNull();
   });
 

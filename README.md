@@ -65,7 +65,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - The shared in-memory rate-limit helper caps active bucket creation to bound process memory during abusive key spray attempts.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
-- Signup, OAuth profile, and session display values are bounded and stripped of control/format characters, and OAuth profile images must be HTTPS URLs before storage or display.
+- Signup, OAuth profile, session display values, and email credentials are bounded and stripped or rejected when they contain control/format characters; OAuth profile images must be HTTPS URLs before storage or display.
 - OAuth provider account identifiers are bounded before user-account lookup or storage.
 - Password signup, verified OAuth user creation, and verified OAuth account linking write audit records in the same database transaction as the account change.
 - OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links, and recovers cleanly when a concurrent sign-in creates the provider link first.
@@ -136,7 +136,7 @@ flowchart LR
 - Auth.js email/password signup and credentials authentication
 - Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
-- Bounded server-side credential normalization, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
+- Bounded server-side credential normalization with control/format-character rejection for email credentials, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup email/name/password validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
@@ -370,7 +370,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/seed-policy.test.ts`: production seed runs reject the documented default bootstrap password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped, and Auth.js redirects are allowlisted to expected same-origin paths while rejecting external or malformed callback URLs.
-- `tests/auth-credentials.test.ts`: login credentials, auth display names, and profile image URLs are normalized and bounded before use.
+- `tests/auth-credentials.test.ts`: login credentials, email control/format-character rejection, auth display names, and profile image URLs are normalized and bounded before use.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
 - `tests/auth-signup.test.ts`: signup input validation, display-name/password bounds, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
