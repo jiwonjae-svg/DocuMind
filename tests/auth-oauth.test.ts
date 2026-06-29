@@ -1,4 +1,5 @@
 import type { Account, Profile, User } from "next-auth";
+import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const prismaMock = vi.hoisted(() => ({
@@ -45,6 +46,16 @@ function oauthUser(email = "owner@example.com"): User {
 
 function profile(value: Record<string, unknown>): Profile {
   return value as Profile;
+}
+
+function uniqueConstraintError() {
+  return new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+    clientVersion: "test",
+    code: "P2002",
+    meta: {
+      target: ["provider", "providerAccountId"],
+    },
+  });
 }
 
 describe("OAuth user provisioning", () => {
@@ -183,5 +194,37 @@ describe("OAuth user provisioning", () => {
       }),
     );
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("recovers when concurrent OAuth linking creates the account first", async () => {
+    prismaMock.userAccount.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ userId: "user-1" });
+    prismaMock.user.findUnique.mockResolvedValue(null);
+    prismaMock.$transaction.mockRejectedValue(uniqueConstraintError());
+    prismaMock.user.update.mockResolvedValue({
+      email: "owner@example.com",
+      id: "user-1",
+      image: null,
+      name: "Owner",
+    });
+
+    await expect(
+      ensureOAuthUser({
+        account: oauthAccount("google"),
+        profile: profile({ email_verified: true }),
+        user: oauthUser("owner@example.com"),
+      }),
+    ).resolves.toMatchObject({ id: "user-1" });
+
+    expect(prismaMock.userAccount.findUnique).toHaveBeenCalledTimes(2);
+    expect(prismaMock.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id: "user-1",
+        },
+      }),
+    );
+    expect(prismaMock.auditLog.create).not.toHaveBeenCalled();
   });
 });

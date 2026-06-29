@@ -64,7 +64,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
 - Password signup, verified OAuth user creation, and verified OAuth account linking write audit records in the same database transaction as the account change.
-- OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links.
+- OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links, and recovers cleanly when a concurrent sign-in creates the provider link first.
 - Password signup accepts duplicate-email submissions with the same public response shape as new-account submissions to reduce account enumeration.
 - Text extraction and chunking with overlap metadata.
 - Extracted document text and PDF page counts are capped before chunking and embedding to bound processing cost.
@@ -371,7 +371,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-signup.test.ts`: signup input validation plus client/email/aggregate account-creation rate limits and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
-- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, and blocks automatic linking into password accounts, including transaction-time collision races.
+- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
 
 Run the suite with:
