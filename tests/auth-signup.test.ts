@@ -6,11 +6,15 @@ import {
 import {
   SIGNUP_CLIENT_RATE_LIMIT,
   SIGNUP_EMAIL_RATE_LIMIT,
+  SIGNUP_GLOBAL_RATE_LIMIT,
   SIGNUP_RATE_LIMIT_WINDOW_MS,
   checkSignupEmailRateLimit,
   checkSignupRateLimit,
 } from "../lib/auth/signup-rate-limit";
-import { clearRateLimitBuckets } from "../lib/rate-limit";
+import {
+  clearRateLimitBuckets,
+  getRateLimitBucketCount,
+} from "../lib/rate-limit";
 
 function request(ipAddress: string) {
   const headers = new Headers({
@@ -93,5 +97,49 @@ describe("signup rate limiting", () => {
         now,
       }).allowed,
     ).toBe(false);
+  });
+
+  it("limits aggregate account creation attempts across many clients", () => {
+    const now = () => 1000;
+
+    for (let index = 0; index < SIGNUP_GLOBAL_RATE_LIMIT; index += 1) {
+      expect(
+        checkSignupRateLimit({
+          now,
+          request: request(`203.0.113.${index}`),
+        }).allowed,
+      ).toBe(true);
+    }
+
+    const rateLimit = checkSignupRateLimit({
+      now,
+      request: request("198.51.100.200"),
+    });
+
+    expect(rateLimit.allowed).toBe(false);
+    expect(rateLimit.retryAfterSeconds).toBe(
+      SIGNUP_RATE_LIMIT_WINDOW_MS / 1000,
+    );
+  });
+
+  it("does not create new client buckets after the aggregate signup limit is reached", () => {
+    const now = () => 1000;
+
+    for (let index = 0; index < SIGNUP_GLOBAL_RATE_LIMIT; index += 1) {
+      checkSignupRateLimit({
+        now,
+        request: request(`203.0.113.${index}`),
+      });
+    }
+
+    const bucketCountBeforeDeniedAttempt = getRateLimitBucketCount();
+
+    expect(
+      checkSignupRateLimit({
+        now,
+        request: request("198.51.100.250"),
+      }).allowed,
+    ).toBe(false);
+    expect(getRateLimitBucketCount()).toBe(bucketCountBeforeDeniedAttempt);
   });
 });

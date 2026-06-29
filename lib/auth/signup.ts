@@ -11,6 +11,8 @@ export const SIGNUP_PASSWORD_TOO_SHORT_ERROR =
   "Password must be at least 12 characters.";
 export const SIGNUP_EMAIL_EXISTS_ERROR =
   "An account already exists for this email.";
+export const SIGNUP_ACCEPTED_MESSAGE =
+  "If the account can be created, continue with sign in.";
 
 type SignupValidationResult =
   | {
@@ -25,6 +27,16 @@ type SignupValidationResult =
       error: string;
       ok: false;
     };
+
+type PasswordUserCreationResult = {
+  created: boolean;
+  ok: true;
+  user: {
+    email: string;
+    id: string;
+    name: string | null;
+  } | null;
+};
 
 function readString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -89,23 +101,7 @@ export async function createPasswordUser({
   email: string;
   name: string | null;
   password: string;
-}) {
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (existingUser) {
-    return {
-      error: SIGNUP_EMAIL_EXISTS_ERROR,
-      ok: false as const,
-    };
-  }
-
+}): Promise<PasswordUserCreationResult> {
   try {
     const passwordHash = await hashPassword(password);
     const user = await prisma.$transaction(async (transaction) => {
@@ -138,6 +134,7 @@ export async function createPasswordUser({
     });
 
     return {
+      created: true,
       ok: true as const,
       user,
     };
@@ -147,8 +144,9 @@ export async function createPasswordUser({
       error.code === "P2002"
     ) {
       return {
-        error: SIGNUP_EMAIL_EXISTS_ERROR,
-        ok: false as const,
+        created: false,
+        ok: true as const,
+        user: null,
       };
     }
 

@@ -10,6 +10,7 @@ import {
 } from "@/lib/auth/signup-rate-limit";
 import {
   createPasswordUser,
+  SIGNUP_ACCEPTED_MESSAGE,
   validateSignupInput,
 } from "@/lib/auth/signup";
 import { NextRequest, NextResponse } from "next/server";
@@ -72,15 +73,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const result = await createPasswordUser(validation.data);
-
-  if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 409 });
-  }
+  await createPasswordUser(validation.data);
 
   return NextResponse.json(
     {
-      user: result.user,
+      message: SIGNUP_ACCEPTED_MESSAGE,
     },
     { status: 201 },
   );

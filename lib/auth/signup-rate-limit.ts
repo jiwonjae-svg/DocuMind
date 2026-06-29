@@ -3,6 +3,7 @@ import { readIpAddress } from "../tools/response";
 
 export const SIGNUP_CLIENT_RATE_LIMIT = 5;
 export const SIGNUP_EMAIL_RATE_LIMIT = 3;
+export const SIGNUP_GLOBAL_RATE_LIMIT = 50;
 export const SIGNUP_RATE_LIMIT_WINDOW_MS = 10 * 60_000;
 export const SIGNUP_RATE_LIMIT_ERROR =
   "Too many account creation attempts. Try again shortly.";
@@ -41,6 +42,21 @@ export function checkSignupRateLimit({
     ...(now ? { now } : {}),
     windowMs: SIGNUP_RATE_LIMIT_WINDOW_MS,
   };
+  const globalResult = checkRateLimit("auth-signup:global", {
+    ...rateLimitOptions,
+    limit: SIGNUP_GLOBAL_RATE_LIMIT,
+  });
+
+  if (!globalResult.allowed) {
+    return {
+      allowed: false,
+      limit: SIGNUP_CLIENT_RATE_LIMIT,
+      remaining: 0,
+      resetAt: globalResult.resetAt,
+      retryAfterSeconds: globalResult.retryAfterSeconds,
+    };
+  }
+
   const result = checkRateLimit(
     `auth-signup:client:${readSignupClientIdentifier(request.headers)}`,
     {

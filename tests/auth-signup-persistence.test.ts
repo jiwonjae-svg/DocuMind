@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const prismaMock = vi.hoisted(() => ({
@@ -21,10 +22,17 @@ vi.mock("../lib/password", () => ({
   hashPassword: hashPasswordMock,
 }));
 
-import {
-  createPasswordUser,
-  SIGNUP_EMAIL_EXISTS_ERROR,
-} from "../lib/auth/signup";
+import { createPasswordUser } from "../lib/auth/signup";
+
+function uniqueEmailError() {
+  return new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+    clientVersion: "test",
+    code: "P2002",
+    meta: {
+      target: ["email"],
+    },
+  });
+}
 
 describe("signup persistence", () => {
   beforeEach(() => {
@@ -51,6 +59,7 @@ describe("signup persistence", () => {
         password: "secure-password-123",
       }),
     ).resolves.toEqual({
+      created: true,
       ok: true,
       user: {
         email: "new.user@example.com",
@@ -83,8 +92,9 @@ describe("signup persistence", () => {
     });
   });
 
-  it("does not hash or write audit logs for existing emails", async () => {
-    prismaMock.user.findUnique.mockResolvedValue({ id: "existing-user-1" });
+  it("does not reveal unique email collisions", async () => {
+    prismaMock.user.findUnique.mockResolvedValue(null);
+    prismaMock.user.create.mockRejectedValue(uniqueEmailError());
 
     await expect(
       createPasswordUser({
@@ -93,12 +103,13 @@ describe("signup persistence", () => {
         password: "secure-password-123",
       }),
     ).resolves.toEqual({
-      error: SIGNUP_EMAIL_EXISTS_ERROR,
-      ok: false,
+      created: false,
+      ok: true,
+      user: null,
     });
 
-    expect(hashPasswordMock).not.toHaveBeenCalled();
-    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    expect(hashPasswordMock).toHaveBeenCalledWith("secure-password-123");
+    expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
     expect(prismaMock.auditLog.create).not.toHaveBeenCalled();
   });
 });

@@ -88,9 +88,12 @@ describe("API route security contracts", () => {
     const clientRateLimitIndex = source.indexOf("const clientRateLimit");
     const jsonBodyIndex = source.indexOf("readJsonBodyResult(request)");
     const emailRateLimitIndex = source.indexOf("const emailRateLimit");
-    const createUserIndex = source.indexOf("const result = await createPasswordUser");
+    const createUserIndex = source.indexOf("await createPasswordUser");
 
     expect(source).toContain("isSameOriginRequest(request)");
+    expect(source).toContain("SIGNUP_ACCEPTED_MESSAGE");
+    expect(source).not.toContain("status: 409");
+    expect(source).not.toContain("result.user");
     expect(clientRateLimitIndex).toBeGreaterThanOrEqual(0);
     expect(jsonBodyIndex).toBeGreaterThan(clientRateLimitIndex);
     expect(emailRateLimitIndex).toBeGreaterThan(jsonBodyIndex);

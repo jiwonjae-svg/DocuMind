@@ -55,7 +55,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
     setIsSubmitting(false);
 
     if (!signInResult || signInResult.error) {
-      setError("Account created. Sign in with your new password.");
+      setError("If this account exists, sign in with its current password.");
       return;
     }
 
