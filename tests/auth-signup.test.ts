@@ -42,6 +42,23 @@ describe("signup validation", () => {
     });
   });
 
+  it("removes unsafe display characters from signup names", () => {
+    expect(
+      validateSignupInput({
+        email: "new.user@example.com",
+        name: " Mina\u202e\r\nTanaka\u0085 ",
+        password: "secure-password-123",
+      }),
+    ).toEqual({
+      data: {
+        email: "new.user@example.com",
+        name: "Mina Tanaka",
+        password: "secure-password-123",
+      },
+      ok: true,
+    });
+  });
+
   it("rejects short passwords", () => {
     expect(
       validateSignupInput({

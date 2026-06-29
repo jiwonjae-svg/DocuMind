@@ -63,6 +63,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Per-user in-memory rate limiting for document uploads before multipart parsing and document deletes before delete lookup.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
+- Signup, OAuth profile, and session display values are bounded and stripped of control/format characters, and OAuth profile images must be HTTPS URLs before storage or display.
 - Password signup, verified OAuth user creation, and verified OAuth account linking write audit records in the same database transaction as the account change.
 - OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links, and recovers cleanly when a concurrent sign-in creates the provider link first.
 - Password signup accepts duplicate-email submissions with the same public response shape as new-account submissions to reduce account enumeration.
@@ -365,13 +366,13 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/seed-policy.test.ts`: production seed runs reject the documented default bootstrap password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped, and Auth.js redirects are allowlisted to expected same-origin paths while rejecting external or malformed callback URLs.
-- `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
+- `tests/auth-credentials.test.ts`: login credentials, auth display names, and profile image URLs are normalized and bounded before use.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
-- `tests/auth-signup.test.ts`: signup input validation plus client/email/aggregate account-creation rate limits and aggregate bucket short-circuiting.
+- `tests/auth-signup.test.ts`: signup input validation, display-name normalization, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
-- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
+- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, normalizes provider display values, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
 - `tests/client-server-boundary.test.ts`: client components are scanned to prevent value imports from server-only authentication, Prisma, document processing, QA, AI, and password modules.
 

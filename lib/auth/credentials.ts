@@ -1,5 +1,9 @@
 export const MAX_EMAIL_CREDENTIAL_LENGTH = 254;
+export const MAX_AUTH_DISPLAY_NAME_LENGTH = 80;
+export const MAX_AUTH_IMAGE_URL_LENGTH = 2048;
 export const MAX_PASSWORD_CREDENTIAL_LENGTH = 1024;
+
+const unsafeAuthDisplayCharacters = /[\u0000-\u001f\u007f-\u009f\p{Cf}]+/gu;
 
 function readStringCredential(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -37,4 +41,37 @@ export function normalizePasswordCredential(value: unknown) {
   }
 
   return password;
+}
+
+export function normalizeAuthDisplayName(value: unknown) {
+  const name = readStringCredential(value)
+    .normalize("NFC")
+    .replace(unsafeAuthDisplayCharacters, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!name || name.length > MAX_AUTH_DISPLAY_NAME_LENGTH) {
+    return null;
+  }
+
+  return name;
+}
+
+export function normalizeAuthImageUrl(value: unknown) {
+  const imageUrl = readStringCredential(value).replace(
+    unsafeAuthDisplayCharacters,
+    "",
+  );
+
+  if (!imageUrl || imageUrl.length > MAX_AUTH_IMAGE_URL_LENGTH) {
+    return null;
+  }
+
+  try {
+    const url = new URL(imageUrl);
+
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
 }

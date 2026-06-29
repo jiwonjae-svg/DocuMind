@@ -1,7 +1,11 @@
 import { Prisma } from "@prisma/client";
 import type { Account, Profile, User } from "next-auth";
 import { prisma } from "../prisma";
-import { normalizeEmailCredential } from "./credentials";
+import {
+  normalizeAuthDisplayName,
+  normalizeAuthImageUrl,
+  normalizeEmailCredential,
+} from "./credentials";
 import { getOAuthProviderName } from "./oauth-providers";
 
 export const OAUTH_ACCOUNT_EMAIL_CONFLICT_ERROR =
@@ -27,19 +31,17 @@ function readProfileBoolean(profile: Profile | undefined, key: string) {
 
 function readOAuthDisplayName(user: User, profile?: Profile) {
   return (
-    user.name ??
-    readProfileString(profile, "name") ??
-    readProfileString(profile, "login") ??
-    null
+    normalizeAuthDisplayName(user.name) ??
+    normalizeAuthDisplayName(readProfileString(profile, "name")) ??
+    normalizeAuthDisplayName(readProfileString(profile, "login"))
   );
 }
 
 function readOAuthImage(user: User, profile?: Profile) {
   return (
-    user.image ??
-    readProfileString(profile, "picture") ??
-    readProfileString(profile, "avatar_url") ??
-    null
+    normalizeAuthImageUrl(user.image) ??
+    normalizeAuthImageUrl(readProfileString(profile, "picture")) ??
+    normalizeAuthImageUrl(readProfileString(profile, "avatar_url"))
   );
 }
 

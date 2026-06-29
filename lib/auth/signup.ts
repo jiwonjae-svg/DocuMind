@@ -1,10 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { hashPassword } from "../password";
 import { prisma } from "../prisma";
-import { normalizeEmailCredential } from "./credentials";
+import {
+  normalizeAuthDisplayName,
+  normalizeEmailCredential,
+} from "./credentials";
 
 export const MIN_SIGNUP_PASSWORD_LENGTH = 12;
-export const MAX_SIGNUP_NAME_LENGTH = 80;
 export const SIGNUP_INVALID_INPUT_ERROR =
   "Enter a valid email, name, and password.";
 export const SIGNUP_PASSWORD_TOO_SHORT_ERROR =
@@ -38,20 +40,6 @@ type PasswordUserCreationResult = {
   } | null;
 };
 
-function readString(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function normalizeSignupName(value: unknown) {
-  const name = readString(value).replace(/\s+/g, " ");
-
-  if (!name) {
-    return null;
-  }
-
-  return name.length <= MAX_SIGNUP_NAME_LENGTH ? name : null;
-}
-
 function readSignupPassword(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -66,7 +54,7 @@ export function validateSignupInput(body: unknown): SignupValidationResult {
 
   const values = body as Record<string, unknown>;
   const email = normalizeEmailCredential(values.email);
-  const name = normalizeSignupName(values.name);
+  const name = normalizeAuthDisplayName(values.name);
   const password = readSignupPassword(values.password);
 
   if (!email || name === null || !password) {

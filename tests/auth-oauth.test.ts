@@ -36,11 +36,18 @@ function oauthAccount(
   } as Account;
 }
 
-function oauthUser(email = "owner@example.com"): User {
+function oauthUser(
+  email = "owner@example.com",
+  options: {
+    image?: string | null;
+    name?: string | null;
+  } = {},
+): User {
   return {
     email,
     id: "provider-user-1",
-    name: "Owner",
+    image: options.image,
+    name: Object.hasOwn(options, "name") ? options.name : "Owner",
   } as User;
 }
 
@@ -194,6 +201,42 @@ describe("OAuth user provisioning", () => {
       }),
     );
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("normalizes OAuth profile display values before storing them", async () => {
+    prismaMock.userAccount.findUnique.mockResolvedValue(null);
+    prismaMock.user.findUnique.mockResolvedValue(null);
+    prismaMock.user.create.mockResolvedValue({
+      email: "owner@example.com",
+      id: "user-1",
+      image: "https://cdn.example.com/avatar.png",
+      name: "Owner Name",
+    });
+
+    await expect(
+      ensureOAuthUser({
+        account: oauthAccount("google"),
+        profile: profile({
+          email_verified: true,
+          name: "Owner\u202e\r\nName",
+          picture: "javascript:alert(1)",
+        }),
+        user: oauthUser("owner@example.com", {
+          image: "https://cdn.example.com/avatar.png",
+          name: null,
+        }),
+      }),
+    ).resolves.toMatchObject({ id: "user-1" });
+
+    expect(prismaMock.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          email: "owner@example.com",
+          image: "https://cdn.example.com/avatar.png",
+          name: "Owner Name",
+        },
+      }),
+    );
   });
 
   it("recovers when concurrent OAuth linking creates the account first", async () => {

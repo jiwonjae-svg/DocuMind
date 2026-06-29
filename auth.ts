@@ -5,6 +5,8 @@ import Google from "next-auth/providers/google";
 import type { Provider } from "next-auth/providers";
 import { normalizeAuthRedirectUrl } from "@/lib/auth/callback-url";
 import {
+  normalizeAuthDisplayName,
+  normalizeAuthImageUrl,
   normalizeEmailCredential,
   normalizePasswordCredential,
 } from "@/lib/auth/credentials";
@@ -139,6 +141,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
+        session.user.name = normalizeAuthDisplayName(session.user.name);
+        session.user.image = normalizeAuthImageUrl(session.user.image);
       }
 
       return session;
