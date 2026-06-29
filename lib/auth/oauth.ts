@@ -18,6 +18,12 @@ function readProfileString(profile: Profile | undefined, key: string) {
   return typeof value === "string" ? value : null;
 }
 
+function readProfileBoolean(profile: Profile | undefined, key: string) {
+  const value = profile?.[key as keyof Profile];
+
+  return typeof value === "boolean" ? value : null;
+}
+
 function readOAuthDisplayName(user: User, profile?: Profile) {
   return (
     user.name ??
@@ -38,7 +44,14 @@ function readOAuthImage(user: User, profile?: Profile) {
 
 function hasVerifiedProviderEmail(account: Account, profile?: Profile) {
   if (account.provider === "google") {
-    return profile?.email_verified === true;
+    return readProfileBoolean(profile, "email_verified") === true;
+  }
+
+  if (account.provider === "github") {
+    return (
+      readProfileBoolean(profile, "email_verified") === true ||
+      readProfileBoolean(profile, "verified") === true
+    );
   }
 
   return false;
@@ -115,6 +128,10 @@ export async function ensureOAuthUser({
     return null;
   }
 
+  if (!hasVerifiedProviderEmail(account, profile)) {
+    return null;
+  }
+
   const existingUser = await prisma.user.findUnique({
     where: {
       email,
@@ -125,7 +142,7 @@ export async function ensureOAuthUser({
     },
   });
 
-  if (existingUser?.passwordHash && !hasVerifiedProviderEmail(account, profile)) {
+  if (existingUser?.passwordHash) {
     return null;
   }
 

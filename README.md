@@ -41,7 +41,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Implemented
 
 - Auth.js email/password signup, credentials sign-in, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
-- OAuth sign-ins create or link a local Prisma user so document ownership continues to use the internal user ID.
+- OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked.
 - Public signup is protected with same-origin checks, bounded JSON parsing, password hashing, and in-memory client/email rate limiting.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
@@ -61,7 +61,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Per-user in-memory rate limiting for document uploads before multipart parsing and document deletes before delete lookup.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
-- Password signup, OAuth user creation, and OAuth account linking write audit records.
+- Password signup, verified OAuth user creation, and verified OAuth account linking write audit records.
 - Text extraction and chunking with overlap metadata.
 - Extracted document text is capped before chunking and embedding to bound processing cost.
 - Document processing status writes remain owner-scoped.
@@ -125,7 +125,7 @@ flowchart LR
 - Tailwind CSS
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
-- Optional Google and GitHub OAuth authentication through Auth.js
+- Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks before local account creation or linking
 - App-relative login callback URL normalization
 - Bounded server-side credential normalization, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup input validation, server-side scrypt password hashing, and signup rate limiting
@@ -365,6 +365,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
 - `tests/auth-signup.test.ts`: signup input validation and client/email account-creation rate limits.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
+- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, and blocks automatic linking into password accounts.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
 
 Run the suite with:
@@ -376,8 +377,8 @@ npm run test
 Local verification on 2026-06-29:
 
 ```text
-Test Files  32 passed (32)
-Tests       186 passed (186)
+Test Files  33 passed (33)
+Tests       190 passed (190)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -396,7 +397,7 @@ npm run prisma:seed
 
 ## Account Setup
 
-After running migrations, create an account at [http://localhost:3000/signup](http://localhost:3000/signup). Email/password signup hashes the password on the server and then signs the new user in. If Google or GitHub OAuth variables are configured, the signup and login pages also show OAuth buttons.
+After running migrations, create an account at [http://localhost:3000/signup](http://localhost:3000/signup). Email/password signup hashes the password on the server and then signs the new user in. If Google or GitHub OAuth variables are configured, the signup and login pages also show OAuth buttons. OAuth only provisions or links local users when the provider supplies a verified email; password accounts are not automatically linked by OAuth sign-in.
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
@@ -656,7 +657,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - AI-backed search, answer, signup, and credentials sign-in endpoints use in-memory rate limiters, which are not shared across multiple app instances.
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
-- OAuth account-linking settings and enterprise SSO are not implemented yet.
+- User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
 - MCP is not implemented yet; `/api/tools/*` endpoints are prepared so they can be wrapped later.
 - There is no organization-wide admin audit review UI yet; the MVP exposes only owner-scoped user audit logs.
 
