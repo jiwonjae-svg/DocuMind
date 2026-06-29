@@ -106,22 +106,41 @@ export async function createPasswordUser({
     };
   }
 
-  const passwordHash = await hashPassword(password);
-  let user: { email: string; id: string; name: string | null };
-
   try {
-    user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        passwordHash,
-      },
-      select: {
-        email: true,
-        id: true,
-        name: true,
-      },
+    const passwordHash = await hashPassword(password);
+    const user = await prisma.$transaction(async (transaction) => {
+      const createdUser = await transaction.user.create({
+        data: {
+          email,
+          name,
+          passwordHash,
+        },
+        select: {
+          email: true,
+          id: true,
+          name: true,
+        },
+      });
+
+      await transaction.auditLog.create({
+        data: {
+          actorId: createdUser.id,
+          action: "user_signed_up",
+          resourceType: "User",
+          resourceId: createdUser.id,
+          metadata: {
+            method: "password",
+          },
+        },
+      });
+
+      return createdUser;
     });
+
+    return {
+      ok: true as const,
+      user,
+    };
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -135,21 +154,4 @@ export async function createPasswordUser({
 
     throw error;
   }
-
-  await prisma.auditLog.create({
-    data: {
-      actorId: user.id,
-      action: "user_signed_up",
-      resourceType: "User",
-      resourceId: user.id,
-      metadata: {
-        method: "password",
-      },
-    },
-  });
-
-  return {
-    ok: true as const,
-    user,
-  };
 }

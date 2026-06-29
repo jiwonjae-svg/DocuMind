@@ -49,8 +49,10 @@ function profile(value: Record<string, unknown>): Profile {
 describe("OAuth user provisioning", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    prismaMock.$transaction.mockImplementation(async (operations) =>
-      Promise.all(operations),
+    prismaMock.$transaction.mockImplementation(async (operation) =>
+      typeof operation === "function"
+        ? operation(prismaMock)
+        : Promise.all(operation),
     );
     prismaMock.auditLog.create.mockResolvedValue({ id: "audit-1" });
     prismaMock.userAccount.create.mockResolvedValue({ id: "account-1" });
@@ -96,6 +98,7 @@ describe("OAuth user provisioning", () => {
     expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
     expect(prismaMock.user.upsert).not.toHaveBeenCalled();
     expect(prismaMock.userAccount.create).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
   it("does not auto-link OAuth to existing password accounts", async () => {
@@ -115,6 +118,7 @@ describe("OAuth user provisioning", () => {
 
     expect(prismaMock.user.upsert).not.toHaveBeenCalled();
     expect(prismaMock.userAccount.create).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
   it("creates a local OAuth user for verified provider emails", async () => {
@@ -150,5 +154,6 @@ describe("OAuth user provisioning", () => {
         }),
       }),
     );
+    expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
   });
 });

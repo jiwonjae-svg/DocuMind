@@ -61,7 +61,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Per-user in-memory rate limiting for document uploads before multipart parsing and document deletes before delete lookup.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
-- Password signup, verified OAuth user creation, and verified OAuth account linking write audit records.
+- Password signup, verified OAuth user creation, and verified OAuth account linking write audit records in the same database transaction as the account change.
 - Text extraction and chunking with overlap metadata.
 - Extracted document text is capped before chunking and embedding to bound processing cost.
 - Document processing status writes remain owner-scoped.
@@ -364,6 +364,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
 - `tests/auth-signup.test.ts`: signup input validation and client/email account-creation rate limits.
+- `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
 - `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, and blocks automatic linking into password accounts.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
@@ -377,8 +378,8 @@ npm run test
 Local verification on 2026-06-29:
 
 ```text
-Test Files  33 passed (33)
-Tests       190 passed (190)
+Test Files  34 passed (34)
+Tests       192 passed (192)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 

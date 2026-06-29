@@ -147,37 +147,39 @@ export async function ensureOAuthUser({
   }
 
   const providerName = getOAuthProviderName(account.provider);
-  const localUser = await prisma.user.upsert({
-    where: {
-      email,
-    },
-    update: {
-      ...(name ? { name } : {}),
-      ...(image ? { image } : {}),
-    },
-    create: {
-      email,
-      image,
-      name,
-    },
-    select: {
-      email: true,
-      id: true,
-      image: true,
-      name: true,
-    },
-  });
 
-  await prisma.$transaction([
-    prisma.userAccount.create({
+  return prisma.$transaction(async (transaction) => {
+    const localUser = await transaction.user.upsert({
+      where: {
+        email,
+      },
+      update: {
+        ...(name ? { name } : {}),
+        ...(image ? { image } : {}),
+      },
+      create: {
+        email,
+        image,
+        name,
+      },
+      select: {
+        email: true,
+        id: true,
+        image: true,
+        name: true,
+      },
+    });
+
+    await transaction.userAccount.create({
       data: {
         provider: account.provider,
         providerAccountId,
         type: account.type ?? "oauth",
         userId: localUser.id,
       },
-    }),
-    prisma.auditLog.create({
+    });
+
+    await transaction.auditLog.create({
       data: {
         actorId: localUser.id,
         action: existingUser ? "oauth_account_linked" : "oauth_user_created",
@@ -187,8 +189,8 @@ export async function ensureOAuthUser({
           provider: providerName,
         },
       },
-    }),
-  ]);
+    });
 
-  return localUser;
+    return localUser;
+  });
 }
