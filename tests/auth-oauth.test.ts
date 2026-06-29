@@ -7,6 +7,7 @@ const prismaMock = vi.hoisted(() => ({
     create: vi.fn(),
   },
   user: {
+    create: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
     upsert: vi.fn(),
@@ -96,6 +97,7 @@ describe("OAuth user provisioning", () => {
     ).resolves.toBeNull();
 
     expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
     expect(prismaMock.user.upsert).not.toHaveBeenCalled();
     expect(prismaMock.userAccount.create).not.toHaveBeenCalled();
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
@@ -121,10 +123,34 @@ describe("OAuth user provisioning", () => {
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
+  it("rechecks password accounts inside the OAuth linking transaction", async () => {
+    prismaMock.userAccount.findUnique.mockResolvedValue(null);
+    prismaMock.user.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: "password-user-1",
+        passwordHash: "scrypt:salt:hash",
+      });
+
+    await expect(
+      ensureOAuthUser({
+        account: oauthAccount("google"),
+        profile: profile({ email_verified: true }),
+        user: oauthUser("owner@example.com"),
+      }),
+    ).resolves.toBeNull();
+
+    expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
+    expect(prismaMock.user.update).not.toHaveBeenCalled();
+    expect(prismaMock.userAccount.create).not.toHaveBeenCalled();
+    expect(prismaMock.auditLog.create).not.toHaveBeenCalled();
+  });
+
   it("creates a local OAuth user for verified provider emails", async () => {
     prismaMock.userAccount.findUnique.mockResolvedValue(null);
     prismaMock.user.findUnique.mockResolvedValue(null);
-    prismaMock.user.upsert.mockResolvedValue({
+    prismaMock.user.create.mockResolvedValue({
       email: "owner@example.com",
       id: "user-1",
       image: null,
@@ -139,10 +165,12 @@ describe("OAuth user provisioning", () => {
       }),
     ).resolves.toMatchObject({ id: "user-1" });
 
-    expect(prismaMock.user.upsert).toHaveBeenCalledWith(
+    expect(prismaMock.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
+        data: {
           email: "owner@example.com",
+          image: null,
+          name: "Owner",
         },
       }),
     );

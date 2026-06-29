@@ -149,26 +149,52 @@ export async function ensureOAuthUser({
   const providerName = getOAuthProviderName(account.provider);
 
   return prisma.$transaction(async (transaction) => {
-    const localUser = await transaction.user.upsert({
+    const transactionExistingUser = await transaction.user.findUnique({
       where: {
         email,
-      },
-      update: {
-        ...(name ? { name } : {}),
-        ...(image ? { image } : {}),
-      },
-      create: {
-        email,
-        image,
-        name,
       },
       select: {
         email: true,
         id: true,
         image: true,
         name: true,
+        passwordHash: true,
       },
     });
+
+    if (transactionExistingUser?.passwordHash) {
+      return null;
+    }
+
+    const localUser = transactionExistingUser
+      ? await transaction.user.update({
+          where: {
+            id: transactionExistingUser.id,
+          },
+          data: {
+            ...(name ? { name } : {}),
+            ...(image ? { image } : {}),
+          },
+          select: {
+            email: true,
+            id: true,
+            image: true,
+            name: true,
+          },
+        })
+      : await transaction.user.create({
+          data: {
+            email,
+            image,
+            name,
+          },
+          select: {
+            email: true,
+            id: true,
+            image: true,
+            name: true,
+          },
+        });
 
     await transaction.userAccount.create({
       data: {
@@ -182,7 +208,9 @@ export async function ensureOAuthUser({
     await transaction.auditLog.create({
       data: {
         actorId: localUser.id,
-        action: existingUser ? "oauth_account_linked" : "oauth_user_created",
+        action: transactionExistingUser
+          ? "oauth_account_linked"
+          : "oauth_user_created",
         resourceType: "User",
         resourceId: localUser.id,
         metadata: {

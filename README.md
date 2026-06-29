@@ -41,7 +41,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Implemented
 
 - Auth.js email/password signup, credentials sign-in, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
-- OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked.
+- OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
 - Public signup is protected with same-origin checks, bounded JSON parsing, password hashing, and in-memory client/email/aggregate rate limiting.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
@@ -62,6 +62,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
 - Password signup, verified OAuth user creation, and verified OAuth account linking write audit records in the same database transaction as the account change.
+- OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links.
 - Password signup accepts duplicate-email submissions with the same public response shape as new-account submissions to reduce account enumeration.
 - Text extraction and chunking with overlap metadata.
 - Extracted document text is capped before chunking and embedding to bound processing cost.
@@ -126,7 +127,7 @@ flowchart LR
 - Tailwind CSS
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
-- Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks before local account creation or linking
+- Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
 - App-relative login callback URL normalization
 - Bounded server-side credential normalization, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup input validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
@@ -367,7 +368,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-signup.test.ts`: signup input validation plus client/email/aggregate account-creation rate limits and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
-- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, and blocks automatic linking into password accounts.
+- `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, preserves already-linked accounts, and blocks automatic linking into password accounts, including transaction-time collision races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
 
 Run the suite with:
