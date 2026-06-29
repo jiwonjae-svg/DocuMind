@@ -8,7 +8,7 @@ type RequestWithHeaders = { headers: Headers };
 
 function normalizeHeaderValue(value: string | null | undefined, maxLength: number) {
   const trimmedValue = value
-    ?.replace(/[\u0000-\u001f\u007f]+/g, " ")
+    ?.replace(/[\u0000-\u001f\u007f-\u009f\p{Cf}]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
 

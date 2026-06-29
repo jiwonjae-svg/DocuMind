@@ -85,13 +85,13 @@ describe("request metadata helpers", () => {
     expect(readUserAgent(request)).toHaveLength(MAX_USER_AGENT_LENGTH);
   });
 
-  it("removes control characters before storing audit metadata", () => {
+  it("removes control and format characters before storing audit metadata", () => {
     const request = requestWithRawHeaderValues({
-      "user-agent": "DocuMind\r\nReviewer\tBrowser",
+      "user-agent": "DocuMind\r\nReviewer\tBrowser\u202eHidden",
       "x-forwarded-for": " 203.0.113.10\r\nInjected, 10.0.0.2 ",
     });
 
     expect(readIpAddress(request)).toBeNull();
-    expect(readUserAgent(request)).toBe("DocuMind Reviewer Browser");
+    expect(readUserAgent(request)).toBe("DocuMind Reviewer Browser Hidden");
   });
 });

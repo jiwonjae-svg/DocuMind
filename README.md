@@ -318,7 +318,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text and AI model avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query normalization, control-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
-- `tests/tools-response.test.ts`: bounded, control-character-normalized, single-hop valid-IP-filtered request metadata captured for audit logs.
+- `tests/tools-response.test.ts`: bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
@@ -330,7 +330,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
-- `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, single-hop valid-IP-filtered request metadata without storing submitted credential values.
+- `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
 
 Run the suite with:
 
@@ -394,7 +394,7 @@ The page is intentionally owner-scoped for the MVP:
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
 - Metadata display is normalized and capped to keep control characters, long filenames, provider/model details, or nested values from dominating the audit screen.
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
-- Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control characters normalized and IP metadata validated before persistence.
+- Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control/format characters normalized and IP metadata validated before persistence.
 - Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
 - It does not expose other users' audit records.
 
