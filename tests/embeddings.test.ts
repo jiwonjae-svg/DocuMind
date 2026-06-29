@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -175,5 +177,20 @@ describe("OpenAI embeddings", () => {
     expect(normalizeEmbeddingBackfillLimit(0)).toBeNull();
     expect(normalizeEmbeddingBackfillLimit(SEARCH_EMBEDDING_BACKFILL_LIMIT + 10))
       .toBe(SEARCH_EMBEDDING_BACKFILL_LIMIT);
+  });
+
+  it("keeps document chunk embedding backfills document-owner scoped", () => {
+    const source = readFileSync(
+      path.join(process.cwd(), "lib", "documents", "embeddings.ts"),
+      "utf8",
+    );
+
+    expect(source).toContain(
+      'INNER JOIN "documents" d ON d."id" = dc."documentId"',
+    );
+    expect(source).toContain('AND d."ownerId" = ${ownerId}');
+    expect(source).toContain('UPDATE "document_chunks" dc');
+    expect(source).toContain('FROM "documents" d');
+    expect(source).toContain('AND d."id" = dc."documentId"');
   });
 });

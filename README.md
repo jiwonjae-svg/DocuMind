@@ -73,6 +73,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Document processing status writes remain owner-scoped.
 - OpenAI embeddings stored in PostgreSQL with pgvector.
 - Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
+- Document-specific embedding backfills and embedding writes recheck `Document.ownerId` before selecting or updating chunks.
 - Empty searches skip query embedding when the signed-in user has no searchable ready chunks.
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
@@ -347,7 +348,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, unsafe answer character normalization, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, bounded provider response parsing and answer response extraction, and timed-out answer retries.
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records, including owner-scoped document link verification.
-- `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed and oversized embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
+- `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed and oversized embedding response handling, request timeout handling, pgvector formatting, bounded search-time embedding backfill, and document-owner-scoped chunk embedding updates.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, expired bucket cleanup, and active bucket cap behavior.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded/control-character-normalized snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries and stored-file size checks before extraction.
@@ -468,6 +469,7 @@ After upload, documents are processed server-side:
 - Chunk metadata stores character offsets, original filename, MIME type, and document title.
 - Chunk embeddings are generated server-side with the OpenAI embeddings API and stored in PostgreSQL using pgvector.
 - Existing chunk embeddings are skipped when backfilling missing embeddings.
+- Embedding backfills and embedding writes recheck the owning document row before selecting or updating chunks.
 - Status changes to `READY` when chunks and embeddings are stored.
 - Status changes to `FAILED` with a processing error when extraction fails or no text is found.
 - Processing audit logs are written only after the owner-scoped status update succeeds.

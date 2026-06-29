@@ -23,12 +23,14 @@ async function findMissingDocumentChunkEmbeddings({
 }: EmbedMissingChunksOptions) {
   if (documentId) {
     return prisma.$queryRaw<EmbeddableChunk[]>(Prisma.sql`
-      SELECT "id", "content"
-      FROM "document_chunks"
-      WHERE "documentId" = ${documentId}
-        AND "ownerId" = ${ownerId}
-        AND "embedding" IS NULL
-      ORDER BY "chunkIndex" ASC
+      SELECT dc."id", dc."content"
+      FROM "document_chunks" dc
+      INNER JOIN "documents" d ON d."id" = dc."documentId"
+      WHERE dc."documentId" = ${documentId}
+        AND dc."ownerId" = ${ownerId}
+        AND d."ownerId" = ${ownerId}
+        AND dc."embedding" IS NULL
+      ORDER BY dc."chunkIndex" ASC
     `);
   }
 
@@ -74,15 +76,18 @@ async function updateChunkEmbedding({
   const embeddingVector = toPgVector(embedding);
 
   return prisma.$executeRaw(Prisma.sql`
-    UPDATE "document_chunks"
+    UPDATE "document_chunks" dc
     SET
       "embedding" = ${embeddingVector}::vector,
       "embeddingModel" = ${model},
       "embeddedAt" = NOW(),
       "updatedAt" = NOW()
-    WHERE "id" = ${chunkId}
-      AND "ownerId" = ${ownerId}
-      AND "embedding" IS NULL
+    FROM "documents" d
+    WHERE dc."id" = ${chunkId}
+      AND dc."ownerId" = ${ownerId}
+      AND dc."embedding" IS NULL
+      AND d."id" = dc."documentId"
+      AND d."ownerId" = ${ownerId}
   `);
 }
 
