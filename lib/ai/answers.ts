@@ -13,6 +13,8 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_ANSWER_OUTPUT_TOKENS = 1600;
 export const MAX_GROUNDED_ANSWER_CHARS = 8_000;
 const TRANSIENT_STATUS_CODES = new Set([408, 409, 429, 500, 502, 503, 504]);
+const unsafeAnswerCharacters =
+  /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\p{Cf}]+/gu;
 
 type FetchLike = typeof fetch;
 
@@ -196,6 +198,16 @@ function normalizeCitationIndexes(value: unknown, sourceCount: number) {
   return Array.from(new Set(indexes));
 }
 
+export function normalizeGroundedAnswerText(answer: string) {
+  return answer
+    .replace(/\r\n?/g, "\n")
+    .replace(unsafeAnswerCharacters, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
 export function parseGroundedAnswerPayload(
   text: string,
   sourceCount: number,
@@ -219,7 +231,9 @@ export function parseGroundedAnswerPayload(
   }
 
   const answer =
-    typeof parsed.answer === "string" ? parsed.answer.trim() : "";
+    typeof parsed.answer === "string"
+      ? normalizeGroundedAnswerText(parsed.answer)
+      : "";
 
   if (!answer) {
     throw new AnswerApiError("OpenAI answer response did not include an answer.");

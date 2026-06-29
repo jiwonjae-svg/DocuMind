@@ -51,6 +51,23 @@ describe("grounded answer generation", () => {
     });
   });
 
+  it("removes unsafe control and format characters from answer text", () => {
+    const parsed = parseGroundedAnswerPayload(
+      JSON.stringify({
+        answer: "Manager\r\nreview\u202erequired\u0000before launch.",
+        citationIndexes: [1],
+        insufficientInformation: false,
+      }),
+      1,
+    );
+
+    expect(parsed).toEqual({
+      answer: "Manager\nreview required before launch.",
+      citationIndexes: [1],
+      insufficientInformation: false,
+    });
+  });
+
   it("rejects oversized grounded answer text before persistence", () => {
     expect(() =>
       parseGroundedAnswerPayload(
