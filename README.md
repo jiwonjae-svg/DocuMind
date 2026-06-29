@@ -176,7 +176,7 @@ flowchart LR
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
 - Production Docker image runs the Next.js app as a non-root `nextjs` user
 - GitHub Actions CI for lint, tests, and build
-- Optional local bootstrap user seed script
+- Optional local bootstrap user seed script with bounded credentials and production safeguards
 - Health check route at `/api/health`
 - Local environment example in `.env.example`
 
@@ -260,7 +260,7 @@ Optionally seed a local bootstrap user:
 npm run prisma:seed
 ```
 
-The seed script is optional because users can now create accounts at `/signup`. If `npm run prisma:seed` is run with `NODE_ENV=production`, `SEED_USER_PASSWORD` must be explicitly set to a non-default value or the seed script will fail.
+The seed script is optional because users can now create accounts at `/signup`. Seed credentials use the same bounded-email/password posture as app authentication. If `npm run prisma:seed` is run with `NODE_ENV=production`, `SEED_USER_PASSWORD` must be explicitly set to a non-default value or the seed script will fail. Seed audit/log output avoids writing the raw bootstrap email.
 
 Run the development server:
 
@@ -367,7 +367,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
 - `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, cross-origin opener/resource policies, disabled powered-by header, and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker and Git ignore rules exclude secrets and generated output.
-- `tests/seed-policy.test.ts`: production seed runs reject the documented default bootstrap password.
+- `tests/seed-policy.test.ts`: production seed runs reject the documented default bootstrap password, validates seed email/password bounds, and avoids raw seed email audit/log output.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped, and Auth.js redirects are allowlisted to expected same-origin paths while rejecting external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials, email control/format-character rejection, auth display names, and profile image URLs are normalized and bounded before use.
@@ -422,7 +422,7 @@ Recommended local verification flow:
 5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
 6. Review owner-scoped audit log entries for your activity.
 
-The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use.
+The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use. Seed credentials are bounded and normalized; production seeding rejects the documented default password.
 
 ## Audit Logs
 

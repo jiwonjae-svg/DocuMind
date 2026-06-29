@@ -45,7 +45,6 @@ async function main() {
     },
     select: {
       id: true,
-      email: true,
     },
   });
 
@@ -56,13 +55,13 @@ async function main() {
       resourceType: "User",
       resourceId: user.id,
       metadata: {
-        email: user.email,
+        method: "seed",
       },
     },
   });
 
   await prisma.$disconnect();
-  console.log(`Seeded bootstrap user: ${user.email}`);
+  console.log("Seeded bootstrap user.");
 }
 
 main().catch((error) => {
