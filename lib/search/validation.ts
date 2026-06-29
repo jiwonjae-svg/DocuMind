@@ -1,6 +1,8 @@
 export const DEFAULT_SEARCH_LIMIT = 5;
 export const MAX_SEARCH_LIMIT = 10;
 export const MAX_SEARCH_QUERY_LENGTH = 1000;
+const unsafeSearchQueryCharacters =
+  /[\u0000-\u001f\u007f-\u009f\p{Cf}]+/gu;
 
 export function normalizeSearchQuery(query: unknown) {
   if (typeof query !== "string") {
@@ -8,7 +10,7 @@ export function normalizeSearchQuery(query: unknown) {
   }
 
   const normalizedQuery = query
-    .replace(/[\u0000-\u001f\u007f-\u009f]+/g, " ")
+    .replace(unsafeSearchQueryCharacters, " ")
     .replace(/\s+/g, " ")
     .trim();
 

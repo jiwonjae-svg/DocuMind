@@ -57,7 +57,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
 - Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, cross-origin opener/resource policies, disabled framework powered-by header, and private `no-store` caching headers for API responses.
 - Bounded JSON body parsing and `application/json` content-type enforcement for search, ask, and agent tool endpoints.
-- Search and ask text inputs are normalized to remove control characters before embedding, persistence, and audit metadata length calculation.
+- Search and ask text inputs are normalized to remove control and Unicode format characters before embedding, persistence, and audit metadata length calculation.
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts, with aggregate denial short-circuiting before new client/email buckets are created.
 - Per-client, per-email, and aggregate in-memory rate limiting for account creation, with aggregate denial short-circuiting before new client buckets are created.
 - Per-user in-memory rate limiting for document uploads before multipart parsing and document deletes before delete lookup.
@@ -144,7 +144,7 @@ flowchart LR
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked
 - Security headers, Content Security Policy without production `unsafe-eval`, cross-origin opener/resource policies, disabled Next.js powered-by header, HSTS, and private `no-store` caching headers on API routes
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
-- Control-character normalization for search and ask inputs before AI-backed work or question persistence
+- Control/format-character normalization for search and ask inputs before AI-backed work or question persistence
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Multipart content-type enforcement and parse-error handling for document uploads
 - Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
@@ -355,7 +355,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text and PDF page count limits are enforced before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
 - `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text and AI model avoidance for audit metadata.
-- `tests/search-validation.test.ts`: semantic search query normalization, control-character stripping, and limit validation.
+- `tests/search-validation.test.ts`: semantic search query normalization, control/format-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.

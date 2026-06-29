@@ -14,10 +14,12 @@ describe("search validation", () => {
     );
   });
 
-  it("removes control characters from search and ask inputs", () => {
+  it("removes control and format characters from search and ask inputs", () => {
     expect(
-      normalizeSearchQuery("policy\u0000launch\u007fnotes\u0085owner"),
-    ).toBe("policy launch notes owner");
+      normalizeSearchQuery(
+        "policy\u0000launch\u007fnotes\u0085owner\u202eapproval\u200bflow",
+      ),
+    ).toBe("policy launch notes owner approval flow");
   });
 
   it("rejects invalid search queries", () => {
