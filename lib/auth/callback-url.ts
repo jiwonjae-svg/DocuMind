@@ -6,8 +6,21 @@ function isDashboardPath(pathname: string) {
   return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 }
 
+function isAuthRedirectPath(pathname: string) {
+  return (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    isDashboardPath(pathname)
+  );
+}
+
 function hasEncodedPathSeparator(pathname: string) {
   return /%2f|%5c/i.test(pathname);
+}
+
+function hasUnsafeRedirectCharacters(value: string) {
+  return value.includes("\\") || /[\u0000-\u001f\u007f]/.test(value);
 }
 
 export function normalizeLoginCallbackUrl(value: unknown) {
@@ -21,8 +34,7 @@ export function normalizeLoginCallbackUrl(value: unknown) {
     !callbackUrl ||
     !callbackUrl.startsWith("/") ||
     callbackUrl.startsWith("//") ||
-    callbackUrl.includes("\\") ||
-    /[\u0000-\u001f\u007f]/.test(callbackUrl)
+    hasUnsafeRedirectCharacters(callbackUrl)
   ) {
     return DEFAULT_LOGIN_CALLBACK_URL;
   }
@@ -41,5 +53,44 @@ export function normalizeLoginCallbackUrl(value: unknown) {
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
     return DEFAULT_LOGIN_CALLBACK_URL;
+  }
+}
+
+function buildAuthRedirectUrl(baseUrl: string, path: string) {
+  try {
+    return new URL(path, baseUrl).toString();
+  } catch {
+    return DEFAULT_LOGIN_CALLBACK_URL;
+  }
+}
+
+export function normalizeAuthRedirectUrl({
+  baseUrl,
+  url,
+}: {
+  baseUrl: string;
+  url: string;
+}) {
+  const fallbackUrl = buildAuthRedirectUrl(baseUrl, DEFAULT_LOGIN_CALLBACK_URL);
+
+  if (!url.trim() || hasUnsafeRedirectCharacters(url)) {
+    return fallbackUrl;
+  }
+
+  try {
+    const base = new URL(baseUrl);
+    const parsed = new URL(url, base);
+
+    if (
+      parsed.origin !== base.origin ||
+      !isAuthRedirectPath(parsed.pathname) ||
+      hasEncodedPathSeparator(parsed.pathname)
+    ) {
+      return fallbackUrl;
+    }
+
+    return parsed.toString();
+  } catch {
+    return fallbackUrl;
   }
 }

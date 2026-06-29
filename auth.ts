@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import type { Provider } from "next-auth/providers";
+import { normalizeAuthRedirectUrl } from "@/lib/auth/callback-url";
 import {
   normalizeEmailCredential,
   normalizePasswordCredential,
@@ -110,6 +111,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     process.env.NODE_ENV === "development",
   providers: authProviders,
   callbacks: {
+    redirect({ baseUrl, url }) {
+      return normalizeAuthRedirectUrl({ baseUrl, url });
+    },
     async signIn({ account, profile, user }) {
       if (!account || account.provider === "credentials") {
         return true;

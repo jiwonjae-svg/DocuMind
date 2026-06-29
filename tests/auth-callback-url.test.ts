@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_LOGIN_CALLBACK_URL,
+  normalizeAuthRedirectUrl,
   normalizeLoginCallbackUrl,
 } from "../lib/auth/callback-url";
+
+const baseUrl = "https://documind.example";
 
 describe("login callback URL normalization", () => {
   it("allows app-relative callback URLs", () => {
@@ -51,5 +54,57 @@ describe("login callback URL normalization", () => {
     );
     expect(normalizeLoginCallbackUrl("")).toBe(DEFAULT_LOGIN_CALLBACK_URL);
     expect(normalizeLoginCallbackUrl(null)).toBe(DEFAULT_LOGIN_CALLBACK_URL);
+  });
+
+  it("allows only expected same-origin Auth.js redirect targets", () => {
+    expect(normalizeAuthRedirectUrl({ baseUrl, url: "/" })).toBe(
+      `${baseUrl}/`,
+    );
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: "/dashboard/documents?uploaded=1#latest",
+      }),
+    ).toBe(`${baseUrl}/dashboard/documents?uploaded=1#latest`);
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: `${baseUrl}/login?error=OAuthCallback`,
+      }),
+    ).toBe(`${baseUrl}/login?error=OAuthCallback`);
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: `${baseUrl}/signup?callbackUrl=%2Fdashboard`,
+      }),
+    ).toBe(`${baseUrl}/signup?callbackUrl=%2Fdashboard`);
+  });
+
+  it("rejects external or unexpected Auth.js redirect targets", () => {
+    const fallbackUrl = `${baseUrl}${DEFAULT_LOGIN_CALLBACK_URL}`;
+
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: "https://evil.example/dashboard",
+      }),
+    ).toBe(fallbackUrl);
+    expect(normalizeAuthRedirectUrl({ baseUrl, url: "/api/auth/session" }))
+      .toBe(fallbackUrl);
+    expect(normalizeAuthRedirectUrl({ baseUrl, url: "/documents" })).toBe(
+      fallbackUrl,
+    );
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: "/dashboard/%2F%2Fevil.example",
+      }),
+    ).toBe(fallbackUrl);
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: "/dashboard\\evil",
+      }),
+    ).toBe(fallbackUrl);
   });
 });

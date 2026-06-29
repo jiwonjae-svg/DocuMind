@@ -42,6 +42,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 
 - Auth.js email/password signup, credentials sign-in, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
+- Auth.js redirect callbacks are constrained to the landing page, login/signup pages, and dashboard paths.
 - Public signup is protected with same-origin checks, bounded JSON parsing, password hashing, and in-memory client/email/aggregate rate limiting.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
@@ -129,7 +130,7 @@ flowchart LR
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
 - Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
-- App-relative login callback URL normalization
+- App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup input validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
 - PostgreSQL support through Prisma
@@ -363,7 +364,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/deployment-hygiene.test.ts`: Docker and Git ignore rules exclude secrets and generated output.
 - `tests/seed-policy.test.ts`: production seed runs reject the documented default bootstrap password.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
-- `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
+- `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped, and Auth.js redirects are allowlisted to expected same-origin paths while rejecting external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
