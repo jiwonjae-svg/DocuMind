@@ -19,7 +19,7 @@ describe("login audit data", () => {
     const auditData = buildUserLoginAuditData({
       request: requestWithHeaders({
         "user-agent": "DocuMind reviewer browser",
-        "x-forwarded-for": " 203.0.113.42, 10.0.0.1 ",
+        "x-forwarded-for": " 203.0.113.42 ",
       }),
       userId: "user-1",
     });
@@ -51,7 +51,7 @@ describe("login audit data", () => {
     const auditData = buildUserLoginFailureAuditData({
       request: requestWithHeaders({
         "user-agent": "DocuMind reviewer browser",
-        "x-forwarded-for": " 203.0.113.42, 10.0.0.1 ",
+        "x-forwarded-for": " 203.0.113.42 ",
       }),
       userId: "user-1",
     });

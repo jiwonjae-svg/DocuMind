@@ -29,13 +29,22 @@ function requestWithRawHeaderValues(headers: Record<string, string>): RequestWit
 }
 
 describe("request metadata helpers", () => {
-  it("reads the first forwarded IP address", () => {
+  it("reads a single forwarded IP address", () => {
+    const request = requestWithHeaders({
+      "x-forwarded-for": " 203.0.113.10 ",
+      "x-real-ip": "198.51.100.5",
+    });
+
+    expect(readIpAddress(request)).toBe("203.0.113.10");
+  });
+
+  it("rejects multi-hop forwarded IP chains before audit persistence", () => {
     const request = requestWithHeaders({
       "x-forwarded-for": " 203.0.113.10, 10.0.0.2 ",
       "x-real-ip": "198.51.100.5",
     });
 
-    expect(readIpAddress(request)).toBe("203.0.113.10");
+    expect(readIpAddress(request)).toBe("198.51.100.5");
   });
 
   it("falls back to x-real-ip when forwarded IP is empty", () => {

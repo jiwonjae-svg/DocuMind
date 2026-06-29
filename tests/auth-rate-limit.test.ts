@@ -150,6 +150,14 @@ describe("credential login rate limiting", () => {
     expect(readLoginClientIdentifier(headers)).toBe("unknown");
   });
 
+  it("does not trust multi-hop forwarded IP values for client rate limit keys", () => {
+    const headers = new Headers({
+      "x-forwarded-for": " 203.0.113.10, 10.0.0.2 ",
+    });
+
+    expect(readLoginClientIdentifier(headers)).toBe("unknown");
+  });
+
   it("uses a valid real IP fallback when forwarded IP metadata is malformed", () => {
     const headers = new Headers({
       "x-forwarded-for": " attacker-controlled ",

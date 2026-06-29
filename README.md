@@ -318,7 +318,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text and AI model avoidance for audit metadata.
 - `tests/search-validation.test.ts`: semantic search query normalization, control-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
-- `tests/tools-response.test.ts`: bounded, control-character-normalized, valid-IP-filtered request metadata captured for audit logs.
+- `tests/tools-response.test.ts`: bounded, control-character-normalized, single-hop valid-IP-filtered request metadata captured for audit logs.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
@@ -329,8 +329,8 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped and reject external or malformed callback URLs.
 - `tests/auth-credentials.test.ts`: login credentials are normalized and bounded before verification.
-- `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
-- `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded and valid-IP-filtered request metadata without storing submitted credential values.
+- `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
+- `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, single-hop valid-IP-filtered request metadata without storing submitted credential values.
 
 Run the suite with:
 
@@ -342,7 +342,7 @@ Local verification on 2026-06-29:
 
 ```text
 Test Files  29 passed (29)
-Tests       167 passed (167)
+Tests       169 passed (169)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
