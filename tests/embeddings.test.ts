@@ -13,6 +13,7 @@ import {
   normalizeEmbeddingBackfillLimit,
   SEARCH_EMBEDDING_BACKFILL_LIMIT,
 } from "../lib/documents/embedding-limits";
+import { AI_JSON_RESPONSE_LIMIT_BYTES } from "../lib/ai/json-response";
 
 function buildEmbedding() {
   return Array.from({ length: EMBEDDING_DIMENSIONS }, (_, index) => index / 1000);
@@ -80,6 +81,27 @@ describe("OpenAI embeddings", () => {
     await expect(result).rejects.toThrow(
       "OpenAI embedding response did not contain valid JSON.",
     );
+
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry oversized successful embedding response bodies", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        headers: {
+          "content-length": String(AI_JSON_RESPONSE_LIMIT_BYTES + 1),
+        },
+        status: 200,
+      }),
+    ) as unknown as typeof fetch;
+
+    await expect(
+      createEmbedding("hello", {
+        apiKey: "test-key",
+        fetchImpl,
+        retryBaseDelayMs: 0,
+      }),
+    ).rejects.toThrow("OpenAI embedding response exceeded maximum size.");
 
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });

@@ -4,6 +4,11 @@ import {
   createOpenAiRequestTimeout,
   isAbortError,
 } from "./request-timeout";
+import {
+  AiJsonResponseTooLargeError,
+  readAiProviderErrorMessage,
+  readBoundedAiJsonResponse,
+} from "./json-response";
 
 export const DEFAULT_ANSWER_MODEL = "gpt-5-mini";
 export const INSUFFICIENT_INFORMATION_ANSWER =
@@ -110,11 +115,11 @@ function sleep(ms: number) {
 
 async function parseErrorMessage(response: Response) {
   try {
-    const body = await response.json();
-    const message = body?.error?.message;
+    const body = await readBoundedAiJsonResponse(response);
+    const message = readAiProviderErrorMessage(body);
 
-    if (typeof message === "string" && message.trim()) {
-      return message.trim();
+    if (message) {
+      return message;
     }
   } catch {
     // Ignore JSON parse errors and fall back to the HTTP status text.
@@ -397,8 +402,12 @@ export function extractResponseText(body: ResponsesApiBody) {
 
 async function parseAnswerResponse(response: Response) {
   try {
-    return (await response.json()) as ResponsesApiBody;
-  } catch {
+    return (await readBoundedAiJsonResponse(response)) as ResponsesApiBody;
+  } catch (error) {
+    if (error instanceof AiJsonResponseTooLargeError) {
+      throw new AnswerApiError("OpenAI answer response exceeded maximum size.");
+    }
+
     throw new AnswerApiError(
       "OpenAI answer response did not contain valid JSON.",
     );

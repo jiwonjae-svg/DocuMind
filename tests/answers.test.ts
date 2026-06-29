@@ -12,6 +12,7 @@ import {
   MAX_GROUNDED_ANSWER_CHARS,
   parseGroundedAnswerPayload,
 } from "../lib/ai/answers";
+import { AI_JSON_RESPONSE_LIMIT_BYTES } from "../lib/ai/json-response";
 
 const sources = [
   {
@@ -284,6 +285,29 @@ describe("grounded answer generation", () => {
     await expect(result).rejects.toThrow(
       "OpenAI answer response did not contain valid JSON.",
     );
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry oversized successful answer response bodies", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        headers: {
+          "content-length": String(AI_JSON_RESPONSE_LIMIT_BYTES + 1),
+        },
+        status: 200,
+      }),
+    ) as unknown as typeof fetch;
+
+    await expect(
+      createGroundedAnswer({
+        apiKey: "test-key",
+        fetchImpl,
+        question: "What approval step is required?",
+        retryBaseDelayMs: 0,
+        sources,
+      }),
+    ).rejects.toThrow("OpenAI answer response exceeded maximum size.");
+
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 

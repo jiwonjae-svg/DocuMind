@@ -4,6 +4,11 @@ import {
   createOpenAiRequestTimeout,
   isAbortError,
 } from "./request-timeout";
+import {
+  AiJsonResponseTooLargeError,
+  readAiProviderErrorMessage,
+  readBoundedAiJsonResponse,
+} from "./json-response";
 
 export const EMBEDDING_DIMENSIONS = 1536;
 export const DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
@@ -87,11 +92,11 @@ function validateEmbedding(embedding: unknown): number[] {
 
 async function parseErrorMessage(response: Response) {
   try {
-    const body = await response.json();
-    const message = body?.error?.message;
+    const body = await readBoundedAiJsonResponse(response);
+    const message = readAiProviderErrorMessage(body);
 
-    if (typeof message === "string" && message.trim()) {
-      return message.trim();
+    if (message) {
+      return message;
     }
   } catch {
     // Ignore JSON parse errors and fall back to the HTTP status text.
@@ -102,8 +107,14 @@ async function parseErrorMessage(response: Response) {
 
 async function parseEmbeddingResponse(response: Response) {
   try {
-    return (await response.json()) as EmbeddingsResponse;
-  } catch {
+    return (await readBoundedAiJsonResponse(response)) as EmbeddingsResponse;
+  } catch (error) {
+    if (error instanceof AiJsonResponseTooLargeError) {
+      throw new EmbeddingApiError(
+        "OpenAI embedding response exceeded maximum size.",
+      );
+    }
+
     throw new EmbeddingApiError(
       "OpenAI embedding response did not contain valid JSON.",
     );
