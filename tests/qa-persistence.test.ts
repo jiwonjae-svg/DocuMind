@@ -29,6 +29,14 @@ describe("grounded answer persistence", () => {
               return { id: "audit-1" };
             },
           },
+          document: {
+            findFirst: async (args) => {
+              calls.push("document");
+              createdPayloads.push(args);
+
+              return { id: "document-1" };
+            },
+          },
           question: {
             create: async (args) => {
               calls.push("question");
@@ -75,8 +83,23 @@ describe("grounded answer persistence", () => {
       answerId: "answer-1",
       questionId: "question-1",
     });
-    expect(calls).toEqual(["transaction", "question", "answer", "auditLog"]);
+    expect(calls).toEqual([
+      "transaction",
+      "document",
+      "question",
+      "answer",
+      "auditLog",
+    ]);
     expect(createdPayloads).toMatchObject([
+      {
+        select: {
+          id: true,
+        },
+        where: {
+          id: "document-1",
+          ownerId: "user-1",
+        },
+      },
       {
         data: {
           documentId: "document-1",
@@ -108,9 +131,90 @@ describe("grounded answer persistence", () => {
         },
       },
     ]);
-    expect(JSON.stringify(createdPayloads[2])).not.toContain(
+    expect(JSON.stringify(createdPayloads[3])).not.toContain(
       "What is the private roadmap?",
     );
-    expect(JSON.stringify(createdPayloads[2])).not.toContain("test-model");
+    expect(JSON.stringify(createdPayloads[3])).not.toContain("test-model");
+  });
+
+  it("does not persist a document link that is not owned by the user", async () => {
+    const createdPayloads: unknown[] = [];
+    const db: GroundedAnswerPersistenceDb = {
+      $transaction: async (callback) =>
+        callback({
+          answer: {
+            create: async (args) => {
+              createdPayloads.push(args);
+
+              return { id: "answer-1" };
+            },
+          },
+          auditLog: {
+            create: async (args) => {
+              createdPayloads.push(args);
+
+              return { id: "audit-1" };
+            },
+          },
+          document: {
+            findFirst: async (args) => {
+              createdPayloads.push(args);
+
+              return null;
+            },
+          },
+          question: {
+            create: async (args) => {
+              createdPayloads.push(args);
+
+              return { id: "question-1" };
+            },
+          },
+        }),
+    };
+
+    await persistGroundedAnswer({
+      action: "question_ask",
+      db,
+      ipAddress: null,
+      ownerId: "user-1",
+      question: "What is the private roadmap?",
+      result: {
+        answer: "Use the internal launch checklist.",
+        citations: [],
+        insufficientInformation: false,
+        matchedSnippets: [],
+        model: "test-model",
+        primaryDocumentId: "other-user-document",
+      },
+      userAgent: null,
+    });
+
+    expect(createdPayloads).toMatchObject([
+      {
+        where: {
+          id: "other-user-document",
+          ownerId: "user-1",
+        },
+      },
+      {
+        data: {
+          documentId: null,
+          ownerId: "user-1",
+        },
+      },
+      {
+        data: {
+          documentId: null,
+          ownerId: "user-1",
+        },
+      },
+      {
+        data: {
+          actorId: "user-1",
+          resourceType: "Question",
+        },
+      },
+    ]);
   });
 });

@@ -75,7 +75,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Owner-scoped semantic search over ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
-- Question, answer, and ask audit records are persisted in a single database transaction.
+- Question, answer, and ask audit records are persisted in a single database transaction, with document links rechecked against the owner before persistence.
 - OpenAI embedding and answer requests use bounded timeouts with retry handling for transient failures.
 - OpenAI provider JSON responses are read with a byte limit before parsing.
 - OpenAI answer response extraction is bounded by text size and nested traversal limits before persistence.
@@ -344,7 +344,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text while allowing known rate-limit notices.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, unsafe answer character normalization, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, bounded provider response parsing and answer response extraction, and timed-out answer retries.
-- `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records.
+- `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records, including owner-scoped document link verification.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed and oversized embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, and expired bucket cleanup.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded/control-character-normalized snippets, and non-empty summary context selection.
@@ -533,6 +533,7 @@ The RAG flow is:
 - The response includes the answer, citations, and matched snippets.
 - The app stores `Question` and `Answer` records and writes a `question_ask` audit log.
 - The question, answer, and ask audit log are saved in one transaction to avoid partial persistence.
+- The optional persisted document link is rechecked with `ownerId` before it is saved.
 
 Response shape:
 

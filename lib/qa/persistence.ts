@@ -12,6 +12,17 @@ type TransactionClient = {
   auditLog: {
     create: (args: unknown) => Promise<unknown>;
   };
+  document: {
+    findFirst(args: {
+      select: {
+        id: true;
+      };
+      where: {
+        id: string;
+        ownerId: string;
+      };
+    }): Promise<{ id: string } | null>;
+  };
   question: {
     create: (args: unknown) => Promise<CreateResult>;
   };
@@ -43,9 +54,22 @@ export async function persistGroundedAnswer({
   userAgent,
 }: PersistGroundedAnswerInput) {
   return db.$transaction(async (transaction) => {
+    const ownedDocument = result.primaryDocumentId
+      ? await transaction.document.findFirst({
+          where: {
+            id: result.primaryDocumentId,
+            ownerId,
+          },
+          select: {
+            id: true,
+          },
+        })
+      : null;
+    const documentId = ownedDocument?.id ?? null;
+
     const questionRecord = await transaction.question.create({
       data: {
-        documentId: result.primaryDocumentId,
+        documentId,
         ownerId,
         text: question,
       },
@@ -55,7 +79,7 @@ export async function persistGroundedAnswer({
     });
     const answerRecord = await transaction.answer.create({
       data: {
-        documentId: result.primaryDocumentId,
+        documentId,
         ownerId,
         questionId: questionRecord.id,
         text: result.answer,
