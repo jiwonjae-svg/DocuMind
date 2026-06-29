@@ -23,6 +23,7 @@ import {
   checkRateLimit,
   clearRateLimitBuckets,
   getRateLimitBucketCount,
+  MAX_RATE_LIMIT_BUCKETS,
   pruneExpiredRateLimitBuckets,
 } from "../lib/rate-limit";
 
@@ -87,6 +88,66 @@ describe("rate limiting", () => {
 
     pruneExpiredRateLimitBuckets(60_999);
 
+    expect(getRateLimitBucketCount()).toBe(1);
+  });
+
+  it("denies new buckets when the active bucket cap is reached", () => {
+    const now = () => 1000;
+
+    expect(
+      checkRateLimit("user-1", {
+        limit: 1,
+        maxBuckets: 2,
+        now,
+        windowMs: 60_000,
+      }).allowed,
+    ).toBe(true);
+    expect(
+      checkRateLimit("user-2", {
+        limit: 1,
+        maxBuckets: 2,
+        now,
+        windowMs: 60_000,
+      }).allowed,
+    ).toBe(true);
+
+    const rateLimit = checkRateLimit("user-3", {
+      limit: 1,
+      maxBuckets: 2,
+      now,
+      windowMs: 60_000,
+    });
+
+    expect(rateLimit).toEqual({
+      allowed: false,
+      limit: 1,
+      remaining: 0,
+      resetAt: 61_000,
+      retryAfterSeconds: 60,
+    });
+    expect(getRateLimitBucketCount()).toBe(2);
+    expect(MAX_RATE_LIMIT_BUCKETS).toBeGreaterThan(2);
+  });
+
+  it("continues to evaluate existing buckets when the active bucket cap is reached", () => {
+    const now = () => 1000;
+
+    checkRateLimit("user-1", {
+      limit: 2,
+      maxBuckets: 1,
+      now,
+      windowMs: 60_000,
+    });
+
+    const rateLimit = checkRateLimit("user-1", {
+      limit: 2,
+      maxBuckets: 1,
+      now,
+      windowMs: 60_000,
+    });
+
+    expect(rateLimit.allowed).toBe(true);
+    expect(rateLimit.remaining).toBe(0);
     expect(getRateLimitBucketCount()).toBe(1);
   });
 

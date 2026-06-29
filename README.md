@@ -61,6 +61,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Per-client, per-email, and aggregate in-memory rate limiting for credentials sign-in attempts, with aggregate denial short-circuiting before new client/email buckets are created.
 - Per-client, per-email, and aggregate in-memory rate limiting for account creation, with aggregate denial short-circuiting before new client buckets are created.
 - Per-user in-memory rate limiting for document uploads before multipart parsing and document deletes before delete lookup.
+- The shared in-memory rate-limit helper caps active bucket creation to bound process memory during abusive key spray attempts.
 - Unknown-user sign-in attempts still run a dummy password verification path to reduce email enumeration timing signals.
 - Failed credentials sign-in attempts write bounded audit records without storing submitted email or password values.
 - Signup, OAuth profile, and session display values are bounded and stripped of control/format characters, and OAuth profile images must be HTTPS URLs before storage or display.
@@ -347,7 +348,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, unsafe answer character normalization, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, bounded provider response parsing and answer response extraction, and timed-out answer retries.
 - `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records, including owner-scoped document link verification.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed and oversized embedding response handling, request timeout handling, pgvector formatting, and bounded search-time embedding backfill.
-- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, and expired bucket cleanup.
+- `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, expired bucket cleanup, and active bucket cap behavior.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded/control-character-normalized snippets, and non-empty summary context selection.
 - `tests/document-extraction.test.ts`: text/PDF extraction boundaries and stored-file size checks before extraction.
 - `tests/document-extraction-limits.test.ts`: PDF page counts are checked before text extraction and parser resources are released on rejection.
@@ -663,7 +664,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 ## Known Limitations
 
 - Local file storage is intended for development; production should use object storage such as S3 or GCS.
-- AI-backed search, answer, signup, and credentials sign-in endpoints use in-memory rate limiters, which are not shared across multiple app instances.
+- AI-backed search, answer, signup, and credentials sign-in endpoints use bounded in-memory rate limiters, which are not shared across multiple app instances.
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
