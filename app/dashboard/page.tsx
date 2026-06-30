@@ -32,6 +32,11 @@ const workspaceCardMeta = [
     icon: "team",
     accent: "blue",
   },
+  {
+    href: "/dashboard/admin/teams",
+    icon: "team",
+    accent: "violet",
+  },
 ] as const;
 
 const roadmapMeta = [
@@ -96,7 +101,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className={`${ui.container} py-8`}>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {copy.dashboard.cards.map(([title, body, action], index) => {
             const card = workspaceCardMeta[index];
 

@@ -2,8 +2,11 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "../prisma";
 
 export const ORGANIZATION_ADMIN_ROLES = ["OWNER", "ADMIN"] as const;
+export const ASSIGNABLE_ORGANIZATION_ROLES = ["ADMIN", "MEMBER"] as const;
 export const TEAM_MANAGER_ROLES = ["MANAGER"] as const;
+export const ASSIGNABLE_TEAM_ROLES = ["MANAGER", "MEMBER", "VIEWER"] as const;
 export const DEFAULT_TEAM_NAME = "General";
+export const MAX_TEAM_NAME_LENGTH = 80;
 
 type OrganizationRoleValue = (typeof ORGANIZATION_ADMIN_ROLES)[number] | "MEMBER";
 type TeamRoleValue = (typeof TEAM_MANAGER_ROLES)[number] | "MEMBER" | "VIEWER";
@@ -29,6 +32,45 @@ function normalizeWorkspaceName(value: string) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 80);
+}
+
+export function normalizeTeamName(value: unknown) {
+  const name =
+    typeof value === "string"
+      ? value
+          .normalize("NFC")
+          .replace(unsafeWorkspaceNameCharacters, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+      : "";
+
+  if (!name || name.length > MAX_TEAM_NAME_LENGTH) {
+    return null;
+  }
+
+  return name;
+}
+
+export function normalizeAssignableOrganizationRole(
+  value: unknown,
+): (typeof ASSIGNABLE_ORGANIZATION_ROLES)[number] | null {
+  return typeof value === "string" &&
+    ASSIGNABLE_ORGANIZATION_ROLES.includes(
+      value as (typeof ASSIGNABLE_ORGANIZATION_ROLES)[number],
+    )
+    ? (value as (typeof ASSIGNABLE_ORGANIZATION_ROLES)[number])
+    : null;
+}
+
+export function normalizeAssignableTeamRole(
+  value: unknown,
+): (typeof ASSIGNABLE_TEAM_ROLES)[number] | null {
+  return typeof value === "string" &&
+    ASSIGNABLE_TEAM_ROLES.includes(
+      value as (typeof ASSIGNABLE_TEAM_ROLES)[number],
+    )
+    ? (value as (typeof ASSIGNABLE_TEAM_ROLES)[number])
+    : null;
 }
 
 function readDefaultWorkspaceName({ email, name }: UserWorkspaceInput) {

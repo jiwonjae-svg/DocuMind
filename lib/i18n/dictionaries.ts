@@ -182,6 +182,7 @@ const en = {
       ["Grounded question answering", "Ask questions over retrieved chunks and review source citations.", "Ask questions"],
       ["Audit log review", "Review owner-scoped records for uploads, processing, questions, and agent tool usage.", "Review audit logs"],
       ["Organization audit", "Owners and admins can review recent activity across organization members.", "Review organization"],
+      ["Team RBAC", "Owners and admins can create teams and assign existing users to organization and team roles.", "Manage teams"],
     ],
     roadmap: [
       ["Team sharing workflows", "Add invitations and team-scoped document sharing beyond the current admin/audit foundation."],
@@ -358,6 +359,34 @@ const en = {
       VIEWER: "viewer",
     },
     unknownActor: "Unknown actor",
+  },
+  teamAdmin: {
+    addMemberBody:
+      "Add an existing DocuMind user to this organization and assign a team role. New users must sign up before they can be added.",
+    addMemberSubmit: "Assign member",
+    addMemberTitle: "Assign an existing user",
+    addingMember: "Assigning...",
+    body:
+      "Create teams and manage role assignments for existing users. Document access remains owner-scoped while team RBAC controls workspace administration.",
+    createTeamBody:
+      "Create a team inside this organization. The current admin is added as that team's manager.",
+    createTeamSubmit: "Create team",
+    createTeamTitle: "Create team",
+    creatingTeam: "Creating...",
+    currentTeams: "Current teams",
+    existingUsersOnly: "Users must create an account before an admin can assign them to a team.",
+    fallbackError: "Team RBAC update failed.",
+    memberEmail: "User email",
+    memberCount: "{count} members",
+    noTeams: "No teams yet. Create a team to start assigning roles.",
+    organizationRole: "Organization role",
+    successMemberAssigned: "Team member assigned.",
+    successTeamCreated: "Team created.",
+    team: "Team",
+    teamCount: "{count} teams",
+    teamName: "Team name",
+    teamRole: "Team role",
+    title: "Manage team RBAC",
   },
 };
 
@@ -541,6 +570,7 @@ const ko = {
       ["근거 기반 질문 답변", "검색된 청크를 기반으로 질문하고 출처 인용을 검토합니다.", "질문하기"],
       ["감사 로그 검토", "업로드, 처리, 질문, 에이전트 도구 사용 기록을 본인 범위에서 확인합니다.", "감사 로그 보기"],
       ["조직 감사", "소유자와 관리자는 조직 구성원의 최근 활동을 검토할 수 있습니다.", "조직 검토"],
+      ["팀 RBAC", "소유자와 관리자는 팀을 만들고 기존 사용자를 조직 및 팀 역할에 배정할 수 있습니다.", "팀 관리"],
     ],
     roadmap: [
       ["팀 공유 워크플로", "현재 관리자/감사 기반 위에 초대와 팀 범위 문서 공유를 추가합니다."],
@@ -715,6 +745,34 @@ const ko = {
       VIEWER: "뷰어",
     },
     unknownActor: "알 수 없는 사용자",
+  },
+  teamAdmin: {
+    addMemberBody:
+      "기존 DocuMind 사용자를 이 조직에 추가하고 팀 역할을 배정합니다. 새 사용자는 먼저 가입해야 합니다.",
+    addMemberSubmit: "멤버 배정",
+    addMemberTitle: "기존 사용자 배정",
+    addingMember: "배정 중...",
+    body:
+      "팀을 만들고 기존 사용자의 역할 배정을 관리합니다. 문서 접근은 소유자 범위를 유지하고, 팀 RBAC는 워크스페이스 관리를 제어합니다.",
+    createTeamBody:
+      "이 조직 안에 팀을 만듭니다. 현재 관리자는 해당 팀의 매니저로 추가됩니다.",
+    createTeamSubmit: "팀 생성",
+    createTeamTitle: "팀 생성",
+    creatingTeam: "생성 중...",
+    currentTeams: "현재 팀",
+    existingUsersOnly: "관리자가 팀에 배정하려면 사용자가 먼저 계정을 만들어야 합니다.",
+    fallbackError: "팀 RBAC 업데이트에 실패했습니다.",
+    memberEmail: "사용자 이메일",
+    memberCount: "{count}명",
+    noTeams: "아직 팀이 없습니다. 역할 배정을 시작하려면 팀을 만드세요.",
+    organizationRole: "조직 역할",
+    successMemberAssigned: "팀 멤버를 배정했습니다.",
+    successTeamCreated: "팀을 생성했습니다.",
+    team: "팀",
+    teamCount: "{count}개 팀",
+    teamName: "팀 이름",
+    teamRole: "팀 역할",
+    title: "팀 RBAC 관리",
   },
 };
 
@@ -898,6 +956,7 @@ const ja = {
       ["根拠付き質問応答", "取得チャンクに対して質問し、出典引用を確認します。", "質問する"],
       ["監査ログ確認", "アップロード、処理、質問、エージェントツール利用の記録を所有者スコープで確認します。", "監査ログを見る"],
       ["組織監査", "オーナーと管理者は組織メンバーの最近の活動を確認できます。", "組織を確認"],
+      ["チームRBAC", "オーナーと管理者はチームを作成し、既存ユーザーを組織ロールとチームロールに割り当てられます。", "チームを管理"],
     ],
     roadmap: [
       ["チーム共有ワークフロー", "現在の管理者/監査基盤の上に、招待とチームスコープ文書共有を追加します。"],
@@ -1072,6 +1131,34 @@ const ja = {
       VIEWER: "閲覧者",
     },
     unknownActor: "不明なユーザー",
+  },
+  teamAdmin: {
+    addMemberBody:
+      "既存のDocuMindユーザーをこの組織に追加し、チームロールを割り当てます。新規ユーザーは先に登録する必要があります。",
+    addMemberSubmit: "メンバーを割り当て",
+    addMemberTitle: "既存ユーザーを割り当て",
+    addingMember: "割り当て中...",
+    body:
+      "チームを作成し、既存ユーザーのロール割り当てを管理します。文書アクセスは所有者スコープのまま、チームRBACはワークスペース管理を制御します。",
+    createTeamBody:
+      "この組織内にチームを作成します。現在の管理者はそのチームのマネージャーとして追加されます。",
+    createTeamSubmit: "チームを作成",
+    createTeamTitle: "チーム作成",
+    creatingTeam: "作成中...",
+    currentTeams: "現在のチーム",
+    existingUsersOnly: "管理者がチームに割り当てるには、ユーザーが先にアカウントを作成する必要があります。",
+    fallbackError: "チームRBACの更新に失敗しました。",
+    memberEmail: "ユーザーメール",
+    memberCount: "{count}人",
+    noTeams: "まだチームはありません。ロール割り当てを始めるにはチームを作成してください。",
+    organizationRole: "組織ロール",
+    successMemberAssigned: "チームメンバーを割り当てました。",
+    successTeamCreated: "チームを作成しました。",
+    team: "チーム",
+    teamCount: "{count}チーム",
+    teamName: "チーム名",
+    teamRole: "チームロール",
+    title: "チームRBACを管理",
   },
 };
 

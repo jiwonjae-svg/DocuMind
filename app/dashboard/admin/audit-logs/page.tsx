@@ -125,6 +125,10 @@ export default async function AdminAuditLogsPage({
                 <Icon name="document" className="h-4 w-4 text-blue-700" />
                 {copy.common.documents}
               </Link>
+              <Link href="/dashboard/admin/teams" className={ui.secondaryButton}>
+                <Icon name="team" className="h-4 w-4 text-blue-700" />
+                {copy.teamAdmin.title}
+              </Link>
             </div>
           </div>
 

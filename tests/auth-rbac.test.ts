@@ -31,6 +31,9 @@ import {
   canManageTeam,
   createOwnedOrganizationForUser,
   ensureUserDefaultOrganization,
+  normalizeAssignableOrganizationRole,
+  normalizeAssignableTeamRole,
+  normalizeTeamName,
 } from "../lib/auth/rbac";
 
 describe("RBAC helpers", () => {
@@ -66,6 +69,24 @@ describe("RBAC helpers", () => {
     expect(canManageTeam("MANAGER")).toBe(true);
     expect(canManageTeam("MEMBER")).toBe(false);
     expect(canManageTeam("VIEWER")).toBe(false);
+  });
+
+  it("normalizes team RBAC management inputs", () => {
+    expect(normalizeTeamName("  Sales\u202e Enablement  ")).toBe(
+      "Sales Enablement",
+    );
+    expect(normalizeTeamName("")).toBeNull();
+    expect(normalizeTeamName("a".repeat(81))).toBeNull();
+
+    expect(normalizeAssignableOrganizationRole("ADMIN")).toBe("ADMIN");
+    expect(normalizeAssignableOrganizationRole("MEMBER")).toBe("MEMBER");
+    expect(normalizeAssignableOrganizationRole("OWNER")).toBeNull();
+    expect(normalizeAssignableOrganizationRole("admin")).toBeNull();
+
+    expect(normalizeAssignableTeamRole("MANAGER")).toBe("MANAGER");
+    expect(normalizeAssignableTeamRole("MEMBER")).toBe("MEMBER");
+    expect(normalizeAssignableTeamRole("VIEWER")).toBe("VIEWER");
+    expect(normalizeAssignableTeamRole("OWNER")).toBeNull();
   });
 
   it("builds organization audit log filters from member user IDs", () => {

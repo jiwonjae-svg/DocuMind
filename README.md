@@ -151,6 +151,7 @@ flowchart LR
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
+- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams and assigning existing users to organization and team roles
 - EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, and organization admin audit UI with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -185,6 +186,7 @@ flowchart LR
 - Password reset request, completion, and delivery-failure audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
+- Admin team-management API routes for creating teams and assigning existing users, with same-origin checks, bounded JSON parsing, role validation, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
@@ -453,7 +455,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  41 passed (41)
-Tests       248 passed (248)
+Tests       249 passed (249)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -513,6 +515,14 @@ Organization owners and admins can also review organization member activity at [
 - It finds current organization members and filters audit records by those member `actorId` values.
 - It shows member organization roles and team roles next to recent organization-wide audit events.
 - Document reads, writes, search, ask, and tool execution still keep their existing owner-scoped authorization checks.
+
+Organization owners and admins can manage team RBAC at [http://localhost:3000/dashboard/admin/teams](http://localhost:3000/dashboard/admin/teams):
+
+- Create teams inside the current organization.
+- Assign existing DocuMind users by email to organization `ADMIN`/`MEMBER` roles.
+- Assign existing users to team `MANAGER`/`MEMBER`/`VIEWER` roles.
+- Team creation and member assignment write bounded audit log records.
+- Users must sign up before an admin can assign them to a team; email invitation delivery is future scope.
 
 ## Documents
 
@@ -792,7 +802,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
-- Team invitations and team-scoped document sharing are not implemented yet; document operations remain owner-scoped.
+- Email invitations and team-scoped document sharing are not implemented yet; document operations remain owner-scoped.
 - Production password reset email requires `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM`; without them, reset requests still return safely but no email is delivered.
 - The MCP wrapper currently uses a bounded JSON-RPC POST endpoint; richer streaming/session transport can be added later.
 
@@ -800,7 +810,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add account-linking settings, team invitations, and team-scoped document sharing.
+- Add account-linking settings, email invitations, and team-scoped document sharing.
 - Add organization-wide audit export controls.
 - Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.
