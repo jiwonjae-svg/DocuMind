@@ -2,7 +2,7 @@
 
 DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams.
 
-This repository contains a usable MVP with email/password signup, password reset, account password changes, optional Google/GitHub OAuth, document upload, original file download, document processing, OpenAI embeddings, access-scoped semantic search, grounded question answering, and user-managed MCP API tokens.
+This repository contains a usable MVP with email/password signup, password reset and OAuth-to-password setup, account password changes, optional Google/GitHub OAuth, document upload, original file download, document processing, OpenAI embeddings, access-scoped semantic search, grounded question answering, and user-managed MCP API tokens.
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
@@ -48,7 +48,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - OAuth provider account IDs are bounded and reject control/format characters before lookup or linking.
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
 - Public signup is protected with same-origin checks, bounded JSON parsing, bounded password input validation, password hashing, and in-memory client/email/aggregate rate limiting.
-- Public password reset uses non-enumerating responses, same-origin checks, bounded JSON parsing, in-memory client/email/aggregate request rate limiting, hashed single-use reset tokens, expiry checks, server-side password hashing, and audit logs for reset requests and completed resets.
+- Public password reset uses non-enumerating responses, same-origin checks, bounded JSON parsing, in-memory client/email/aggregate request rate limiting, hashed single-use reset tokens, expiry checks, server-side password hashing, and audit logs for reset requests and completed resets; OAuth-only users can request the same email-verified flow to add password sign-in.
 - Password reset and team invitation email delivery use the Resend HTTP API when `RESEND_API_KEY` and sender variables are configured, localize the email subject/body from the current locale cookie or `Accept-Language`, and avoid client-side secrets or extra runtime dependencies.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
@@ -149,13 +149,13 @@ flowchart LR
 - Tailwind CSS
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
-- Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, and optional EN/KO/JA Resend email delivery
+- Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, OAuth-to-password setup support, and optional EN/KO/JA Resend email delivery
 - Account security page at `/dashboard/account` for reviewing sign-in methods, changing password-account credentials with server-side current-password verification, and removing linked OAuth providers without deleting the last sign-in method
 - Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks, transaction-time password-account collision checks before local account creation or linking, and localized callback failure messages for users
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization with control/format-character rejection for email credentials, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup email/name/password validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
-- Bounded forgot-password and reset-password validation, non-enumerating reset request responses, per-client/per-email/aggregate reset request rate limiting, and one-time reset token consumption
+- Bounded forgot-password and reset-password validation, non-enumerating reset request responses, per-client/per-email/aggregate reset request rate limiting, OAuth-only account password setup through email verification, and one-time reset token consumption
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
@@ -467,7 +467,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
 - `tests/auth-signup.test.ts`: signup input validation, display-name/password bounds, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
-- `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
+- `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, OAuth-only password setup token issuance, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
 - `tests/auth-account-password.test.ts`: signed-in password changes validate current/new password input, reject OAuth-only users, avoid password reuse, handle concurrent update races, write audit events, and rate-limit repeated attempts.
 - `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-team-invitation-email.test.ts`: optional Resend team invitation email delivery, sender fallback, EN/KO/JA email copy selection, and provider failure handling.
@@ -513,9 +513,9 @@ npm run prisma:seed
 
 After running migrations, create an account at [http://localhost:3000/signup](http://localhost:3000/signup). Email/password signup hashes the password on the server and then signs the new user in. If Google or GitHub OAuth variables are configured, the signup and login pages also show OAuth buttons. OAuth only provisions or links local users when the provider supplies a verified email; password accounts are not automatically linked by OAuth sign-in.
 
-Password users can start account recovery at [http://localhost:3000/forgot-password](http://localhost:3000/forgot-password). The app stores only a hashed reset token, sends a localized one-time reset link when Resend email delivery is configured, and accepts the new password at `/reset-password?token=...`. For local testing without email, set `PASSWORD_RESET_DEBUG_LINKS=true` outside production to show the reset link after requesting it.
+Password users can start account recovery at [http://localhost:3000/forgot-password](http://localhost:3000/forgot-password). OAuth-only users can use the same email-verified flow to add email/password sign-in from `/dashboard/account` without exposing provider credentials to DocuMind. The app stores only a hashed reset token, sends a localized one-time reset link when Resend email delivery is configured, and accepts the new password at `/reset-password?token=...`. For local testing without email, set `PASSWORD_RESET_DEBUG_LINKS=true` outside production to show the reset link after requesting it.
 
-Signed-in password users can open [http://localhost:3000/dashboard/account](http://localhost:3000/dashboard/account) to review their profile, linked sign-in methods, and change their password. Password changes require the current password, use the same 12-character minimum as signup/reset, are rate-limited, hash the new password server-side, and write a `password_changed` audit log. Users with OAuth providers can remove a linked provider only when another password or OAuth sign-in method remains; the unlink route writes an `oauth_account_unlinked` audit log.
+Signed-in users can open [http://localhost:3000/dashboard/account](http://localhost:3000/dashboard/account) to review their profile and linked sign-in methods. Password users can change credentials there with current-password verification, the same 12-character minimum as signup/reset, rate limiting, server-side hashing, and a `password_changed` audit log. OAuth-only users can request a password setup link from the same page. Users with OAuth providers can remove a linked provider only when another password or OAuth sign-in method remains; the unlink route writes an `oauth_account_unlinked` audit log.
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 

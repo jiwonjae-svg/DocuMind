@@ -200,13 +200,51 @@ describe("password reset persistence", () => {
     );
   });
 
-  it("does not issue reset tokens for missing or OAuth-only users", async () => {
+  it("creates reset tokens for OAuth-only users to add password sign-in", async () => {
+    const now = new Date("2026-06-30T00:00:00.000Z");
     prismaMock.user.findUnique.mockResolvedValue({
       email: "owner@example.com",
       id: "user-1",
       name: "Owner",
       passwordHash: null,
     });
+
+    const result = await requestPasswordReset({
+      email: "owner@example.com",
+      env: {
+        AUTH_URL: "https://documind.example",
+        NODE_ENV: "test",
+        PASSWORD_RESET_DEBUG_LINKS: "true",
+        PASSWORD_RESET_EMAIL_FROM: "DocuMind <security@documind.example>",
+        RESEND_API_KEY: "re_test",
+      },
+      now: () => now,
+      request: request(),
+    });
+
+    expect(result.resetUrl).toMatch(
+      /^https:\/\/documind\.example\/reset-password\?token=/,
+    );
+    const resetUrl = new URL(result.resetUrl ?? "");
+    const token = resetUrl.searchParams.get("token") ?? "";
+
+    expect(prismaMock.passwordResetToken.create).toHaveBeenCalledWith({
+      data: {
+        expiresAt: new Date("2026-06-30T00:30:00.000Z"),
+        tokenHash: tokenHash(token),
+        userId: "user-1",
+      },
+    });
+    expect(sendPasswordResetEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resetUrl: result.resetUrl,
+        to: "owner@example.com",
+      }),
+    );
+  });
+
+  it("does not issue reset tokens for missing users", async () => {
+    prismaMock.user.findUnique.mockResolvedValue(null);
 
     await expect(
       requestPasswordReset({

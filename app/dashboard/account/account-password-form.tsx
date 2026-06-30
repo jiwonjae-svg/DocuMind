@@ -3,6 +3,7 @@
 import { PasswordField } from "@/components/auth/password-field";
 import { Icon, ui } from "@/components/ui";
 import { lookupApiError } from "@/lib/i18n/dictionaries";
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type AccountPasswordFormCopy = {
@@ -20,11 +21,13 @@ type AccountPasswordFormCopy = {
   newPassword: string;
   passwordHelp: string;
   showPassword: string;
+  requestPasswordSetup: string;
 };
 
 type AccountPasswordFormProps = {
   copy: AccountPasswordFormCopy;
   hasPassword: boolean;
+  passwordSetupHref: string;
 };
 
 type PasswordChangeResponse = {
@@ -39,6 +42,7 @@ async function readPasswordChangeResponse(response: Response) {
 export function AccountPasswordForm({
   copy,
   hasPassword,
+  passwordSetupHref,
 }: AccountPasswordFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -143,7 +147,15 @@ export function AccountPasswordForm({
             {isSubmitting ? copy.changingPassword : copy.changePassword}
           </button>
         </form>
-      ) : null}
+      ) : (
+        <Link
+          href={passwordSetupHref}
+          className={`${ui.primaryButton} mt-5 w-full sm:w-auto`}
+        >
+          <Icon name="lock" className="h-4 w-4" />
+          {copy.requestPasswordSetup}
+        </Link>
+      )}
     </section>
   );
 }

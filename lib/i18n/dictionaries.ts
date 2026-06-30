@@ -132,14 +132,14 @@ const en = {
     emailPasswordDescription:
       "Enter your email and password. If OAuth is configured for this deployment, you can continue with a connected provider.",
     forgotFormBody:
-      "Enter the email for your password account. If the account can be reset, DocuMind will send instructions.",
+      "Enter the email for your DocuMind account. If the account can be reset or set up for password sign-in, DocuMind will send instructions.",
     forgotTitle: "Reset access without exposing account details",
     forgotBody:
-      "DocuMind sends a one-time reset link for password accounts. The public response stays the same whether an address exists or not.",
+      "DocuMind sends a one-time link for password recovery or password setup. The public response stays the same whether an address exists or not.",
     forgotSubmit: "Send reset instructions",
     forgotSubmitPending: "Sending instructions...",
     forgotSuccess:
-      "If an account exists, password reset instructions have been sent.",
+      "If an account exists, password instructions have been sent.",
     forgotError: "Unable to request a password reset.",
     hidePassword: "Hide password",
     localResetLink: "Open local reset link",
@@ -155,16 +155,17 @@ const en = {
     ownerScopedData: "Access-scoped data",
     ownerScopedDataBody:
       "Documents, chunks, and answers stay filtered by ownership or team membership.",
-    passwordAccount: "Password account",
-    passwordAccountBody: "This flow updates only accounts that use password sign-in.",
+    passwordAccount: "Password access",
+    passwordAccountBody:
+      "This flow updates password sign-in or adds it to an email-verified OAuth account.",
     passwordHelp: "Use at least 12 characters.",
     privateByDefault: "Private by default",
     privateByDefaultBody:
       "Documents and answers are filtered by your account and assigned teams.",
     rememberPassword: "Remember your password?",
     resetBody:
-      "Reset links are single-use and expire quickly. After a successful reset, sign in again with the new password.",
-    resetComplete: "Your password has been reset. Sign in again.",
+      "Reset links are single-use and expire quickly. After a successful reset or setup, use the new password for future email sign-ins.",
+    resetComplete: "Your password has been updated.",
     resetError: "Unable to reset this password.",
     resetFormBody: "Choose a new password with at least 12 characters.",
     resetMissing: "This reset link is missing its token.",
@@ -360,10 +361,11 @@ const en = {
     oauthConnectionsTitle: "OAuth connections",
     passwordMethod: "Email and password",
     passwordUnavailable:
-      "This account currently uses OAuth sign-in only. Use the connected provider to manage credentials.",
+      "This account currently uses OAuth sign-in only. Request an email verification link to add password sign-in as a backup.",
     profileTitle: "Profile",
     removeOAuth: "Remove",
     removingOAuth: "Removing...",
+    requestPasswordSetup: "Request password setup link",
     securityBody:
       "Password updates run on the server, are rate-limited, and write a bounded audit event.",
     securityTitle: "Account security",
@@ -797,13 +799,13 @@ const ko = {
     emailPasswordDescription:
       "이메일과 비밀번호를 입력하세요. 이 배포에 OAuth가 설정되어 있으면 연결된 제공자로 계속할 수 있습니다.",
     forgotFormBody:
-      "비밀번호 계정의 이메일을 입력하세요. 재설정 가능한 계정이면 안내를 보냅니다.",
+      "DocuMind 계정 이메일을 입력하세요. 재설정 또는 비밀번호 로그인 설정이 가능한 계정이면 안내를 보냅니다.",
     forgotTitle: "계정 정보를 노출하지 않고 접근 복구",
     forgotBody:
-      "DocuMind는 비밀번호 계정에 1회용 재설정 링크를 보냅니다. 주소 존재 여부와 관계없이 공개 응답은 동일합니다.",
+      "DocuMind는 비밀번호 복구 또는 설정을 위한 1회용 링크를 보냅니다. 주소 존재 여부와 관계없이 공개 응답은 동일합니다.",
     forgotSubmit: "재설정 안내 보내기",
     forgotSubmitPending: "안내 전송 중...",
-    forgotSuccess: "계정이 존재하면 비밀번호 재설정 안내를 보냈습니다.",
+    forgotSuccess: "계정이 존재하면 비밀번호 안내를 보냈습니다.",
     forgotError: "비밀번호 재설정을 요청할 수 없습니다.",
     hidePassword: "비밀번호 숨기기",
     localResetLink: "로컬 재설정 링크 열기",
@@ -819,15 +821,16 @@ const ko = {
     ownerScopedData: "접근 범위 데이터",
     ownerScopedDataBody:
       "문서, 청크, 답변은 소유권 또는 팀 멤버십으로 필터링됩니다.",
-    passwordAccount: "비밀번호 계정",
-    passwordAccountBody: "이 흐름은 비밀번호 로그인 계정만 업데이트합니다.",
+    passwordAccount: "비밀번호 접근",
+    passwordAccountBody:
+      "이 흐름은 비밀번호 로그인을 업데이트하거나 이메일로 확인된 OAuth 계정에 비밀번호 로그인을 추가합니다.",
     passwordHelp: "12자 이상을 사용하세요.",
     privateByDefault: "기본 비공개",
     privateByDefaultBody: "문서와 답변은 계정 및 배정된 팀으로 필터링됩니다.",
     rememberPassword: "비밀번호가 기억나시나요?",
     resetBody:
-      "재설정 링크는 한 번만 사용할 수 있고 빠르게 만료됩니다. 성공 후 새 비밀번호로 다시 로그인하세요.",
-    resetComplete: "비밀번호가 재설정되었습니다. 다시 로그인하세요.",
+      "재설정 링크는 한 번만 사용할 수 있고 빠르게 만료됩니다. 재설정 또는 설정 후에는 새 비밀번호로 이메일 로그인을 사용할 수 있습니다.",
+    resetComplete: "비밀번호가 업데이트되었습니다.",
     resetError: "이 비밀번호를 재설정할 수 없습니다.",
     resetFormBody: "12자 이상의 새 비밀번호를 선택하세요.",
     resetMissing: "이 재설정 링크에는 토큰이 없습니다.",
@@ -1104,10 +1107,11 @@ const ko = {
     oauthConnectionsTitle: "OAuth 연결",
     passwordMethod: "이메일과 비밀번호",
     passwordUnavailable:
-      "이 계정은 현재 OAuth 로그인만 사용합니다. 연결된 제공자에서 자격 증명을 관리하세요.",
+      "이 계정은 현재 OAuth 로그인만 사용합니다. 이메일 검증 링크를 요청해 비밀번호 로그인을 백업 방식으로 추가할 수 있습니다.",
     profileTitle: "프로필",
     removeOAuth: "제거",
     removingOAuth: "제거 중...",
+    requestPasswordSetup: "비밀번호 설정 링크 요청",
     securityBody:
       "비밀번호 업데이트는 서버에서 실행되고 rate limit이 적용되며 제한된 감사 이벤트를 기록합니다.",
     securityTitle: "계정 보안",
@@ -1540,13 +1544,13 @@ const ja = {
     emailPasswordDescription:
       "メールとパスワードを入力してください。このデプロイでOAuthが設定されている場合は接続済みプロバイダーでも続行できます。",
     forgotFormBody:
-      "パスワードアカウントのメールを入力してください。再設定可能な場合は手順を送信します。",
+      "DocuMindアカウントのメールを入力してください。再設定またはパスワードログイン設定が可能な場合は手順を送信します。",
     forgotTitle: "アカウント情報を公開せずにアクセスを復旧",
     forgotBody:
-      "DocuMindはパスワードアカウントに1回限りの再設定リンクを送信します。アドレスの有無に関わらず公開レスポンスは同じです。",
+      "DocuMindはパスワード復旧または設定用の1回限りのリンクを送信します。アドレスの有無に関わらず公開レスポンスは同じです。",
     forgotSubmit: "再設定手順を送信",
     forgotSubmitPending: "送信中...",
-    forgotSuccess: "アカウントが存在する場合、パスワード再設定手順を送信しました。",
+    forgotSuccess: "アカウントが存在する場合、パスワード手順を送信しました。",
     forgotError: "パスワード再設定をリクエストできません。",
     hidePassword: "パスワードを隠す",
     localResetLink: "ローカル再設定リンクを開く",
@@ -1562,16 +1566,17 @@ const ja = {
     ownerScopedData: "アクセススコープのデータ",
     ownerScopedDataBody:
       "文書、チャンク、回答は所有権またはチームメンバーシップでフィルタリングされます。",
-    passwordAccount: "パスワードアカウント",
-    passwordAccountBody: "このフローはパスワードログインのアカウントだけを更新します。",
+    passwordAccount: "パスワードアクセス",
+    passwordAccountBody:
+      "このフローはパスワードログインを更新するか、メール確認済みのOAuthアカウントに追加します。",
     passwordHelp: "12文字以上を使用してください。",
     privateByDefault: "初期状態で非公開",
     privateByDefaultBody:
       "文書と回答はアカウントと割り当てられたチームでフィルタリングされます。",
     rememberPassword: "パスワードを覚えていますか？",
     resetBody:
-      "再設定リンクは1回だけ使用でき、短時間で期限切れになります。成功後は新しいパスワードで再度ログインしてください。",
-    resetComplete: "パスワードを再設定しました。再度ログインしてください。",
+      "再設定リンクは1回だけ使用でき、短時間で期限切れになります。再設定または設定後は、新しいパスワードでメールログインできます。",
+    resetComplete: "パスワードを更新しました。",
     resetError: "このパスワードを再設定できません。",
     resetFormBody: "12文字以上の新しいパスワードを選択してください。",
     resetMissing: "この再設定リンクにはトークンがありません。",
@@ -1850,10 +1855,11 @@ const ja = {
     oauthConnectionsTitle: "OAuth連携",
     passwordMethod: "メールとパスワード",
     passwordUnavailable:
-      "このアカウントは現在OAuthログインのみを使用しています。接続済みプロバイダーで認証情報を管理してください。",
+      "このアカウントは現在OAuthログインのみを使用しています。メール確認リンクをリクエストして、パスワードログインをバックアップとして追加できます。",
     profileTitle: "プロフィール",
     removeOAuth: "削除",
     removingOAuth: "削除中...",
+    requestPasswordSetup: "パスワード設定リンクをリクエスト",
     securityBody:
       "パスワード更新はサーバーで実行され、レート制限され、制限付き監査イベントを記録します。",
     securityTitle: "アカウントセキュリティ",

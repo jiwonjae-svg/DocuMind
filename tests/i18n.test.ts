@@ -72,6 +72,7 @@ describe("i18n locale helpers", () => {
       (copy) => copy.audit.title,
       (copy) => copy.account.title,
       (copy) => copy.account.changePassword,
+      (copy) => copy.account.requestPasswordSetup,
       (copy) => copy.account.oauthConnectionsTitle,
       (copy) => copy.account.successOAuthRemoved,
       (copy) => copy.apiTokens.title,

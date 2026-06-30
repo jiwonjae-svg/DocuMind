@@ -18,9 +18,9 @@ import {
 } from "./password-reset-email";
 
 export const PASSWORD_RESET_ACCEPTED_MESSAGE =
-  "If an account exists, password reset instructions have been sent.";
+  "If an account exists, password instructions have been sent.";
 export const PASSWORD_RESET_COMPLETED_MESSAGE =
-  "Your password has been reset. Sign in with your new password.";
+  "Your password has been updated.";
 export const PASSWORD_RESET_INVALID_EMAIL_ERROR = "Enter a valid email address.";
 export const PASSWORD_RESET_INVALID_REQUEST_ERROR =
   "Enter a valid reset token and password.";
@@ -223,11 +223,10 @@ export async function requestPasswordReset({
       email: true,
       id: true,
       name: true,
-      passwordHash: true,
     },
   });
 
-  if (!user?.passwordHash) {
+  if (!user) {
     return {
       ok: true as const,
     };

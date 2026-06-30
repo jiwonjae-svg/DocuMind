@@ -1,10 +1,8 @@
-import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { buildPageMetadata } from "@/lib/i18n/metadata";
 import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ResetPasswordForm } from "./reset-password-form";
 
 type ResetPasswordPageProps = {
@@ -27,14 +25,9 @@ export async function generateMetadata() {
 export default async function ResetPasswordPage({
   searchParams,
 }: ResetPasswordPageProps) {
-  const session = await auth();
   const params = searchParams ? await searchParams : {};
   const { copy, locale } = await getCurrentI18n();
   const token = readParam(params.token)?.trim() ?? "";
-
-  if (session?.user) {
-    redirect("/dashboard");
-  }
 
   return (
     <main className={ui.page}>

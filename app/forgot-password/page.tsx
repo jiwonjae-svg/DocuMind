@@ -1,11 +1,18 @@
-import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
+import { normalizeEmailCredential } from "@/lib/auth/credentials";
 import { buildPageMetadata } from "@/lib/i18n/metadata";
 import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ForgotPasswordForm } from "./forgot-password-form";
+
+type ForgotPasswordPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function readParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 export async function generateMetadata() {
   const copy = await getCurrentDictionary();
@@ -16,13 +23,12 @@ export async function generateMetadata() {
   });
 }
 
-export default async function ForgotPasswordPage() {
-  const session = await auth();
+export default async function ForgotPasswordPage({
+  searchParams,
+}: ForgotPasswordPageProps) {
+  const params = searchParams ? await searchParams : {};
   const { copy, locale } = await getCurrentI18n();
-
-  if (session?.user) {
-    redirect("/dashboard");
-  }
+  const initialEmail = normalizeEmailCredential(readParam(params.email)) ?? "";
 
   return (
     <main className={ui.page}>
@@ -88,6 +94,7 @@ export default async function ForgotPasswordPage() {
                 submitting: copy.auth.forgotSubmitPending,
                 success: copy.auth.forgotSuccess,
               }}
+              initialEmail={initialEmail}
             />
             <p className="mt-5 text-center text-sm text-slate-600">
               {copy.auth.rememberPassword}{" "}

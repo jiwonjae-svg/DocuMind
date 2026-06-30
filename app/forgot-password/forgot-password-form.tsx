@@ -13,6 +13,7 @@ type ForgotPasswordResponse = {
 
 export function ForgotPasswordForm({
   copy,
+  initialEmail = "",
 }: {
   copy: {
     apiErrors: Record<string, string>;
@@ -23,6 +24,7 @@ export function ForgotPasswordForm({
     submitting: string;
     success: string;
   };
+  initialEmail?: string;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -77,6 +79,7 @@ export function ForgotPasswordForm({
           name="email"
           type="email"
           autoComplete="email"
+          defaultValue={initialEmail}
           required
           className={`mt-2 ${ui.input}`}
         />

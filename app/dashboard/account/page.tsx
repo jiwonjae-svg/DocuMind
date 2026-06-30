@@ -57,6 +57,9 @@ export default async function AccountPage() {
     ...(user.passwordHash ? [copy.account.passwordMethod] : []),
     ...user.accounts.map((account) => getOAuthProviderName(account.provider)),
   ];
+  const passwordSetupHref = `/forgot-password?email=${encodeURIComponent(
+    user.email,
+  )}`;
 
   return (
     <main className={ui.page}>
@@ -166,6 +169,7 @@ export default async function AccountPage() {
               showPassword: copy.auth.showPassword,
             }}
             hasPassword={Boolean(user.passwordHash)}
+            passwordSetupHref={passwordSetupHref}
           />
           <OAuthAccountManager
             accounts={user.accounts.map((account) => ({
