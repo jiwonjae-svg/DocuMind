@@ -3,6 +3,7 @@
 import { Icon, IconTile, ui } from "@/components/ui";
 import { formatCopy, lookupApiError } from "@/lib/i18n/dictionaries";
 import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type SearchResult = {
@@ -23,24 +24,46 @@ type SearchFormCopy = {
   apiErrors: Record<string, string>;
   chunk: string;
   empty: string;
+  emptyTitle: string;
   fallbackError: string;
   invalidResponse: string;
   invalidResult: string;
   matches: string;
+  noReadyBody: string;
+  noReadyTitle: string;
   pending: string;
   placeholder: string;
   queryLabel: string;
+  readyHintBody: string;
+  readyHintTitle: string;
   required: string;
   results: string;
+  scoreHigh: string;
+  scoreLabel: string;
+  scoreLow: string;
+  scoreMedium: string;
   scopeBody: string;
   scopeEyebrow: string;
   scopeTitle: string;
   submit: string;
   topMatches: string;
+  uploadReadyCta: string;
 };
 
 function formatScore(score: number) {
   return `${Math.round(score * 100)}%`;
+}
+
+function readScoreLabel(score: number, copy: SearchFormCopy) {
+  if (score >= 0.78) {
+    return copy.scoreHigh;
+  }
+
+  if (score >= 0.58) {
+    return copy.scoreMedium;
+  }
+
+  return copy.scoreLow;
 }
 
 function isSearchResult(value: unknown): value is SearchResult {
@@ -58,7 +81,13 @@ function isSearchResult(value: unknown): value is SearchResult {
   );
 }
 
-export function SearchForm({ copy }: { copy: SearchFormCopy }) {
+export function SearchForm({
+  copy,
+  hasReadyChunks,
+}: {
+  copy: SearchFormCopy;
+  hasReadyChunks: boolean;
+}) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [query, setQuery] = useState("");
@@ -68,6 +97,12 @@ export function SearchForm({ copy }: { copy: SearchFormCopy }) {
     event.preventDefault();
 
     const trimmedQuery = query.trim();
+
+    if (!hasReadyChunks) {
+      setError(null);
+      setResults(null);
+      return;
+    }
 
     if (!trimmedQuery) {
       setError(copy.required);
@@ -120,6 +155,28 @@ export function SearchForm({ copy }: { copy: SearchFormCopy }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       <div className={`${ui.card} p-6`}>
+        {!hasReadyChunks ? (
+          <section className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-amber-900">
+                  {copy.noReadyTitle}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-amber-800">
+                  {copy.noReadyBody}
+                </p>
+              </div>
+              <Link
+                href="/dashboard/documents"
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-amber-300 bg-white px-3 text-sm font-semibold text-amber-800 transition hover:bg-amber-100"
+              >
+                <Icon name="document" className="h-4 w-4" />
+                {copy.uploadReadyCta}
+              </Link>
+            </div>
+          </section>
+        ) : null}
+
         <form onSubmit={handleSubmit}>
           <label htmlFor="query" className={ui.label}>
             {copy.queryLabel}
@@ -139,7 +196,7 @@ export function SearchForm({ copy }: { copy: SearchFormCopy }) {
             </p>
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !hasReadyChunks}
               className={`${ui.primaryButton} w-full sm:w-auto`}
             >
               <Icon name="search" className="h-4 w-4" />
@@ -152,6 +209,22 @@ export function SearchForm({ copy }: { copy: SearchFormCopy }) {
           <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
           </div>
+        ) : null}
+
+        {!results && !error && hasReadyChunks ? (
+          <section className={`${ui.subtleCard} mt-6 p-5`}>
+            <div className="flex items-start gap-4">
+              <IconTile accent="emerald" icon="search" className="h-10 w-10" />
+              <div>
+                <h2 className="text-base font-semibold text-[#0b1535]">
+                  {copy.readyHintTitle}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {copy.readyHintBody}
+                </p>
+              </div>
+            </div>
+          </section>
         ) : null}
 
         {results ? (
@@ -169,9 +242,21 @@ export function SearchForm({ copy }: { copy: SearchFormCopy }) {
             </div>
 
             {results.length === 0 ? (
-              <p className="mt-5 text-sm leading-6 text-slate-600">
-                {copy.empty}
-              </p>
+              <div className="mt-5 rounded-lg border border-slate-200 bg-white p-4">
+                <h3 className="text-sm font-semibold text-[#0b1535]">
+                  {copy.emptyTitle}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {copy.empty}
+                </p>
+                <Link
+                  href="/dashboard/documents"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-900"
+                >
+                  {copy.uploadReadyCta}
+                  <Icon name="arrow" className="h-4 w-4" />
+                </Link>
+              </div>
             ) : (
               <div className="mt-5 grid gap-4">
                 {results.map((result, index) => (
@@ -189,7 +274,8 @@ export function SearchForm({ copy }: { copy: SearchFormCopy }) {
                         </p>
                       </div>
                       <span className="w-fit rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                        {formatScore(result.similarityScore)}
+                        {copy.scoreLabel}: {formatScore(result.similarityScore)} /{" "}
+                        {readScoreLabel(result.similarityScore, copy)}
                       </span>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-slate-600">

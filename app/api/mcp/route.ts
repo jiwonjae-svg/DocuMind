@@ -14,6 +14,7 @@ import {
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
 import { buildSearchAuditMetadata, buildSummaryAuditMetadata } from "@/lib/audit/metadata";
+import { buildReadableDocumentWhere } from "@/lib/documents/access";
 import {
   JsonRpcRequest,
   jsonRpcError,
@@ -185,10 +186,10 @@ async function callSummarizeDocument({
   }
 
   const document = await prisma.document.findFirst({
-    where: {
-      id: documentId,
-      ownerId,
-    },
+    where: buildReadableDocumentWhere({
+      documentId,
+      userId: ownerId,
+    }),
     select: {
       chunks: {
         orderBy: {
@@ -197,9 +198,6 @@ async function callSummarizeDocument({
         select: {
           chunkIndex: true,
           content: true,
-        },
-        where: {
-          ownerId,
         },
       },
       id: true,

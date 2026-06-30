@@ -2,7 +2,7 @@
 
 DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams.
 
-This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, owner-scoped semantic search, and grounded question answering.
+This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, access-scoped semantic search, and grounded question answering.
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
@@ -24,7 +24,7 @@ DocuMind is a portfolio-ready backend/full-stack project for demonstrating how t
 
 English:
 
-DocuMind is a secure internal knowledge search MVP for Japanese and Korean teams. It demonstrates full-stack execution across authentication, document upload and processing, PostgreSQL/Prisma data modeling, pgvector semantic search, OpenAI-powered grounded answers, source citations, audit logging, Docker, CI, and agent-ready tool APIs. The product focus is deliberately practical: help internal teams find trusted answers from their own documents without leaking secrets or bypassing ownership rules.
+DocuMind is a secure internal knowledge search MVP for Japanese and Korean teams. It demonstrates full-stack execution across authentication, document upload and processing, PostgreSQL/Prisma data modeling, pgvector semantic search, OpenAI-powered grounded answers, source citations, audit logging, Docker, CI, and agent-ready tool APIs. The product focus is deliberately practical: help internal teams find trusted answers from authorized personal or team documents without leaking secrets or bypassing access rules.
 
 Japanese:
 
@@ -32,7 +32,7 @@ DocuMind は、日本・韓国チーム向けの安全な社内ナレッジ検�
 
 ## Why This Matters In Agentic Workflows
 
-Agentic systems need reliable tools, not just chat UI. DocuMind prepares the core tool surface an internal assistant would need: search documents, ask with citations, and summarize a document while preserving user authentication, owner-scoped retrieval, and auditability. This keeps the future agent from becoming a privileged bypass around access control.
+Agentic systems need reliable tools, not just chat UI. DocuMind prepares the core tool surface an internal assistant would need: search documents, ask with citations, and summarize a document while preserving user authentication, owner/team-scoped retrieval, and auditability. This keeps the future agent from becoming a privileged bypass around access control.
 
 ## Implemented vs Future Scope
 
@@ -57,7 +57,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Storage path construction re-sanitizes filename segments before resolving local upload paths.
 - Upload writes use exclusive file creation, and stored files are size-checked again before extraction.
 - PDF extraction is capped by page count before text extraction to reduce parser abuse risk.
-- Document IDs are normalized before owner-scoped document mutations.
+- Document IDs are normalized before document operations, and destructive document mutations remain owner-scoped.
 - Same-origin and Fetch Metadata checks for authenticated mutating POST routes.
 - Cookie-authenticated mutating POST routes without Origin or Fetch Metadata provenance are rejected.
 - Baseline security headers, Content Security Policy without production `unsafe-eval`, HSTS, cross-origin opener/resource policies, disabled framework powered-by header, and private `no-store` caching headers for API responses.
@@ -82,10 +82,10 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Bounded search-time missing embedding backfill to avoid unbounded OpenAI calls from a single search request.
 - Document-specific embedding backfills and embedding writes recheck `Document.ownerId` before selecting or updating chunks.
 - Empty searches skip query embedding when the signed-in user has no searchable ready chunks.
-- Owner-scoped semantic search over ready document chunks with dashboard UI.
+- Access-scoped semantic search over personal and team ready document chunks with dashboard UI.
 - Grounded question answering with source citations.
 - JSON Lines source packaging for grounded-answer prompts so retrieved document text cannot spoof source boundaries.
-- Question, answer, and ask audit records are persisted in a single database transaction, with document links rechecked against the owner before persistence.
+- Question, answer, and ask audit records are persisted in a single database transaction, with document links rechecked against owner or team-member access before persistence.
 - OpenAI embedding and answer requests use bounded timeouts with retry handling for transient failures.
 - OpenAI provider JSON responses are read with a byte limit before parsing.
 - OpenAI answer response extraction is bounded by text size and nested traversal limits before persistence.
@@ -97,6 +97,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
 - Organization-wide admin audit log viewer for organization owners/admins, scoped to audit events created by current organization members.
+- Team-scoped document upload, listing, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read, and only the uploading owner can delete the stored file.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
@@ -107,7 +108,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Future / Production Hardening
 
 - MCP streaming/session transport hardening beyond the current authenticated JSON-RPC wrapper.
-- Team invitations, team-scoped document sharing, and role-scoped document access beyond the current owner/admin audit foundation.
+- Team invitations and self-service join workflows beyond assigning existing users from the admin screen.
 - Optional S3/GCS storage adapters if deploying outside the current Vercel Blob path.
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
@@ -204,7 +205,7 @@ Screenshots should be added when the portfolio is published:
 
 - Landing page with Japanese-facing product copy
 - Documents dashboard showing upload, status, chunks, and delete action
-- Search page showing owner-scoped semantic matches with similarity scores
+- Search page showing access-scoped semantic matches with similarity scores
 - Ask page showing a grounded answer with citations and matched snippets
 - Audit log page showing owner-scoped user activity
 - Example agent tool API response
@@ -418,9 +419,9 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, display-name control/format character stripping, storage path construction, storage provider selection, and upload validation.
 - `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text while allowing known rate-limit notices.
-- `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
+- `tests/document-ownership.test.ts`: owner-scoped mutation filters, team-readable document filters, and access control helpers for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, unsafe answer character normalization, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, bounded provider response parsing and answer response extraction, and timed-out answer retries.
-- `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records, including owner-scoped document link verification.
+- `tests/qa-persistence.test.ts`: transactional persistence for question, answer, and ask audit records, including owner/team-readable document link verification.
 - `tests/embeddings.test.ts`: OpenAI embedding helper behavior, malformed and oversized embedding response handling, request timeout handling, pgvector formatting, bounded search-time embedding backfill, and document-owner-scoped chunk embedding updates.
 - `tests/rate-limit.test.ts`: per-user rate limiting behavior, shared AI search/answer quota, document upload/delete quotas, retry headers, expired bucket cleanup, and active bucket cap behavior.
 - `tests/tool-summary.test.ts`: document summary tool response behavior, bounded/control-character-normalized snippets, and non-empty summary context selection.
@@ -465,7 +466,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  41 passed (41)
-Tests       249 passed (249)
+Tests       251 passed (251)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -524,13 +525,14 @@ Organization owners and admins can also review organization member activity at [
 - The admin view verifies the signed-in user has `OWNER` or `ADMIN` organization role.
 - It finds current organization members and filters audit records by those member `actorId` values.
 - It shows member organization roles and team roles next to recent organization-wide audit events.
-- Document reads, writes, search, ask, and tool execution still keep their existing owner-scoped authorization checks.
+- Document reads, search, ask, summarize, and tool execution use owner or team-member authorization checks. Document deletion stays limited to the uploading owner.
 
 Organization owners and admins can manage team RBAC at [http://localhost:3000/dashboard/admin/teams](http://localhost:3000/dashboard/admin/teams):
 
 - Create teams inside the current organization.
 - Assign existing DocuMind users by email to organization `ADMIN`/`MEMBER` roles.
 - Assign existing users to team `MANAGER`/`MEMBER`/`VIEWER` roles.
+- `MANAGER` and `MEMBER` team roles can upload documents to that team; `VIEWER` can read team documents through document lists, search, ask, and summarize flows.
 - Team creation and member assignment write bounded audit log records.
 - Users must sign up before an admin can assign them to a team; email invitation delivery is future scope.
 
@@ -553,7 +555,7 @@ uploads/documents
 
 With `DOCUMENT_STORAGE_PROVIDER=vercel-blob`, uploaded files are stored as private Vercel Blob objects using the same safe relative pathname stored in the database.
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and stored relative paths are validated before local or Blob reads/deletes; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Local upload file writes use exclusive file creation, Blob uploads disallow overwrite, and stored files are rechecked for size before text/PDF extraction. PDF text extraction rejects documents above the configured page limit before extracting page text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are validated before the database record is deleted.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and stored relative paths are validated before local or Blob reads/deletes; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Local upload file writes use exclusive file creation, Blob uploads disallow overwrite, and stored files are rechecked for size before text/PDF extraction. PDF text extraction rejects documents above the configured page limit before extracting page text. Users can upload to a personal scope or to teams where they hold `MANAGER`/`MEMBER` role; readable team documents are listed for all team members. Delete lookups and delete mutations still include the uploading `ownerId` filter, and stored paths are validated before the database record is deleted.
 
 After upload, documents are processed server-side:
 
@@ -574,7 +576,7 @@ After upload, documents are processed server-side:
 
 ## Semantic Search
 
-Signed-in users can search their own ready document chunks at [http://localhost:3000/dashboard/search](http://localhost:3000/dashboard/search) or with:
+Signed-in users can search ready document chunks they can access at [http://localhost:3000/dashboard/search](http://localhost:3000/dashboard/search) or with:
 
 ```http
 POST /api/search
@@ -589,7 +591,7 @@ Request body:
 }
 ```
 
-The endpoint returns top matching chunks for the authenticated user only:
+The endpoint returns top matching chunks for the authenticated user's personal and team-accessible documents only:
 
 ```json
 {
@@ -604,14 +606,14 @@ The endpoint returns top matching chunks for the authenticated user only:
 }
 ```
 
-Search validates the request, applies a shared per-user in-memory rate limit immediately before AI-backed work, generates the query embedding server-side, and filters by `ownerId` before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
+Search validates the request, applies a shared per-user in-memory rate limit immediately before AI-backed work, generates the query embedding server-side, and filters by document owner or team membership before returning results. Successful searches write a `document_search` audit log with the bounded query length, requested limit, and result count. AI configuration and provider failures are returned as stable API errors instead of raw provider messages.
 
 If ready chunks are missing embeddings, search backfills only a bounded batch per request. Full document processing still embeds all chunks for the uploaded document.
 If no ready chunks have embeddings after that bounded backfill, search returns an empty result set without generating a query embedding.
 
 ## Grounded Question Answering
 
-Signed-in users can ask questions over their own ready document chunks at [http://localhost:3000/dashboard/ask](http://localhost:3000/dashboard/ask) or with:
+Signed-in users can ask questions over ready document chunks they can access at [http://localhost:3000/dashboard/ask](http://localhost:3000/dashboard/ask) or with:
 
 ```http
 POST /api/ask
@@ -629,13 +631,13 @@ The RAG flow is:
 
 - The API authenticates the user, validates the request, and applies a shared per-user in-memory rate limit immediately before answer generation.
 - The question is embedded server-side with `OPENAI_EMBEDDING_MODEL`.
-- The app retrieves top matching `READY` chunks where both `DocumentChunk.ownerId` and `Document.ownerId` match the signed-in user.
+- The app retrieves top matching `READY` chunks where the document is owned by the signed-in user or belongs to a team the user is assigned to.
 - Retrieved chunks are passed as the only allowed context to the answer model, packaged as JSON Lines so source text cannot spoof citation boundaries.
 - The model must return insufficient information when the retrieved chunks do not directly support an answer.
 - The response includes the answer, citations, and matched snippets.
 - The app stores `Question` and `Answer` records and writes a `question_ask` audit log.
 - The question, answer, and ask audit log are saved in one transaction to avoid partial persistence.
-- The optional persisted document link is rechecked with `ownerId` before it is saved.
+- The optional persisted document link is rechecked with owner or team-member access before it is saved.
 
 Response shape:
 
@@ -665,9 +667,9 @@ The ask UI and API never call OpenAI from client components. The shared answer-g
 
 ## Agent Tool API
 
-DocuMind exposes both scoped HTTP tool endpoints and an authenticated JSON-RPC MCP wrapper. All tool surfaces require the same Auth.js session as the dashboard and keep owner-scoped retrieval rules.
+DocuMind exposes both scoped HTTP tool endpoints and an authenticated JSON-RPC MCP wrapper. All tool surfaces require the same Auth.js session as the dashboard and keep owner/team-scoped retrieval rules.
 
-All tool endpoints require the same Auth.js session as the dashboard. Unauthenticated requests return `401`. Each endpoint filters by the authenticated user's `ownerId` and writes an agent tool audit log. Search and answer-generating tool endpoints share the same per-user in-memory rate limits as the dashboard APIs.
+All tool endpoints require the same Auth.js session as the dashboard. Unauthenticated requests return `401`. Each endpoint filters by document owner or team membership and writes an agent tool audit log. Search and answer-generating tool endpoints share the same per-user in-memory rate limits as the dashboard APIs.
 
 ### Search Documents
 
@@ -779,7 +781,7 @@ Example tool call:
 }
 ```
 
-The MCP wrapper uses same-origin checks, Auth.js session authentication, bounded JSON parsing, owner-scoped retrieval, shared AI rate limits, and MCP-specific audit actions.
+The MCP wrapper uses same-origin checks, Auth.js session authentication, bounded JSON parsing, owner/team-scoped retrieval, shared AI rate limits, and MCP-specific audit actions.
 
 ## Database
 
@@ -801,9 +803,10 @@ prisma/migrations/20260603123000_restore_pgvector_hnsw_index/migration.sql
 prisma/migrations/20260629083000_signup_oauth_accounts/migration.sql
 prisma/migrations/20260630093000_password_reset_tokens/migration.sql
 prisma/migrations/20260630101500_organization_team_rbac/migration.sql
+prisma/migrations/20260630151500_document_team_scope/migration.sql
 ```
 
-The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer` for document access control. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, and `AuditLog` records actor and resource fields for security-relevant events.
+The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer`, plus optional `Document.teamId` for team-scoped read access. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, and `AuditLog` records actor and resource fields for security-relevant events.
 
 ## Known Limitations
 
@@ -812,7 +815,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
-- Email invitations and team-scoped document sharing are not implemented yet; document operations remain owner-scoped.
+- Email invitations and self-service team join flows are not implemented yet; team assignment currently requires an existing user and an organization owner/admin.
 - Production password reset email requires `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM`; without them, reset requests still return safely but no email is delivered.
 - The MCP wrapper currently uses a bounded JSON-RPC POST endpoint; richer streaming/session transport can be added later.
 
@@ -820,7 +823,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add account-linking settings, email invitations, and team-scoped document sharing.
+- Add account-linking settings, email invitations, and self-service team join flows.
 - Add organization-wide audit export controls.
 - Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.

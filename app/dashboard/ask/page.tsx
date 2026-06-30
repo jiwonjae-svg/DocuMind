@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
+import { buildReadableDocumentsWhere } from "@/lib/documents/access";
 import { getCurrentDictionary } from "@/lib/i18n/server";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AskForm } from "./ask-form";
@@ -16,6 +18,19 @@ export default async function AskPage() {
 
   const displayName =
     session.user.name ?? session.user.email ?? copy.common.userFallback;
+  const readyChunkDocumentCount = await prisma.document.count({
+    where: {
+      AND: [
+        buildReadableDocumentsWhere(session.user.id),
+        {
+          chunks: {
+            some: {},
+          },
+          status: "READY",
+        },
+      ],
+    },
+  });
 
   return (
     <main className={ui.page}>
@@ -74,7 +89,10 @@ export default async function AskPage() {
       </section>
 
       <section className={`${ui.container} py-4 sm:py-8`}>
-        <AskForm copy={{ ...copy.askForm, apiErrors: copy.apiErrors }} />
+        <AskForm
+          copy={{ ...copy.askForm, apiErrors: copy.apiErrors }}
+          hasReadyChunks={readyChunkDocumentCount > 0}
+        />
       </section>
     </main>
   );

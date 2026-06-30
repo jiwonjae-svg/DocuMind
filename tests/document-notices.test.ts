@@ -36,6 +36,10 @@ describe("document operation notices", () => {
       text: "Choose a file before uploading.",
       tone: "error",
     });
+    expect(getDocumentOperationNotice({ error: "invalid-team" })).toEqual({
+      text: "Selected team is not available for uploads.",
+      tone: "error",
+    });
     expect(
       getDocumentOperationNotice({
         error: "Only .txt, .md, and .pdf files are supported.",

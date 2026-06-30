@@ -85,6 +85,7 @@ model Team {
   updatedAt      DateTime @updatedAt
 
   organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  documents    Document[]
   memberships  TeamMembership[]
 
   @@index([organizationId])
@@ -129,6 +130,7 @@ model UserAccount {
 model Document {
   id                 String         @id @default(cuid())
   ownerId            String
+  teamId             String?
   title              String
   originalName       String         @default("")
   storedName         String         @default("")
@@ -144,11 +146,13 @@ model Document {
   updatedAt          DateTime       @updatedAt
 
   owner     User            @relation("DocumentOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  team      Team?           @relation(fields: [teamId], references: [id], onDelete: SetNull)
   chunks    DocumentChunk[]
   questions Question[]
   answers   Answer[]
 
   @@index([ownerId])
+  @@index([teamId])
   @@map("documents")
 }
 

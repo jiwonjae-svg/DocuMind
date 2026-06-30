@@ -1,4 +1,5 @@
 import { buildAnswerAuditMetadata } from "../audit/metadata";
+import { buildReadableDocumentWhere } from "../documents/access";
 import type { GroundedQuestionAnswer } from "./grounded-answer";
 
 type CreateResult = {
@@ -17,10 +18,7 @@ type TransactionClient = {
       select: {
         id: true;
       };
-      where: {
-        id: string;
-        ownerId: string;
-      };
+      where: unknown;
     }): Promise<{ id: string } | null>;
   };
   question: {
@@ -59,10 +57,10 @@ export async function persistGroundedAnswer({
   return db.$transaction(async (transaction) => {
     const ownedDocument = result.primaryDocumentId
       ? await transaction.document.findFirst({
-          where: {
-            id: result.primaryDocumentId,
-            ownerId,
-          },
+          where: buildReadableDocumentWhere({
+            documentId: result.primaryDocumentId,
+            userId: ownerId,
+          }),
           select: {
             id: true,
           },

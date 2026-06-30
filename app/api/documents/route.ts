@@ -8,6 +8,8 @@ import {
   DOCUMENT_UPLOAD_RATE_LIMIT_ERROR,
   checkDocumentUploadRateLimit,
 } from "@/lib/api/upload-rate-limit";
+import { TEAM_DOCUMENT_WRITE_ROLES } from "@/lib/auth/rbac";
+import { normalizeOptionalTeamId } from "@/lib/documents/access";
 import {
   buildDocumentStoragePath,
   deleteStoredDocument,
@@ -105,9 +107,40 @@ export async function POST(request: NextRequest) {
   }
 
   const file = formData.get("file");
+  const rawTeamId = formData.get("teamId");
+  const teamId =
+    typeof rawTeamId === "string" ? normalizeOptionalTeamId(rawTeamId) : null;
+
+  if (rawTeamId !== null && rawTeamId !== "" && !teamId) {
+    return redirectToDocuments(request, { error: "invalid-team" });
+  }
 
   if (!isUploadFile(file)) {
     return redirectToDocuments(request, { error: "missing-file" });
+  }
+
+  const uploadTeam = teamId
+    ? await prisma.team.findFirst({
+        where: {
+          id: teamId,
+          memberships: {
+            some: {
+              role: {
+                in: [...TEAM_DOCUMENT_WRITE_ROLES],
+              },
+              userId: session.user.id,
+            },
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      })
+    : null;
+
+  if (teamId && !uploadTeam) {
+    return redirectToDocuments(request, { error: "invalid-team" });
   }
 
   const validation = validateDocumentUpload({
@@ -146,6 +179,7 @@ export async function POST(request: NextRequest) {
         data: {
           id: documentId,
           ownerId: session.user.id,
+          teamId: uploadTeam?.id ?? null,
           title: getTitleFromFileName(validation.displayName),
           originalName: validation.displayName,
           storedName: validation.safeFileName,
@@ -167,6 +201,8 @@ export async function POST(request: NextRequest) {
             originalName: validation.displayName,
             sizeBytes: file.size,
             mimeType: validation.mimeType,
+            teamId: uploadTeam?.id ?? null,
+            teamName: uploadTeam?.name ?? null,
           },
           userAgent: readUserAgent(request),
         },

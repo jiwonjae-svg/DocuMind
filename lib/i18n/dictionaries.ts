@@ -11,6 +11,7 @@ const en = {
     ask: "Ask questions",
     auditLogs: "Audit logs",
     backToDashboard: "Back to dashboard",
+    cancel: "Cancel",
     dashboard: "Dashboard",
     delete: "Delete",
     documents: "Documents",
@@ -231,6 +232,11 @@ const en = {
     heroBody:
       "Upload internal knowledge files, search ready document chunks, and ask grounded questions with citations in one protected workspace.",
     title: "Knowledge workspace",
+    adminOnly: "Admin only",
+    availableEyebrow: "Available now",
+    availableNow: "Available now",
+    availableTitle: "Core workspace actions",
+    plannedOnly: "Planned only",
     roadmapEyebrow: "MVP roadmap",
     cards: [
       ["Document management", "Upload, process, list, and delete only your own documents.", "Manage documents"],
@@ -248,14 +254,20 @@ const en = {
   documents: {
     acceptedFormats: "Accepted formats: .txt, .md, .pdf. Maximum size: 10 MB.",
     cardBody:
-      "Add text, Markdown, or PDF files to your private workspace. Every list and delete action is scoped to the signed-in user.",
+      "Add text, Markdown, or PDF files to a personal or writable team scope. Lists include documents you can access, while deletion stays limited to the uploading owner.",
     cardTitle: "Upload and manage knowledge files",
     characters: "characters",
     chunks: "chunks",
+    confirmDelete: "Confirm delete",
     countLabel: "{count} files",
+    deleteWarning:
+      "This removes the document, chunks, and embeddings. Only the uploading owner can delete the stored file.",
     emptyBody: "Upload a supported file to create chunks for semantic search and grounded answers.",
     emptyTitle: "No documents uploaded yet",
     library: "Library",
+    lifecycleBody:
+      "Upload creates metadata, processing extracts and chunks text, ready files can be searched and asked against, and failed files show the processing reason.",
+    lifecycleTitle: "Processing lifecycle",
     notices: {
       "Choose a file before uploading.": "Choose a file before uploading.",
       "Cross-origin request blocked.": "Cross-origin request blocked.",
@@ -274,6 +286,8 @@ const en = {
         "Only .txt, .md, and .pdf files are supported.",
       "PDF uploads must contain a valid PDF header.":
         "PDF uploads must contain a valid PDF header.",
+      "Selected team is not available for uploads.":
+        "Selected team is not available for uploads.",
       "Text and Markdown uploads must be text files.":
         "Text and Markdown uploads must be text files.",
       "The file type does not match the selected document format.":
@@ -308,20 +322,32 @@ const en = {
       READY: "Ready",
       UPLOADED: "Uploaded",
     },
+    statusHelp: {
+      FAILED: "Processing stopped. Check the reason and upload a corrected file if needed.",
+      PROCESSING: "Text extraction, chunking, or embedding is still running.",
+      READY: "This file is searchable and can support grounded answers.",
+      UPLOADED: "The file was saved and is waiting for processing.",
+    },
     storageBody:
       "Files use the configured storage provider while metadata and chunks stay in PostgreSQL.",
     storageTitle: "Document storage",
+    personalDocument: "Personal",
+    personalScope: "Personal",
+    readOnly: "Read-only",
+    teamDocument: "Team: {team}",
+    teamScope: "{organization} / {team}",
     upload: "Upload",
     uploadDocument: "Upload document",
+    uploadScope: "Access scope",
     uploadedDocuments: "Uploaded documents",
   },
   searchPage: {
     body:
-      "Enter a natural-language query to retrieve the most relevant chunks from your own READY documents. OpenAI calls stay inside the server route.",
+      "Enter a natural-language query to retrieve the most relevant chunks from READY documents you can access. OpenAI calls stay inside the server route.",
     previewBody:
       "Results include document title, chunk index, snippet, and a similarity score for fast validation.",
     previewTitle: "Retrieval preview",
-    title: "Search your ready document chunks",
+    title: "Search accessible ready document chunks",
   },
   searchForm: {
     auditBody:
@@ -330,25 +356,37 @@ const en = {
     auditTitle: "Search activity",
     chunk: "Chunk",
     empty: "No ready document chunks matched this query.",
+    emptyTitle: "No matches found",
     invalidResult: "Search response contained invalid results.",
     invalidResponse: "Search response was not valid.",
     matches: "{count} matches",
+    noReadyBody:
+      "Search becomes available after at least one uploaded document finishes processing and has chunks.",
+    noReadyTitle: "Upload a ready document first",
     pending: "Searching...",
     placeholder: "Search policies, onboarding guides, and project notes...",
     queryLabel: "Search query",
+    readyHintBody:
+      "Try a policy, onboarding, or project-note query. Results come only from READY document chunks you can access.",
+    readyHintTitle: "Search ready documents",
     required: "Enter a search query.",
     results: "Results",
+    scoreHigh: "High match",
+    scoreLabel: "Match",
+    scoreLow: "Low match",
+    scoreMedium: "Medium match",
     scopeBody:
-      "Search runs through the server API and filters ready chunks by the current user's owner ID before ranking with pgvector.",
+      "Search runs through the server API and filters ready chunks by owner or team membership before ranking with pgvector.",
     scopeEyebrow: "Scope",
-    scopeTitle: "Owner-scoped retrieval",
+    scopeTitle: "Access-scoped retrieval",
     submit: "Search",
     topMatches: "Top matching chunks",
+    uploadReadyCta: "Open documents",
     fallbackError: "Search failed.",
   },
   askPage: {
     body:
-      "Questions are embedded on the server, matched against your own document chunks, and answered only from retrieved context.",
+      "Questions are embedded on the server, matched against document chunks you can access, and answered only from retrieved context.",
     guardrailBody:
       "Unsupported questions return an insufficient-information answer instead of invented facts.",
     guardrailTitle: "Retrieval guardrail",
@@ -365,12 +403,23 @@ const en = {
     invalidSources: "Question response contained invalid sources.",
     matchedSnippets: "Matched snippets",
     noCitations: "No citations yet.",
+    noReadyBody:
+      "Ask becomes available after at least one uploaded document is READY. Unsupported questions will still return an insufficient-information response.",
+    noReadyTitle: "Upload a ready document first",
     noMatches: "No matches yet.",
     placeholder: "What does the onboarding guide say about approval steps?",
     question: "Question",
+    readyHintBody:
+      "Ask about a policy, guide, or project note that exists in your READY documents. Answers are constrained to retrieved chunks.",
+    readyHintTitle: "Ask from retrieved sources",
     required: "Enter a question.",
     retrieval: "Retrieval",
+    scoreHigh: "High match",
+    scoreLabel: "Match",
+    scoreLow: "Low match",
+    scoreMedium: "Medium match",
     sources: "Sources",
+    uploadReadyCta: "Open documents",
     fallbackError: "Question failed.",
   },
   audit: {
@@ -458,6 +507,7 @@ const ko = {
     ask: "질문하기",
     auditLogs: "감사 로그",
     backToDashboard: "대시보드로 돌아가기",
+    cancel: "취소",
     dashboard: "대시보드",
     delete: "삭제",
     documents: "문서",
@@ -676,6 +726,11 @@ const ko = {
     heroBody:
       "내부 지식 파일을 업로드하고, 준비된 문서 청크를 검색하며, 하나의 보호된 워크스페이스에서 출처 있는 질문 답변을 사용할 수 있습니다.",
     title: "지식 워크스페이스",
+    adminOnly: "관리자 전용",
+    availableEyebrow: "현재 사용 가능",
+    availableNow: "사용 가능",
+    availableTitle: "핵심 워크스페이스 작업",
+    plannedOnly: "계획됨",
     roadmapEyebrow: "MVP 로드맵",
     cards: [
       ["문서 관리", "본인 문서만 업로드, 처리, 조회, 삭제합니다.", "문서 관리"],
@@ -694,14 +749,20 @@ const ko = {
     ...en.documents,
     acceptedFormats: "지원 형식: .txt, .md, .pdf. 최대 크기: 10 MB.",
     cardBody:
-      "비공개 워크스페이스에 텍스트, Markdown, PDF 파일을 추가하세요. 모든 목록 조회와 삭제는 로그인 사용자 범위로 제한됩니다.",
+      "개인 또는 쓰기 가능한 팀 범위에 텍스트, Markdown, PDF 파일을 추가하세요. 목록은 접근 가능한 문서를 포함하고, 삭제는 업로드한 소유자에게만 제한됩니다.",
     cardTitle: "지식 파일 업로드 및 관리",
     characters: "글자",
     chunks: "청크",
+    confirmDelete: "삭제 확인",
     countLabel: "{count}개 파일",
+    deleteWarning:
+      "이 문서와 청크, 임베딩이 삭제됩니다. 저장된 파일 삭제는 업로드한 소유자만 할 수 있습니다.",
     emptyBody: "의미 검색과 근거 기반 답변을 위한 청크를 만들려면 지원 파일을 업로드하세요.",
     emptyTitle: "아직 업로드한 문서가 없습니다",
     library: "라이브러리",
+    lifecycleBody:
+      "업로드는 메타데이터를 만들고, 처리는 텍스트 추출과 청킹을 수행합니다. 준비됨 상태의 파일은 검색과 질문에 사용할 수 있으며, 실패한 파일은 처리 사유를 표시합니다.",
+    lifecycleTitle: "처리 상태 흐름",
     notices: {
       "Choose a file before uploading.": "업로드할 파일을 선택하세요.",
       "Cross-origin request blocked.": "교차 출처 요청이 차단되었습니다.",
@@ -720,6 +781,8 @@ const ko = {
         ".txt, .md, .pdf 파일만 지원합니다.",
       "PDF uploads must contain a valid PDF header.":
         "PDF 업로드에는 유효한 PDF 헤더가 있어야 합니다.",
+      "Selected team is not available for uploads.":
+        "선택한 팀에는 업로드할 수 없습니다.",
       "Text and Markdown uploads must be text files.":
         "텍스트와 Markdown 업로드는 텍스트 파일이어야 합니다.",
       "The file type does not match the selected document format.":
@@ -752,20 +815,32 @@ const ko = {
       READY: "준비됨",
       UPLOADED: "업로드됨",
     },
+    statusHelp: {
+      FAILED: "처리가 중단되었습니다. 사유를 확인하고 필요하면 수정한 파일을 다시 업로드하세요.",
+      PROCESSING: "텍스트 추출, 청킹 또는 임베딩이 아직 진행 중입니다.",
+      READY: "이 파일은 검색 가능하며 근거 기반 답변에 사용할 수 있습니다.",
+      UPLOADED: "파일이 저장되었고 처리를 기다리는 중입니다.",
+    },
     storageBody:
       "파일은 설정된 스토리지 제공자에 저장되고, 메타데이터와 청크는 PostgreSQL에 유지됩니다.",
     storageTitle: "문서 스토리지",
+    personalDocument: "개인",
+    personalScope: "개인",
+    readOnly: "읽기 전용",
+    teamDocument: "팀: {team}",
+    teamScope: "{organization} / {team}",
     upload: "업로드",
     uploadDocument: "문서 업로드",
+    uploadScope: "접근 범위",
     uploadedDocuments: "업로드된 문서",
   },
   searchPage: {
     body:
-      "자연어 쿼리를 입력하면 본인의 READY 문서에서 가장 관련 높은 청크를 검색합니다. OpenAI 호출은 서버 라우트 안에서만 실행됩니다.",
+      "자연어 쿼리를 입력하면 접근 가능한 READY 문서에서 가장 관련 높은 청크를 검색합니다. OpenAI 호출은 서버 라우트 안에서만 실행됩니다.",
     previewBody:
       "결과에는 빠른 검토를 위한 문서 제목, 청크 번호, 스니펫, 유사도 점수가 포함됩니다.",
     previewTitle: "검색 미리보기",
-    title: "준비된 문서 청크 검색",
+    title: "접근 가능한 준비된 문서 청크 검색",
   },
   searchForm: {
     auditBody:
@@ -774,25 +849,37 @@ const ko = {
     auditTitle: "검색 활동",
     chunk: "청크",
     empty: "이 쿼리와 일치하는 준비된 문서 청크가 없습니다.",
+    emptyTitle: "일치 항목이 없습니다",
     invalidResult: "검색 응답에 잘못된 결과가 포함되어 있습니다.",
     invalidResponse: "검색 응답이 올바르지 않습니다.",
     matches: "{count}개 일치",
+    noReadyBody:
+      "업로드한 문서가 처리 완료되고 청크가 생기면 검색을 사용할 수 있습니다.",
+    noReadyTitle: "먼저 준비된 문서를 업로드하세요",
     pending: "검색 중...",
     placeholder: "정책, 온보딩 가이드, 프로젝트 노트 검색...",
     queryLabel: "검색어",
+    readyHintBody:
+      "정책, 온보딩, 프로젝트 노트 관련 검색어를 입력하세요. 결과는 접근 가능한 READY 문서 청크에서만 가져옵니다.",
+    readyHintTitle: "준비된 문서 검색",
     required: "검색어를 입력하세요.",
     results: "결과",
+    scoreHigh: "높은 일치",
+    scoreLabel: "일치도",
+    scoreLow: "낮은 일치",
+    scoreMedium: "중간 일치",
     scopeBody:
-      "검색은 서버 API를 통해 실행되며 pgvector 순위화 전에 준비된 청크를 현재 사용자 owner ID로 필터링합니다.",
+      "검색은 서버 API를 통해 실행되며 pgvector 순위화 전에 준비된 청크를 소유자 또는 팀 멤버십으로 필터링합니다.",
     scopeEyebrow: "범위",
-    scopeTitle: "소유자 범위 검색",
+    scopeTitle: "접근 범위 검색",
     submit: "검색",
     topMatches: "상위 일치 청크",
+    uploadReadyCta: "문서 열기",
     fallbackError: "검색에 실패했습니다.",
   },
   askPage: {
     body:
-      "질문은 서버에서 임베딩되고, 본인 문서 청크와 매칭되며, 검색된 맥락만 기반으로 답변됩니다.",
+      "질문은 서버에서 임베딩되고, 접근 가능한 문서 청크와 매칭되며, 검색된 맥락만 기반으로 답변됩니다.",
     guardrailBody:
       "지원되지 않는 질문에는 지어낸 답변 대신 정보 부족 응답을 반환합니다.",
     guardrailTitle: "검색 가드레일",
@@ -809,12 +896,23 @@ const ko = {
     invalidSources: "질문 응답에 잘못된 출처가 포함되어 있습니다.",
     matchedSnippets: "일치 스니펫",
     noCitations: "아직 인용이 없습니다.",
+    noReadyBody:
+      "업로드한 문서가 READY 상태가 되면 질문할 수 있습니다. 지원되지 않는 질문은 정보 부족 응답으로 처리됩니다.",
+    noReadyTitle: "먼저 준비된 문서를 업로드하세요",
     noMatches: "아직 일치 항목이 없습니다.",
     placeholder: "온보딩 가이드에서 승인 단계에 대해 무엇이라고 하나요?",
     question: "질문",
+    readyHintBody:
+      "READY 문서에 들어 있는 정책, 가이드, 프로젝트 노트에 대해 질문하세요. 답변은 검색된 청크 범위로 제한됩니다.",
+    readyHintTitle: "검색된 출처로 질문",
     required: "질문을 입력하세요.",
     retrieval: "검색",
+    scoreHigh: "높은 일치",
+    scoreLabel: "일치도",
+    scoreLow: "낮은 일치",
+    scoreMedium: "중간 일치",
     sources: "출처",
+    uploadReadyCta: "문서 열기",
     fallbackError: "질문에 실패했습니다.",
   },
   audit: {
@@ -901,6 +999,7 @@ const ja = {
     ask: "質問する",
     auditLogs: "監査ログ",
     backToDashboard: "ダッシュボードへ戻る",
+    cancel: "キャンセル",
     dashboard: "ダッシュボード",
     delete: "削除",
     documents: "文書",
@@ -1119,6 +1218,11 @@ const ja = {
     heroBody:
       "社内ナレッジファイルをアップロードし、準備済み文書チャンクを検索し、1つの保護されたワークスペースで出典付き質問応答を利用できます。",
     title: "ナレッジワークスペース",
+    adminOnly: "管理者のみ",
+    availableEyebrow: "現在利用可能",
+    availableNow: "利用可能",
+    availableTitle: "主要ワークスペース操作",
+    plannedOnly: "計画中",
     roadmapEyebrow: "MVPロードマップ",
     cards: [
       ["文書管理", "自分の文書だけをアップロード、処理、一覧、削除します。", "文書を管理"],
@@ -1137,14 +1241,20 @@ const ja = {
     ...en.documents,
     acceptedFormats: "対応形式: .txt、.md、.pdf。最大サイズ: 10 MB。",
     cardBody:
-      "非公開ワークスペースにテキスト、Markdown、PDFファイルを追加します。すべての一覧と削除操作はログインユーザーの範囲に制限されます。",
+      "個人または書き込み可能なチームスコープにテキスト、Markdown、PDFファイルを追加します。一覧にはアクセス可能な文書が含まれ、削除はアップロードしたオーナーに限定されます。",
     cardTitle: "ナレッジファイルのアップロードと管理",
     characters: "文字",
     chunks: "チャンク",
+    confirmDelete: "削除を確定",
     countLabel: "{count}件のファイル",
+    deleteWarning:
+      "この文書、チャンク、埋め込みを削除します。保存済みファイルを削除できるのはアップロードしたオーナーだけです。",
     emptyBody: "セマンティック検索と根拠付き回答用のチャンクを作成するには、対応ファイルをアップロードしてください。",
     emptyTitle: "まだ文書がアップロードされていません",
     library: "ライブラリ",
+    lifecycleBody:
+      "アップロードでメタデータを作成し、処理でテキスト抽出と分割を行います。準備完了のファイルは検索と質問に使え、失敗したファイルには理由を表示します。",
+    lifecycleTitle: "処理ステータスの流れ",
     notices: {
       "Choose a file before uploading.": "アップロードするファイルを選択してください。",
       "Cross-origin request blocked.": "クロスオリジンリクエストがブロックされました。",
@@ -1163,6 +1273,8 @@ const ja = {
         ".txt、.md、.pdfファイルのみ対応しています。",
       "PDF uploads must contain a valid PDF header.":
         "PDFアップロードには有効なPDFヘッダーが必要です。",
+      "Selected team is not available for uploads.":
+        "選択したチームにはアップロードできません。",
       "Text and Markdown uploads must be text files.":
         "テキストとMarkdownのアップロードはテキストファイルである必要があります。",
       "The file type does not match the selected document format.":
@@ -1195,20 +1307,32 @@ const ja = {
       READY: "準備完了",
       UPLOADED: "アップロード済み",
     },
+    statusHelp: {
+      FAILED: "処理が停止しました。理由を確認し、必要に応じて修正したファイルを再アップロードしてください。",
+      PROCESSING: "テキスト抽出、分割、または埋め込みがまだ実行中です。",
+      READY: "このファイルは検索可能で、根拠付き回答に利用できます。",
+      UPLOADED: "ファイルは保存され、処理を待っています。",
+    },
     storageBody:
       "ファイルは設定済みストレージプロバイダーを使用し、メタデータとチャンクはPostgreSQLに保持されます。",
     storageTitle: "文書ストレージ",
+    personalDocument: "個人",
+    personalScope: "個人",
+    readOnly: "読み取り専用",
+    teamDocument: "チーム: {team}",
+    teamScope: "{organization} / {team}",
     upload: "アップロード",
     uploadDocument: "文書をアップロード",
+    uploadScope: "アクセス範囲",
     uploadedDocuments: "アップロード済み文書",
   },
   searchPage: {
     body:
-      "自然言語クエリを入力すると、自分のREADY文書から最も関連するチャンクを取得します。OpenAI呼び出しはサーバールート内に留まります。",
+      "自然言語クエリを入力すると、アクセス可能なREADY文書から最も関連するチャンクを取得します。OpenAI呼び出しはサーバールート内に留まります。",
     previewBody:
       "結果には、素早く検証できるよう文書タイトル、チャンク番号、スニペット、類似度スコアが含まれます。",
     previewTitle: "取得プレビュー",
-    title: "準備済み文書チャンクを検索",
+    title: "アクセス可能な準備済み文書チャンクを検索",
   },
   searchForm: {
     auditBody:
@@ -1217,25 +1341,37 @@ const ja = {
     auditTitle: "検索アクティビティ",
     chunk: "チャンク",
     empty: "このクエリに一致する準備済み文書チャンクはありません。",
+    emptyTitle: "一致する結果はありません",
     invalidResult: "検索レスポンスに不正な結果が含まれています。",
     invalidResponse: "検索レスポンスが正しくありません。",
     matches: "{count}件一致",
+    noReadyBody:
+      "アップロードした文書の処理が完了し、チャンクが作成されると検索を利用できます。",
+    noReadyTitle: "まず準備完了の文書をアップロードしてください",
     pending: "検索中...",
     placeholder: "ポリシー、オンボーディングガイド、プロジェクトノートを検索...",
     queryLabel: "検索クエリ",
+    readyHintBody:
+      "ポリシー、オンボーディング、プロジェクトノートに関するクエリを入力してください。結果はアクセス可能なREADY文書チャンクだけから返されます。",
+    readyHintTitle: "準備済み文書を検索",
     required: "検索クエリを入力してください。",
     results: "結果",
+    scoreHigh: "高い一致",
+    scoreLabel: "一致度",
+    scoreLow: "低い一致",
+    scoreMedium: "中程度の一致",
     scopeBody:
-      "検索はサーバーAPIを通じて実行され、pgvectorでランク付けする前に準備済みチャンクを現在ユーザーのowner IDでフィルタリングします。",
+      "検索はサーバーAPIを通じて実行され、pgvectorでランク付けする前に準備済みチャンクを所有者またはチームメンバーシップでフィルタリングします。",
     scopeEyebrow: "スコープ",
-    scopeTitle: "所有者スコープの取得",
+    scopeTitle: "アクセススコープの取得",
     submit: "検索",
     topMatches: "上位一致チャンク",
+    uploadReadyCta: "文書を開く",
     fallbackError: "検索に失敗しました。",
   },
   askPage: {
     body:
-      "質問はサーバーで埋め込み、自分の文書チャンクと照合し、取得されたコンテキストだけから回答します。",
+      "質問はサーバーで埋め込み、アクセス可能な文書チャンクと照合し、取得されたコンテキストだけから回答します。",
     guardrailBody:
       "対応できない質問には、作り話ではなく情報不足の回答を返します。",
     guardrailTitle: "取得ガードレール",
@@ -1252,12 +1388,23 @@ const ja = {
     invalidSources: "質問レスポンスに不正な出典が含まれています。",
     matchedSnippets: "一致スニペット",
     noCitations: "まだ引用はありません。",
+    noReadyBody:
+      "アップロードした文書がREADYになると質問できます。対応できない質問には情報不足の回答を返します。",
+    noReadyTitle: "まず準備完了の文書をアップロードしてください",
     noMatches: "まだ一致はありません。",
     placeholder: "オンボーディングガイドは承認手順について何と説明していますか？",
     question: "質問",
+    readyHintBody:
+      "READY文書に含まれるポリシー、ガイド、プロジェクトノートについて質問してください。回答は取得されたチャンクの範囲に制限されます。",
+    readyHintTitle: "取得した出典から質問",
     required: "質問を入力してください。",
     retrieval: "取得",
+    scoreHigh: "高い一致",
+    scoreLabel: "一致度",
+    scoreLow: "低い一致",
+    scoreMedium: "中程度の一致",
     sources: "出典",
+    uploadReadyCta: "文書を開く",
     fallbackError: "質問に失敗しました。",
   },
   audit: {

@@ -14,6 +14,7 @@ export type DocumentNotice = {
 
 const knownDocumentErrors = new Map([
   ["missing-file", "Choose a file before uploading."],
+  ["invalid-team", "Selected team is not available for uploads."],
   ["not-found", "Document not found."],
   [DOCUMENT_DELETE_RATE_LIMIT_ERROR, DOCUMENT_DELETE_RATE_LIMIT_ERROR],
   [

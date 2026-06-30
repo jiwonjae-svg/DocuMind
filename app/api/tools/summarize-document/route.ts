@@ -13,6 +13,7 @@ import {
   readJsonBodyResult,
 } from "@/lib/api/json-body";
 import { buildSummaryAuditMetadata } from "@/lib/audit/metadata";
+import { buildReadableDocumentWhere } from "@/lib/documents/access";
 import { prisma } from "@/lib/prisma";
 import {
   normalizeDocumentId,
@@ -68,10 +69,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const document = await prisma.document.findFirst({
-      where: {
-        id: documentId,
-        ownerId: session.user.id,
-      },
+      where: buildReadableDocumentWhere({
+        documentId,
+        userId: session.user.id,
+      }),
       select: {
         id: true,
         status: true,
@@ -83,9 +84,6 @@ export async function POST(request: NextRequest) {
           select: {
             chunkIndex: true,
             content: true,
-          },
-          where: {
-            ownerId: session.user.id,
           },
         },
       },

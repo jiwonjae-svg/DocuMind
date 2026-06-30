@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildReadableDocumentWhere,
+  buildReadableDocumentsWhere,
   buildDocumentOwnerWhere,
   isDocumentOwner,
   normalizeDocumentId,
+  normalizeOptionalTeamId,
 } from "../lib/documents/access";
 
 describe("document ownership checks", () => {
@@ -23,6 +26,55 @@ describe("document ownership checks", () => {
     ).toEqual({
       id: "doc-1",
       ownerId: "user-1",
+    });
+  });
+
+  it("normalizes optional team IDs for upload scopes", () => {
+    expect(normalizeOptionalTeamId(" team-1 ")).toBe("team-1");
+    expect(normalizeOptionalTeamId("")).toBeNull();
+    expect(normalizeOptionalTeamId("../team")).toBeNull();
+    expect(normalizeOptionalTeamId(null)).toBeNull();
+  });
+
+  it("builds readable document filters from ownership or team membership", () => {
+    expect(
+      buildReadableDocumentWhere({
+        documentId: "doc-1",
+        userId: "user-1",
+      }),
+    ).toEqual({
+      id: "doc-1",
+      OR: [
+        {
+          ownerId: "user-1",
+        },
+        {
+          team: {
+            memberships: {
+              some: {
+                userId: "user-1",
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    expect(buildReadableDocumentsWhere("user-1")).toEqual({
+      OR: [
+        {
+          ownerId: "user-1",
+        },
+        {
+          team: {
+            memberships: {
+              some: {
+                userId: "user-1",
+              },
+            },
+          },
+        },
+      ],
     });
   });
 

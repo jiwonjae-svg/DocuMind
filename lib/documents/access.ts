@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 type OwnedResource = {
   ownerId: string;
 };
@@ -21,6 +23,14 @@ export function normalizeDocumentId(documentId: unknown) {
     : null;
 }
 
+export function normalizeOptionalTeamId(teamId: unknown) {
+  if (teamId === null || teamId === undefined || teamId === "") {
+    return null;
+  }
+
+  return normalizeDocumentId(teamId);
+}
+
 export function buildDocumentOwnerWhere({
   documentId,
   ownerId,
@@ -28,6 +38,53 @@ export function buildDocumentOwnerWhere({
   return {
     id: documentId,
     ownerId,
+  };
+}
+
+export function buildReadableDocumentWhere({
+  documentId,
+  userId,
+}: {
+  documentId: string;
+  userId: string;
+}): Prisma.DocumentWhereInput {
+  return {
+    id: documentId,
+    OR: [
+      {
+        ownerId: userId,
+      },
+      {
+        team: {
+          memberships: {
+            some: {
+              userId,
+            },
+          },
+        },
+      },
+    ],
+  };
+}
+
+export function buildReadableDocumentsWhere(
+  userId: string,
+): Prisma.DocumentWhereInput {
+  return {
+    OR: [
+      {
+        ownerId: userId,
+      },
+      {
+        team: {
+          memberships: {
+            some: {
+              userId,
+            },
+          },
+        },
+      },
+    ],
   };
 }
 

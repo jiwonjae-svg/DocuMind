@@ -4,6 +4,7 @@ import { prisma } from "../prisma";
 export const ORGANIZATION_ADMIN_ROLES = ["OWNER", "ADMIN"] as const;
 export const ASSIGNABLE_ORGANIZATION_ROLES = ["ADMIN", "MEMBER"] as const;
 export const TEAM_MANAGER_ROLES = ["MANAGER"] as const;
+export const TEAM_DOCUMENT_WRITE_ROLES = ["MANAGER", "MEMBER"] as const;
 export const ASSIGNABLE_TEAM_ROLES = ["MANAGER", "MEMBER", "VIEWER"] as const;
 export const DEFAULT_TEAM_NAME = "General";
 export const MAX_TEAM_NAME_LENGTH = 80;

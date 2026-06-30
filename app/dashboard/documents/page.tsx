@@ -1,6 +1,11 @@
 import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
+import {
+  TEAM_DOCUMENT_WRITE_ROLES,
+  ensureUserDefaultOrganization,
+} from "@/lib/auth/rbac";
+import { buildReadableDocumentsWhere } from "@/lib/documents/access";
 import { getDocumentOperationNotice } from "@/lib/documents/notices";
 import { formatStoredDocumentProcessingError } from "@/lib/documents/processing-errors";
 import { formatCopy, lookupCopy } from "@/lib/i18n/dictionaries";
@@ -8,6 +13,7 @@ import { getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DeleteDocumentForm } from "./delete-document-form";
 
 type DocumentsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -19,6 +25,8 @@ const statusStyles = {
   READY: "bg-emerald-50 text-emerald-700",
   FAILED: "bg-red-50 text-red-700",
 };
+
+const statusOrder = ["UPLOADED", "PROCESSING", "READY", "FAILED"] as const;
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) {
@@ -44,15 +52,39 @@ export default async function DocumentsPage({
 
   const params = searchParams ? await searchParams : {};
   const notice = getDocumentOperationNotice(params);
-  const documents = await prisma.document.findMany({
-    where: {
-      ownerId: session.user.id,
+  await ensureUserDefaultOrganization(session.user.id);
+  const writableTeams = await prisma.team.findMany({
+    orderBy: {
+      name: "asc",
     },
+    select: {
+      id: true,
+      name: true,
+      organization: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    where: {
+      memberships: {
+        some: {
+          role: {
+            in: [...TEAM_DOCUMENT_WRITE_ROLES],
+          },
+          userId: session.user.id,
+        },
+      },
+    },
+  });
+  const documents = await prisma.document.findMany({
+    where: buildReadableDocumentsWhere(session.user.id),
     orderBy: {
       createdAt: "desc",
     },
     select: {
       id: true,
+      ownerId: true,
       title: true,
       originalName: true,
       processingError: true,
@@ -60,6 +92,17 @@ export default async function DocumentsPage({
       mimeType: true,
       sizeBytes: true,
       status: true,
+      team: {
+        select: {
+          id: true,
+          name: true,
+          organization: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
       createdAt: true,
       _count: {
         select: {
@@ -145,7 +188,7 @@ export default async function DocumentsPage({
             action="/api/documents"
             method="post"
             encType="multipart/form-data"
-            className="grid gap-5 md:grid-cols-[1fr_auto]"
+            className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px_auto]"
           >
             <div>
               <label htmlFor="file" className={ui.label}>
@@ -162,6 +205,30 @@ export default async function DocumentsPage({
               <p className="mt-2 text-xs text-slate-500">
                 {copy.documents.acceptedFormats}
               </p>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                {copy.documents.lifecycleBody}
+              </p>
+            </div>
+            <div>
+              <label htmlFor="teamId" className={ui.label}>
+                {copy.documents.uploadScope}
+              </label>
+              <select
+                id="teamId"
+                name="teamId"
+                defaultValue=""
+                className={`mt-2 ${ui.input}`}
+              >
+                <option value="">{copy.documents.personalScope}</option>
+                {writableTeams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {formatCopy(copy.documents.teamScope, {
+                      organization: team.organization.name,
+                      team: team.name,
+                    })}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex items-end">
               <button type="submit" className={`${ui.primaryButton} w-full md:w-auto`}>
@@ -170,6 +237,27 @@ export default async function DocumentsPage({
               </button>
             </div>
           </form>
+
+          <div className="mt-6 border-t border-slate-200 pt-5">
+            <p className={ui.eyebrow}>{copy.documents.lifecycleTitle}</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {statusOrder.map((status) => (
+                <div
+                  key={status}
+                  className="rounded-lg border border-slate-200 bg-slate-50/70 p-4"
+                >
+                  <span
+                    className={`rounded-md px-2.5 py-1 text-xs font-semibold ${statusStyles[status]}`}
+                  >
+                    {copy.documents.status[status]}
+                  </span>
+                  <p className="mt-3 text-xs leading-5 text-slate-600">
+                    {copy.documents.statusHelp[status]}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className={`${ui.card} mt-6 overflow-hidden`}>
@@ -228,6 +316,13 @@ export default async function DocumentsPage({
                           >
                             {copy.documents.status[document.status]}
                           </span>
+                          <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                            {document.team
+                              ? formatCopy(copy.documents.teamDocument, {
+                                  team: document.team.name,
+                                })
+                              : copy.documents.personalDocument}
+                          </span>
                         </div>
                         <p className="mt-2 truncate text-sm text-slate-600">
                           {document.originalName}
@@ -242,19 +337,30 @@ export default async function DocumentsPage({
                           <p className="mt-2 text-xs leading-5 text-red-700">
                             {processingErrorText}
                           </p>
-                        ) : null}
+                        ) : (
+                          <p className="mt-2 text-xs leading-5 text-slate-500">
+                            {copy.documents.statusHelp[document.status]}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <form
-                      action={`/api/documents/${document.id}/delete`}
-                      method="post"
-                      className="flex items-start lg:justify-end"
-                    >
-                      <button type="submit" className={ui.dangerButton}>
-                        <Icon name="trash" className="h-4 w-4" />
-                        {copy.common.delete}
-                      </button>
-                    </form>
+                    {document.ownerId === session.user.id ? (
+                      <div className="flex items-start lg:justify-end">
+                        <DeleteDocumentForm
+                          action={`/api/documents/${document.id}/delete`}
+                          cancelLabel={copy.common.cancel}
+                          confirmLabel={copy.documents.confirmDelete}
+                          deleteLabel={copy.common.delete}
+                          warning={copy.documents.deleteWarning}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-start lg:justify-end">
+                        <span className="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-600">
+                          {copy.documents.readOnly}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 );
               })}

@@ -97,7 +97,20 @@ describe("grounded answer persistence", () => {
         },
         where: {
           id: "document-1",
-          ownerId: "user-1",
+          OR: [
+            {
+              ownerId: "user-1",
+            },
+            {
+              team: {
+                memberships: {
+                  some: {
+                    userId: "user-1",
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       {
@@ -137,7 +150,7 @@ describe("grounded answer persistence", () => {
     expect(JSON.stringify(createdPayloads[3])).not.toContain("test-model");
   });
 
-  it("does not persist a document link that is not owned by the user", async () => {
+  it("does not persist a document link that is not readable by the user", async () => {
     const createdPayloads: unknown[] = [];
     const db: GroundedAnswerPersistenceDb = {
       $transaction: async (callback) =>
@@ -194,7 +207,20 @@ describe("grounded answer persistence", () => {
       {
         where: {
           id: "other-user-document",
-          ownerId: "user-1",
+          OR: [
+            {
+              ownerId: "user-1",
+            },
+            {
+              team: {
+                memberships: {
+                  some: {
+                    userId: "user-1",
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       {

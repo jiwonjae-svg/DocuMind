@@ -42,8 +42,16 @@ async function hasSearchableDocumentChunks(ownerId: string) {
       SELECT 1
       FROM "document_chunks" dc
       INNER JOIN "documents" d ON d."id" = dc."documentId"
-      WHERE dc."ownerId" = ${ownerId}
-        AND d."ownerId" = ${ownerId}
+      WHERE dc."ownerId" = d."ownerId"
+        AND (
+          d."ownerId" = ${ownerId}
+          OR EXISTS (
+            SELECT 1
+            FROM "team_memberships" tm
+            WHERE tm."teamId" = d."teamId"
+              AND tm."userId" = ${ownerId}
+          )
+        )
         AND d."status" = 'READY'::"DocumentStatus"
         AND dc."embedding" IS NOT NULL
     ) AS "exists"
@@ -82,8 +90,16 @@ export async function retrieveRelevantDocumentChunks({
       1 - (dc."embedding" <=> ${queryVector}::vector) AS "similarityScore"
     FROM "document_chunks" dc
     INNER JOIN "documents" d ON d."id" = dc."documentId"
-    WHERE dc."ownerId" = ${ownerId}
-      AND d."ownerId" = ${ownerId}
+    WHERE dc."ownerId" = d."ownerId"
+      AND (
+        d."ownerId" = ${ownerId}
+        OR EXISTS (
+          SELECT 1
+          FROM "team_memberships" tm
+          WHERE tm."teamId" = d."teamId"
+            AND tm."userId" = ${ownerId}
+        )
+      )
       AND d."status" = 'READY'::"DocumentStatus"
       AND dc."embedding" IS NOT NULL
     ORDER BY dc."embedding" <=> ${queryVector}::vector

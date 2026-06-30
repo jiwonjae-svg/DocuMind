@@ -3,6 +3,7 @@
 import { Icon, IconTile, ui } from "@/components/ui";
 import { lookupApiError } from "@/lib/i18n/dictionaries";
 import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type Citation = {
@@ -35,16 +36,37 @@ type AskFormCopy = {
   invalidSources: string;
   matchedSnippets: string;
   noCitations: string;
+  noReadyBody: string;
+  noReadyTitle: string;
   noMatches: string;
   placeholder: string;
   question: string;
+  readyHintBody: string;
+  readyHintTitle: string;
   required: string;
   retrieval: string;
+  scoreHigh: string;
+  scoreLabel: string;
+  scoreLow: string;
+  scoreMedium: string;
   sources: string;
+  uploadReadyCta: string;
 };
 
 function formatScore(score: number) {
   return `${Math.round(score * 100)}%`;
+}
+
+function readScoreLabel(score: number, copy: AskFormCopy) {
+  if (score >= 0.78) {
+    return copy.scoreHigh;
+  }
+
+  if (score >= 0.58) {
+    return copy.scoreMedium;
+  }
+
+  return copy.scoreLow;
 }
 
 function isCitation(value: unknown): value is Citation {
@@ -69,7 +91,13 @@ function isMatchedSnippet(value: unknown): value is MatchedSnippet {
   return Number.isFinite((value as Partial<MatchedSnippet>).similarityScore);
 }
 
-export function AskForm({ copy }: { copy: AskFormCopy }) {
+export function AskForm({
+  copy,
+  hasReadyChunks,
+}: {
+  copy: AskFormCopy;
+  hasReadyChunks: boolean;
+}) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [question, setQuestion] = useState("");
@@ -79,6 +107,12 @@ export function AskForm({ copy }: { copy: AskFormCopy }) {
     event.preventDefault();
 
     const trimmedQuestion = question.trim();
+
+    if (!hasReadyChunks) {
+      setError(null);
+      setResult(null);
+      return;
+    }
 
     if (!trimmedQuestion) {
       setError(copy.required);
@@ -146,6 +180,28 @@ export function AskForm({ copy }: { copy: AskFormCopy }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
       <div className={`${ui.card} p-6`}>
+        {!hasReadyChunks ? (
+          <section className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-amber-900">
+                  {copy.noReadyTitle}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-amber-800">
+                  {copy.noReadyBody}
+                </p>
+              </div>
+              <Link
+                href="/dashboard/documents"
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-amber-300 bg-white px-3 text-sm font-semibold text-amber-800 transition hover:bg-amber-100"
+              >
+                <Icon name="document" className="h-4 w-4" />
+                {copy.uploadReadyCta}
+              </Link>
+            </div>
+          </section>
+        ) : null}
+
         <form onSubmit={handleSubmit}>
           <label
             htmlFor="question"
@@ -168,7 +224,7 @@ export function AskForm({ copy }: { copy: AskFormCopy }) {
             </p>
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !hasReadyChunks}
               className={`${ui.primaryButton} w-full sm:w-auto`}
             >
               <Icon name="question" className="h-4 w-4" />
@@ -181,6 +237,22 @@ export function AskForm({ copy }: { copy: AskFormCopy }) {
           <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
           </div>
+        ) : null}
+
+        {!result && !error && hasReadyChunks ? (
+          <section className={`${ui.subtleCard} mt-6 p-5`}>
+            <div className="flex items-start gap-4">
+              <IconTile accent="blue" icon="question" className="h-10 w-10" />
+              <div>
+                <h2 className="text-base font-semibold text-[#0b1535]">
+                  {copy.readyHintTitle}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {copy.readyHintBody}
+                </p>
+              </div>
+            </div>
+          </section>
         ) : null}
 
         {result ? (
@@ -266,7 +338,8 @@ export function AskForm({ copy }: { copy: AskFormCopy }) {
                       </p>
                     </div>
                     <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                      {formatScore(snippet.similarityScore)}
+                      {copy.scoreLabel}: {formatScore(snippet.similarityScore)} /{" "}
+                      {readScoreLabel(snippet.similarityScore, copy)}
                     </span>
                   </div>
                   <p className="mt-2 text-xs leading-5 text-slate-600">
