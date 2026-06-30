@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  MAX_JSON_RPC_BATCH_REQUESTS,
   MCP_PROTOCOL_VERSION,
+  isJsonRpcNotification,
   jsonRpcError,
   jsonRpcResult,
   mcpInitializeResult,
+  mcpPingResult,
   mcpTextToolResult,
   mcpToolsListResult,
+  parseJsonRpcMessages,
   parseJsonRpcRequest,
 } from "../lib/mcp/protocol";
 
@@ -44,6 +48,86 @@ describe("MCP JSON-RPC protocol helpers", () => {
     });
   });
 
+  it("parses bounded JSON-RPC batch payloads", () => {
+    expect(
+      parseJsonRpcMessages([
+        {
+          id: "init-1",
+          jsonrpc: "2.0",
+          method: "initialize",
+        },
+        {
+          jsonrpc: "2.0",
+          method: "notifications/initialized",
+        },
+        {
+          id: "bad-1",
+          jsonrpc: "2.0",
+        },
+      ]),
+    ).toEqual({
+      isBatch: true,
+      messages: [
+        {
+          ok: true,
+          request: {
+            id: "init-1",
+            jsonrpc: "2.0",
+            method: "initialize",
+          },
+        },
+        {
+          ok: true,
+          request: {
+            jsonrpc: "2.0",
+            method: "notifications/initialized",
+          },
+        },
+        {
+          error: "JSON-RPC request must include jsonrpc \"2.0\" and method.",
+          id: "bad-1",
+          ok: false,
+        },
+      ],
+      ok: true,
+    });
+  });
+
+  it("rejects empty or oversized JSON-RPC batches", () => {
+    expect(parseJsonRpcMessages([])).toEqual({
+      error: "JSON-RPC batch must contain at least one request.",
+      ok: false,
+    });
+    expect(
+      parseJsonRpcMessages(
+        Array.from({ length: MAX_JSON_RPC_BATCH_REQUESTS + 1 }, (_, index) => ({
+          id: index,
+          jsonrpc: "2.0",
+          method: "ping",
+        })),
+      ),
+    ).toEqual({
+      error: `JSON-RPC batch must contain ${MAX_JSON_RPC_BATCH_REQUESTS} or fewer requests.`,
+      ok: false,
+    });
+  });
+
+  it("detects notifications without treating null IDs as notifications", () => {
+    expect(
+      isJsonRpcNotification({
+        jsonrpc: "2.0",
+        method: "notifications/initialized",
+      }),
+    ).toBe(true);
+    expect(
+      isJsonRpcNotification({
+        id: null,
+        jsonrpc: "2.0",
+        method: "ping",
+      }),
+    ).toBe(false);
+  });
+
   it("builds MCP initialize and tools/list responses", () => {
     expect(mcpInitializeResult()).toEqual({
       capabilities: {
@@ -61,6 +145,7 @@ describe("MCP JSON-RPC protocol helpers", () => {
       "ask-with-citations",
       "summarize-document",
     ]);
+    expect(mcpPingResult()).toEqual({});
   });
 
   it("wraps tool results as text plus structured content", () => {

@@ -20,13 +20,16 @@ import {
 } from "@/lib/auth/api-tokens";
 import { buildReadableDocumentWhere } from "@/lib/documents/access";
 import {
-  JsonRpcRequest,
+  type JsonRpcRequest,
+  type ParsedJsonRpcMessage,
+  isJsonRpcNotification,
   jsonRpcError,
   jsonRpcResult,
   mcpInitializeResult,
+  mcpPingResult,
   mcpTextToolResult,
   mcpToolsListResult,
-  parseJsonRpcRequest,
+  parseJsonRpcMessages,
 } from "@/lib/mcp/protocol";
 import { prisma } from "@/lib/prisma";
 import {
@@ -55,7 +58,23 @@ export const runtime = "nodejs";
 type ToolCallContext = {
   ownerId: string;
   request: NextRequest;
+  requestId?: JsonRpcRequest["id"];
 };
+
+type JsonRpcResponseMessage =
+  | ReturnType<typeof jsonRpcResult>
+  | ReturnType<typeof jsonRpcError>;
+
+type McpHandledMessage =
+  | {
+      body: JsonRpcResponseMessage;
+      init?: ResponseInit;
+      kind: "json";
+    }
+  | {
+      kind: "next";
+      response: NextResponse;
+    };
 
 async function authenticateMcpRequest(request: NextRequest) {
   const bearerAuth = await authenticateApiBearerToken({
@@ -111,6 +130,7 @@ function readObjectParams(params: unknown) {
 async function callSearchDocuments({
   ownerId,
   request,
+  requestId,
 }: ToolCallContext, args: unknown) {
   const values = readObjectParams(args);
   const query = values ? normalizeSearchQuery(values.query) : null;
@@ -128,6 +148,7 @@ async function callSearchDocuments({
     return NextResponse.json(
       jsonRpcError({
         code: -32000,
+        id: requestId,
         message: AI_SEARCH_RATE_LIMIT_ERROR,
       }),
       buildAiSearchRateLimitResponseInit(rateLimit),
@@ -164,6 +185,7 @@ async function callSearchDocuments({
 async function callAskWithCitations({
   ownerId,
   request,
+  requestId,
 }: ToolCallContext, args: unknown) {
   const values = readObjectParams(args);
   const question = values ? normalizeQuestion(values.question) : null;
@@ -180,6 +202,7 @@ async function callAskWithCitations({
     return NextResponse.json(
       jsonRpcError({
         code: -32000,
+        id: requestId,
         message: AI_ANSWER_RATE_LIMIT_ERROR,
       }),
       buildAiAnswerRateLimitResponseInit(rateLimit),
@@ -214,6 +237,7 @@ async function callAskWithCitations({
 async function callSummarizeDocument({
   ownerId,
   request,
+  requestId,
 }: ToolCallContext, args: unknown) {
   const values = readObjectParams(args);
   const documentId = values ? normalizeDocumentId(values.documentId) : null;
@@ -228,6 +252,7 @@ async function callSummarizeDocument({
     return NextResponse.json(
       jsonRpcError({
         code: -32000,
+        id: requestId,
         message: AI_ANSWER_RATE_LIMIT_ERROR,
       }),
       buildAiAnswerRateLimitResponseInit(rateLimit),
@@ -348,6 +373,10 @@ async function handleMcpRequest(
   switch (requestMessage.method) {
     case "initialize":
       return jsonRpcResult(requestMessage.id, mcpInitializeResult());
+    case "notifications/initialized":
+      return jsonRpcResult(requestMessage.id, {});
+    case "ping":
+      return jsonRpcResult(requestMessage.id, mcpPingResult());
     case "tools/list":
       return jsonRpcResult(requestMessage.id, mcpToolsListResult());
     case "tools/call":
@@ -355,6 +384,7 @@ async function handleMcpRequest(
         context: {
           ownerId,
           request,
+          requestId: requestMessage.id,
         },
         requestMessage,
       });
@@ -365,6 +395,72 @@ async function handleMcpRequest(
         message: `Method not found: ${requestMessage.method}`,
       });
   }
+}
+
+function handleMcpNotification() {
+  // MCP lifecycle notifications do not require server-side state in this MVP.
+}
+
+async function handleMcpMessage({
+  message,
+  ownerId,
+  request,
+}: {
+  message: ParsedJsonRpcMessage;
+  ownerId: string;
+  request: NextRequest;
+}): Promise<McpHandledMessage | null> {
+  if (!message.ok) {
+    return {
+      body: jsonRpcError({
+        code: -32600,
+        id: message.id,
+        message: message.error,
+      }),
+      kind: "json",
+    };
+  }
+
+  if (isJsonRpcNotification(message.request)) {
+    handleMcpNotification();
+    return null;
+  }
+
+  try {
+    const result = await handleMcpRequest(
+      request,
+      message.request,
+      ownerId,
+    );
+
+    return result instanceof NextResponse
+      ? {
+          kind: "next",
+          response: result,
+        }
+      : {
+          body: result,
+          kind: "json",
+        };
+  } catch (error) {
+    const apiError = toApiError(error, "MCP request failed.");
+
+    return {
+      body: jsonRpcError({
+        code: -32000,
+        id: message.request.id,
+        message: apiError.error,
+      }),
+      init: {
+        status: apiError.status,
+      },
+      kind: "json",
+    };
+  }
+}
+
+async function readNextResponseJson(response: NextResponse) {
+  return (await response.json()) as JsonRpcResponseMessage;
 }
 
 export async function POST(request: NextRequest) {
@@ -389,7 +485,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const parsed = parseJsonRpcRequest(jsonBody.body);
+  const parsed = parseJsonRpcMessages(jsonBody.body);
 
   if (!parsed.ok) {
     return NextResponse.json(
@@ -400,26 +496,39 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  try {
-    const result = await handleMcpRequest(
+  const responses: JsonRpcResponseMessage[] = [];
+  let singleResponseInit: ResponseInit | undefined;
+
+  for (const message of parsed.messages) {
+    const handled = await handleMcpMessage({
+      message,
+      ownerId: authentication.userId,
       request,
-      parsed.request,
-      authentication.userId,
-    );
+    });
 
-    return result instanceof NextResponse
-      ? result
-      : NextResponse.json(result);
-  } catch (error) {
-    const apiError = toApiError(error, "MCP request failed.");
+    if (!handled) {
+      continue;
+    }
 
-    return NextResponse.json(
-      jsonRpcError({
-        code: -32000,
-        id: parsed.request.id,
-        message: apiError.error,
-      }),
-      { status: apiError.status },
-    );
+    if (handled.kind === "next") {
+      if (!parsed.isBatch) {
+        return handled.response;
+      }
+
+      responses.push(await readNextResponseJson(handled.response));
+      continue;
+    }
+
+    responses.push(handled.body);
+    singleResponseInit = handled.init;
   }
+
+  if (responses.length === 0) {
+    return new NextResponse(null, { status: 204 });
+  }
+
+  return NextResponse.json(
+    parsed.isBatch ? responses : responses[0],
+    parsed.isBatch ? undefined : singleResponseInit,
+  );
 }

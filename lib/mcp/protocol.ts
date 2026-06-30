@@ -1,5 +1,6 @@
 export const MCP_PROTOCOL_VERSION = "2025-06-18";
 export const MCP_SERVER_NAME = "DocuMind";
+export const MAX_JSON_RPC_BATCH_REQUESTS = 10;
 
 export type JsonRpcId = number | string | null;
 
@@ -9,6 +10,17 @@ export type JsonRpcRequest = {
   method: string;
   params?: unknown;
 };
+
+export type ParsedJsonRpcMessage =
+  | {
+      ok: true;
+      request: JsonRpcRequest;
+    }
+  | {
+      error: string;
+      id?: JsonRpcId;
+      ok: false;
+    };
 
 export type JsonRpcErrorCode =
   | -32700
@@ -26,15 +38,13 @@ function isJsonRpcId(value: unknown): value is JsonRpcId {
   );
 }
 
-export function parseJsonRpcRequest(body: unknown):
-  | {
-      ok: true;
-      request: JsonRpcRequest;
-    }
-  | {
-      error: string;
-      ok: false;
-    } {
+function readValidJsonRpcId(values: Record<string, unknown>) {
+  return "id" in values && isJsonRpcId(values.id)
+    ? (values.id as JsonRpcId)
+    : undefined;
+}
+
+function parseJsonRpcMessage(body: unknown): ParsedJsonRpcMessage {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return {
       error: "JSON-RPC request must be an object.",
@@ -43,10 +53,12 @@ export function parseJsonRpcRequest(body: unknown):
   }
 
   const values = body as Record<string, unknown>;
+  const id = readValidJsonRpcId(values);
 
   if (values.jsonrpc !== "2.0" || typeof values.method !== "string") {
     return {
       error: "JSON-RPC request must include jsonrpc \"2.0\" and method.",
+      ...(id !== undefined ? { id } : {}),
       ok: false,
     };
   }
@@ -61,12 +73,74 @@ export function parseJsonRpcRequest(body: unknown):
   return {
     ok: true,
     request: {
-      id: values.id as JsonRpcId | undefined,
       jsonrpc: "2.0",
       method: values.method,
+      ...("id" in values ? { id: values.id as JsonRpcId } : {}),
       ...("params" in values ? { params: values.params } : {}),
     },
   };
+}
+
+export function parseJsonRpcRequest(body: unknown):
+  | {
+      ok: true;
+      request: JsonRpcRequest;
+    }
+  | {
+      error: string;
+      ok: false;
+    } {
+  const parsed = parseJsonRpcMessage(body);
+
+  return parsed.ok
+    ? parsed
+    : {
+        error: parsed.error,
+        ok: false,
+      };
+}
+
+export function parseJsonRpcMessages(body: unknown):
+  | {
+      isBatch: boolean;
+      messages: ParsedJsonRpcMessage[];
+      ok: true;
+    }
+  | {
+      error: string;
+      ok: false;
+    } {
+  if (!Array.isArray(body)) {
+    return {
+      isBatch: false,
+      messages: [parseJsonRpcMessage(body)],
+      ok: true,
+    };
+  }
+
+  if (body.length === 0) {
+    return {
+      error: "JSON-RPC batch must contain at least one request.",
+      ok: false,
+    };
+  }
+
+  if (body.length > MAX_JSON_RPC_BATCH_REQUESTS) {
+    return {
+      error: `JSON-RPC batch must contain ${MAX_JSON_RPC_BATCH_REQUESTS} or fewer requests.`,
+      ok: false,
+    };
+  }
+
+  return {
+    isBatch: true,
+    messages: body.map(parseJsonRpcMessage),
+    ok: true,
+  };
+}
+
+export function isJsonRpcNotification(request: JsonRpcRequest) {
+  return request.id === undefined;
 }
 
 export function jsonRpcResult(id: JsonRpcId | undefined, result: unknown) {
@@ -94,6 +168,10 @@ export function jsonRpcError({
     id: id ?? null,
     jsonrpc: "2.0",
   };
+}
+
+export function mcpPingResult() {
+  return {};
 }
 
 export const mcpTools = [

@@ -105,7 +105,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Pending and expired team invitations can be renewed from the team admin screen, issuing a new seven-day single-use link and optionally resending email without storing the raw token.
 - Pending team invitation revocation from the team admin screen; revoked invitations are rejected by the join flow and recorded in audit logs.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
-- Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools.
+- Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools, with bounded batch request handling, `ping`, and MCP initialized notification support.
 - User-managed MCP bearer API tokens at `/dashboard/api-tokens`; raw tokens are shown once, stored only as hashes, revocable by the owning user, and usable by external MCP clients without browser cookies.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
 - Docker and Git ignore hygiene for secrets, local uploads, and generated outputs.
@@ -185,7 +185,7 @@ flowchart LR
 - Dashboard semantic search UI at `/dashboard/search`
 - Grounded question answering endpoint at `POST /api/ask`
 - Agent-ready tool endpoints under `/api/tools/*`
-- MCP JSON-RPC wrapper at `/api/mcp` for authenticated tool discovery and calls with either an Auth.js browser session or a user-managed bearer token
+- MCP JSON-RPC wrapper at `/api/mcp` for authenticated tool discovery and calls with either an Auth.js browser session or a user-managed bearer token, including bounded batch requests and MCP lifecycle notification handling
 - API token management UI at `/dashboard/api-tokens`, with hashed token persistence, one-time raw token display, revocation, last-used tracking, and audit events
 - Shared per-user rate limiting across AI-backed dashboard and tool endpoints
 - Ask UI with source citations at `/dashboard/ask`
@@ -489,8 +489,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  51 passed (51)
-Tests       319 passed (319)
+Test Files  52 passed (52)
+Tests       325 passed (325)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -790,9 +790,13 @@ Authorization: Bearer dm_pat_...
 
 Raw token values are shown once, stored only as SHA-256 hashes, scoped to the owning user, and can be revoked from the dashboard. The MCP route updates `lastUsedAt` for accepted bearer tokens and rejects missing, malformed, revoked, or expired tokens.
 
-The route accepts bounded JSON-RPC 2.0 requests and supports:
+The route accepts bounded JSON-RPC 2.0 requests. Single requests and batches of up to 10 requests are supported; notification-only payloads return `204 No Content`.
+
+Supported methods:
 
 - `initialize`
+- `notifications/initialized`
+- `ping`
 - `tools/list`
 - `tools/call` with `search-documents`, `ask-with-citations`, or `summarize-document`
 
@@ -804,6 +808,32 @@ Example `tools/list` request:
   "id": "tools-1",
   "method": "tools/list"
 }
+```
+
+Example initialized notification:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/initialized"
+}
+```
+
+Example batch request:
+
+```json
+[
+  {
+    "jsonrpc": "2.0",
+    "id": "ping-1",
+    "method": "ping"
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": "tools-1",
+    "method": "tools/list"
+  }
+]
 ```
 
 Example tool call:
@@ -823,7 +853,7 @@ Example tool call:
 }
 ```
 
-The MCP wrapper uses same-origin checks for cookie-backed browser calls, Auth.js session authentication or user bearer token authentication, bounded JSON parsing, owner/team-scoped retrieval, shared AI rate limits, and MCP-specific audit actions.
+The MCP wrapper uses same-origin checks for cookie-backed browser calls, Auth.js session authentication or user bearer token authentication, bounded JSON parsing, bounded batch parsing, owner/team-scoped retrieval, shared AI rate limits, and MCP-specific audit actions.
 
 ## Database
 
@@ -861,7 +891,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - OAuth account connections can be reviewed and removed, but self-service provider add/link flows and enterprise SSO are not implemented yet.
 - Production email delivery requires `RESEND_API_KEY` plus `PASSWORD_RESET_EMAIL_FROM` and/or `TEAM_INVITATION_EMAIL_FROM`; without them, password reset requests still return safely and team invitation creation or renewal still returns a manual share link, but no email is delivered.
-- The MCP wrapper currently uses a bounded JSON-RPC POST endpoint; richer streaming/session transport can be added later.
+- The MCP wrapper currently uses a bounded JSON-RPC POST endpoint with lifecycle notifications and batch handling; richer streaming or stateful session transport can be added later.
 
 ## Future Improvements
 
