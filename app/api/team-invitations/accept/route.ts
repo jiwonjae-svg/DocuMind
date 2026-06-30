@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       id: true,
       organizationId: true,
       organizationRole: true,
+      revokedAt: true,
       teamId: true,
       teamRole: true,
     },
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
   if (
     !invitation ||
     invitation.acceptedAt ||
+    invitation.revokedAt ||
     invitation.expiresAt <= currentTime
   ) {
     return NextResponse.json(
@@ -112,6 +114,7 @@ export async function POST(request: NextRequest) {
           gt: currentTime,
         },
         id: invitation.id,
+        revokedAt: null,
       },
     });
 

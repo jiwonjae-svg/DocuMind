@@ -7,6 +7,7 @@ import {
   hashTeamInvitationToken,
   normalizeTeamInvitationToken,
   validateCreateTeamInvitationInput,
+  validateRevokeTeamInvitationInput,
 } from "../lib/auth/team-invitations";
 
 describe("team invitations", () => {
@@ -80,5 +81,27 @@ describe("team invitations", () => {
     expect(addTeamInvitationTtl(new Date("2026-06-30T00:00:00.000Z"))).toEqual(
       new Date("2026-07-07T00:00:00.000Z"),
     );
+  });
+
+  it("validates revoke invitation inputs", () => {
+    expect(
+      validateRevokeTeamInvitationInput({
+        invitationId: "invitation_123",
+      }),
+    ).toEqual({
+      data: {
+        invitationId: "invitation_123",
+      },
+      ok: true,
+    });
+
+    expect(
+      validateRevokeTeamInvitationInput({
+        invitationId: "bad/invitation",
+      }),
+    ).toEqual({
+      error: TEAM_INVITATION_INVALID_REQUEST_ERROR,
+      ok: false,
+    });
   });
 });

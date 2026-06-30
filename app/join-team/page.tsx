@@ -47,6 +47,7 @@ export default async function JoinTeamPage({ searchParams }: JoinTeamPageProps) 
           acceptedAt: true,
           email: true,
           expiresAt: true,
+          revokedAt: true,
           organization: {
             select: {
               name: true,
@@ -120,7 +121,11 @@ export default async function JoinTeamPage({ searchParams }: JoinTeamPageProps) 
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
               {copy.teamInvite.cardTitle}
             </h2>
-            {!token || !invitation || invitation.acceptedAt || isExpired ? (
+            {!token ||
+            !invitation ||
+            invitation.acceptedAt ||
+            invitation.revokedAt ||
+            isExpired ? (
               <div className="mt-7 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
                 <p className="font-semibold">{copy.teamInvite.invalidTitle}</p>
                 <p className="mt-2">{copy.teamInvite.invalidBody}</p>

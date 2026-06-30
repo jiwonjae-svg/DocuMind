@@ -100,6 +100,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Owner-scoped audit log viewer in the dashboard.
 - Organization-wide admin audit log viewer for organization owners/admins, scoped to audit events created by current organization members.
 - Team-scoped document upload, listing, original download, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read/download, and only the uploading owner can delete the stored file.
+- Pending team invitation revocation from the team admin screen; revoked invitations are rejected by the join flow and recorded in audit logs.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools.
 - User-managed MCP bearer API tokens at `/dashboard/api-tokens`; raw tokens are shown once, stored only as hashes, revocable by the owning user, and usable by external MCP clients without browser cookies.
@@ -111,7 +112,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Future / Production Hardening
 
 - MCP streaming/session transport hardening beyond the current authenticated JSON-RPC wrapper.
-- Invitation revocation, resend, and expiry-management screens beyond current single-use invitation creation.
+- Invitation resend and expiry-management screens beyond current single-use invitation creation and revocation.
 - Optional S3/GCS storage adapters if deploying outside the current Vercel Blob path.
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
@@ -197,7 +198,7 @@ flowchart LR
 - API token creation and revocation audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
-- Admin team-management API routes for creating teams, assigning existing users, creating team invitation links with optional email delivery, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
+- Admin team-management API routes for creating teams, assigning existing users, creating team invitation links with optional email delivery, revoking pending invitations, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
@@ -447,7 +448,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/api-tokens.test.ts`: MCP bearer token name normalization, token creation format, server-side hashing, Authorization bearer parsing, active-token authentication, last-used updates, and revoked/expired token rejection.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
-- `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, exclusive upload file writes, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
+- `tests/api-route-security.test.ts`: protected API POST/DELETE routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, exclusive upload file writes, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, revoked invitation rejection, and document ID normalization before delete mutations.
 - `tests/request-origin.test.ts`: same-origin protection for mutating browser requests and cookie-authenticated requests with missing provenance headers.
 - `tests/next-config.test.ts`: security headers, Content Security Policy including production `unsafe-eval` exclusion, cross-origin opener/resource policies, disabled powered-by header, and API cache headers in Next.js configuration.
 - `tests/deployment-hygiene.test.ts`: Docker and Git ignore rules exclude secrets and generated output.
@@ -464,7 +465,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-team-invitation-email.test.ts`: optional Resend team invitation email delivery, sender fallback, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
-- `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, validation, invite URL construction, and expiry calculation.
+- `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, create/revoke validation, invite URL construction, and expiry calculation.
 - `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
 - `tests/i18n-metadata.test.ts`: localized page metadata coverage for the main product pages and language-switcher coverage for dashboard workspace surfaces.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
@@ -482,7 +483,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  47 passed (47)
-Tests       293 passed (293)
+Tests       295 passed (295)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -555,9 +556,10 @@ Organization owners and admins can manage team RBAC at [http://localhost:3000/da
 - Assign existing DocuMind users by email to organization `ADMIN`/`MEMBER` roles.
 - Assign existing users to team `MANAGER`/`MEMBER`/`VIEWER` roles.
 - Create a single-use invitation link for a not-yet-assigned email address, then let the invited user sign in or sign up and accept it at `/join-team`.
+- Review pending invitations and revoke an unused invitation link before it is accepted.
 - Remove a user's team membership to revoke team-scoped document access.
 - `MANAGER` and `MEMBER` team roles can upload documents to that team; `VIEWER` can read team documents through document lists, search, ask, and summarize flows.
-- Team creation, invitation creation, invitation acceptance, member assignment, and member removal write bounded audit log records.
+- Team creation, invitation creation, invitation acceptance, invitation revocation, member assignment, and member removal write bounded audit log records.
 - Invitation emails are sent through Resend when configured; the generated link remains visible so admins can share it manually when email delivery is not configured or fails.
 
 ## Documents
@@ -838,9 +840,10 @@ prisma/migrations/20260630101500_organization_team_rbac/migration.sql
 prisma/migrations/20260630151500_document_team_scope/migration.sql
 prisma/migrations/20260630164500_team_invitations/migration.sql
 prisma/migrations/20260630173000_user_api_tokens/migration.sql
+prisma/migrations/20260630193000_team_invitation_revocations/migration.sql
 ```
 
-The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer`, plus optional `Document.teamId` for team-scoped read access. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, `TeamInvitation` stores hashed single-use join tokens, `UserApiToken` stores hashed user-managed bearer tokens for MCP clients, and `AuditLog` records actor and resource fields for security-relevant events.
+The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer`, plus optional `Document.teamId` for team-scoped read access. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, `TeamInvitation` stores hashed single-use join tokens and revocation state, `UserApiToken` stores hashed user-managed bearer tokens for MCP clients, and `AuditLog` records actor and resource fields for security-relevant events.
 
 ## Known Limitations
 
@@ -856,7 +859,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add account-linking settings and richer invitation lifecycle controls.
+- Add account-linking settings and richer invitation resend/expiry controls.
 - Add organization-wide audit export controls.
 - Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.

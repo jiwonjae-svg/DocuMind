@@ -27,6 +27,7 @@ const jsonPostRouteSuffixes = [
   path.join("tools", "summarize-document", "route.ts"),
 ];
 const jsonDeleteRouteSuffixes = [
+  path.join("admin", "team-invitations", "route.ts"),
   path.join("admin", "team-memberships", "route.ts"),
   path.join("api-tokens", "route.ts"),
 ];
@@ -107,6 +108,7 @@ describe("API route security contracts", () => {
 
   it("keeps every protected DELETE route authenticated and same-origin checked", () => {
     expect(protectedDeleteRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("admin", "team-invitations", "route.ts"),
       path.join("admin", "team-memberships", "route.ts"),
       path.join("api-tokens", "route.ts"),
     ]);
@@ -231,6 +233,21 @@ describe("API route security contracts", () => {
     expect(resetRateLimitIndex).toBeGreaterThanOrEqual(0);
     expect(resetJsonBodyIndex).toBeGreaterThan(resetRateLimitIndex);
     expect(resetCompleteIndex).toBeGreaterThan(resetJsonBodyIndex);
+  });
+
+  it("keeps revoked team invitations from being accepted", () => {
+    const source = readRoute(
+      path.join(apiRoot, "team-invitations", "accept", "route.ts"),
+    );
+    const lookupIndex = source.indexOf("prisma.teamInvitation.findUnique");
+    const revokedSelectIndex = source.indexOf("revokedAt: true", lookupIndex);
+    const invalidCheckIndex = source.indexOf("invitation.revokedAt", lookupIndex);
+    const consumeIndex = source.indexOf("transaction.teamInvitation.updateMany");
+    const revokedWhereIndex = source.indexOf("revokedAt: null", consumeIndex);
+
+    expect(revokedSelectIndex).toBeGreaterThan(lookupIndex);
+    expect(invalidCheckIndex).toBeGreaterThan(revokedSelectIndex);
+    expect(revokedWhereIndex).toBeGreaterThan(consumeIndex);
   });
 
   it("keeps document uploads rate-limited before multipart parsing", () => {

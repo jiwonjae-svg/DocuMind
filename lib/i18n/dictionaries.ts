@@ -88,6 +88,7 @@ const en = {
     "Team invitation is invalid or expired.":
       "Team invitation is invalid or expired.",
     "Invalid team invitation request.": "Invalid team invitation request.",
+    "Team invitation not found.": "Team invitation not found.",
     "Team member not found.": "Team member not found.",
     "Team not found.": "Team not found.",
     "This password reset link is invalid or expired.":
@@ -244,7 +245,7 @@ const en = {
     ],
     planned: [
       "Enterprise SSO and user-managed account-linking settings",
-      "Invitation revocation and resend controls",
+      "Invitation resend controls",
       "Background processing for large document pipelines",
       "Richer MCP streaming/session transport",
       "Production-grade distributed rate limiting",
@@ -284,7 +285,7 @@ const en = {
       ["Account security", "Review your sign-in methods and change your password from a protected account page.", "Manage account"],
     ],
     roadmap: [
-      ["Invitation lifecycle controls", "Add revoke, resend, and expiry-management screens for team invitations."],
+      ["Invitation lifecycle controls", "Add resend and expiry-management screens for team invitations."],
       ["Background processing", "Move long document processing and embeddings into a durable queue for larger deployments."],
     ],
   },
@@ -573,8 +574,12 @@ const en = {
     creatingTeam: "Creating...",
     currentTeams: "Current teams",
     existingUsersOnly: "Users must create an account before an admin can assign them to a team.",
+    expiresAt: "Expires",
     fallbackError: "Team RBAC update failed.",
     confirmRemoveMember: "Remove member",
+    confirmRevokeInvitation: "Revoke invitation",
+    invitationCount: "{count} invitations",
+    invitationLifecycle: "Invitation lifecycle",
     invitationLink: "Invitation link",
     inviteMemberBody:
       "Create a single-use invite link for a person who should join this organization and team.",
@@ -583,12 +588,18 @@ const en = {
     invitingMember: "Creating invitation...",
     memberEmail: "User email",
     memberCount: "{count} members",
+    noPendingInvitations: "No pending invitations.",
     noTeams: "No teams yet. Create a team to start assigning roles.",
     organizationRole: "Organization role",
+    pendingInvitationsTitle: "Pending invitations",
     removeMember: "Remove",
     removeMemberWarning:
       "This removes the user's team role and access to documents shared only through this team.",
     removingMember: "Removing...",
+    revokeInvitation: "Revoke",
+    revokeInvitationWarning:
+      "This disables the invitation link. The invited person will need a new invitation to join.",
+    revokingInvitation: "Revoking...",
     successMemberAssigned: "Team member assigned.",
     successInvitationCreated: "Team invitation created.",
     successInvitationCreatedWithEmail: "Team invitation email sent.",
@@ -780,6 +791,7 @@ const ko = {
     "Team invitation is invalid or expired.":
       "팀 초대가 잘못되었거나 만료되었습니다.",
     "Invalid team invitation request.": "팀 초대 요청이 올바르지 않습니다.",
+    "Team invitation not found.": "팀 초대를 찾을 수 없습니다.",
     "Team member not found.": "팀 멤버를 찾을 수 없습니다.",
     "Team not found.": "팀을 찾을 수 없습니다.",
     "This password reset link is invalid or expired.":
@@ -868,7 +880,7 @@ const ko = {
     ],
     planned: [
       "엔터프라이즈 SSO와 사용자 관리 계정 연결 설정",
-      "초대 취소 및 재전송 제어",
+      "초대 재전송 제어",
       "대용량 문서 파이프라인을 위한 백그라운드 처리",
       "더 풍부한 MCP 스트리밍/세션 전송",
       "운영 등급 분산 rate limiting",
@@ -908,7 +920,7 @@ const ko = {
       ["계정 보안", "로그인 방식을 확인하고 보호된 계정 페이지에서 비밀번호를 변경합니다.", "계정 관리"],
     ],
     roadmap: [
-      ["초대 수명주기 제어", "팀 초대를 취소, 재전송하고 만료를 관리하는 화면을 추가합니다."],
+      ["초대 수명주기 제어", "팀 초대 재전송과 만료 관리 화면을 추가합니다."],
       ["백그라운드 처리", "더 큰 배포를 위해 긴 문서 처리와 임베딩을 내구성 있는 큐로 옮깁니다."],
     ],
   },
@@ -1197,8 +1209,12 @@ const ko = {
     creatingTeam: "생성 중...",
     currentTeams: "현재 팀",
     existingUsersOnly: "관리자가 팀에 배정하려면 사용자가 먼저 계정을 만들어야 합니다.",
+    expiresAt: "만료",
     fallbackError: "팀 RBAC 업데이트에 실패했습니다.",
     confirmRemoveMember: "멤버 제거",
+    confirmRevokeInvitation: "초대 폐기",
+    invitationCount: "{count}개 초대",
+    invitationLifecycle: "초대 수명주기",
     invitationLink: "초대 링크",
     inviteMemberBody:
       "이 조직과 팀에 참여해야 하는 사람을 위한 1회용 초대 링크를 만듭니다.",
@@ -1207,12 +1223,18 @@ const ko = {
     invitingMember: "초대 생성 중...",
     memberEmail: "사용자 이메일",
     memberCount: "{count}명",
+    noPendingInvitations: "대기 중인 초대가 없습니다.",
     noTeams: "아직 팀이 없습니다. 역할 배정을 시작하려면 팀을 만드세요.",
     organizationRole: "조직 역할",
+    pendingInvitationsTitle: "대기 중인 초대",
     removeMember: "제거",
     removeMemberWarning:
       "이 사용자의 팀 역할과 이 팀을 통해서만 공유된 문서 접근 권한을 제거합니다.",
     removingMember: "제거 중...",
+    revokeInvitation: "폐기",
+    revokeInvitationWarning:
+      "이 초대 링크를 비활성화합니다. 초대받은 사용자가 참여하려면 새 초대가 필요합니다.",
+    revokingInvitation: "폐기 중...",
     successMemberAssigned: "팀 멤버를 배정했습니다.",
     successInvitationCreated: "팀 초대를 생성했습니다.",
     successInvitationCreatedWithEmail: "팀 초대 이메일을 보냈습니다.",
@@ -1405,6 +1427,7 @@ const ja = {
     "Team invitation is invalid or expired.":
       "チーム招待が無効または期限切れです。",
     "Invalid team invitation request.": "チーム招待リクエストが正しくありません。",
+    "Team invitation not found.": "チーム招待が見つかりません。",
     "Team member not found.": "チームメンバーが見つかりません。",
     "Team not found.": "チームが見つかりません。",
     "This password reset link is invalid or expired.":
@@ -1493,7 +1516,7 @@ const ja = {
     ],
     planned: [
       "エンタープライズSSOとユーザー管理のアカウント連携設定",
-      "招待の取り消しと再送制御",
+      "招待の再送制御",
       "大規模文書パイプライン向けバックグラウンド処理",
       "より豊富なMCPストリーミング/セッション転送",
       "本番レベルの分散レート制限",
@@ -1533,7 +1556,7 @@ const ja = {
       ["アカウントセキュリティ", "ログイン方法を確認し、保護されたアカウントページでパスワードを変更します。", "アカウント管理"],
     ],
     roadmap: [
-      ["招待ライフサイクル制御", "チーム招待の取り消し、再送、期限管理画面を追加します。"],
+      ["招待ライフサイクル制御", "チーム招待の再送と期限管理画面を追加します。"],
       ["バックグラウンド処理", "大規模デプロイ向けに長い文書処理と埋め込みを耐久性のあるキューへ移します。"],
     ],
   },
@@ -1822,8 +1845,12 @@ const ja = {
     creatingTeam: "作成中...",
     currentTeams: "現在のチーム",
     existingUsersOnly: "管理者がチームに割り当てるには、ユーザーが先にアカウントを作成する必要があります。",
+    expiresAt: "期限",
     fallbackError: "チームRBACの更新に失敗しました。",
     confirmRemoveMember: "メンバーを削除",
+    confirmRevokeInvitation: "招待を取り消し",
+    invitationCount: "{count}件の招待",
+    invitationLifecycle: "招待ライフサイクル",
     invitationLink: "招待リンク",
     inviteMemberBody:
       "この組織とチームに参加する人向けの1回限りの招待リンクを作成します。",
@@ -1832,12 +1859,18 @@ const ja = {
     invitingMember: "招待を作成中...",
     memberEmail: "ユーザーメール",
     memberCount: "{count}人",
+    noPendingInvitations: "保留中の招待はありません。",
     noTeams: "まだチームはありません。ロール割り当てを始めるにはチームを作成してください。",
     organizationRole: "組織ロール",
+    pendingInvitationsTitle: "保留中の招待",
     removeMember: "削除",
     removeMemberWarning:
       "このユーザーのチームロールと、このチーム経由でのみ共有される文書へのアクセスを削除します。",
     removingMember: "削除中...",
+    revokeInvitation: "取り消し",
+    revokeInvitationWarning:
+      "この招待リンクを無効化します。招待されたユーザーが参加するには新しい招待が必要です。",
+    revokingInvitation: "取り消し中...",
     successMemberAssigned: "チームメンバーを割り当てました。",
     successInvitationCreated: "チーム招待を作成しました。",
     successInvitationCreatedWithEmail: "チーム招待メールを送信しました。",

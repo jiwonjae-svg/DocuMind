@@ -16,6 +16,10 @@ export const TEAM_INVITATION_EMAIL_MISMATCH_ERROR =
   "Team invitation belongs to another email address.";
 export const TEAM_INVITATION_ACCEPTED_MESSAGE =
   "Team invitation accepted.";
+export const TEAM_INVITATION_REVOKED_MESSAGE =
+  "Team invitation revoked.";
+export const TEAM_INVITATION_NOT_FOUND_ERROR =
+  "Team invitation not found.";
 
 const invitationTokenPattern = /^[A-Za-z0-9_-]{32,256}$/;
 
@@ -28,6 +32,18 @@ type TeamInvitationValidationResult =
         organizationRole: "ADMIN" | "MEMBER";
         teamId: string;
         teamRole: "MANAGER" | "MEMBER" | "VIEWER";
+      };
+      ok: true;
+    }
+  | {
+      error: string;
+      ok: false;
+    };
+
+type TeamInvitationRevocationValidationResult =
+  | {
+      data: {
+        invitationId: string;
       };
       ok: true;
     }
@@ -128,6 +144,35 @@ export function validateCreateTeamInvitationInput(
       organizationRole,
       teamId,
       teamRole,
+    },
+    ok: true,
+  };
+}
+
+export function validateRevokeTeamInvitationInput(
+  body: unknown,
+): TeamInvitationRevocationValidationResult {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return {
+      error: TEAM_INVITATION_INVALID_REQUEST_ERROR,
+      ok: false,
+    };
+  }
+
+  const invitationId = normalizeRbacResourceId(
+    (body as Record<string, unknown>).invitationId,
+  );
+
+  if (!invitationId) {
+    return {
+      error: TEAM_INVITATION_INVALID_REQUEST_ERROR,
+      ok: false,
+    };
+  }
+
+  return {
+    data: {
+      invitationId,
     },
     ok: true,
   };

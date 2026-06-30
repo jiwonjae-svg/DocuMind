@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { RemoveTeamMemberForm } from "./remove-team-member-form";
+import { RevokeTeamInvitationForm } from "./revoke-team-invitation-form";
 import { TeamRbacForms } from "./team-rbac-form";
 
 type TeamAdminPageProps = {
@@ -29,6 +30,13 @@ function formatMemberName(member: {
   };
 }) {
   return member.user.name ?? member.user.email;
+}
+
+function formatDateTime(value: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(value);
 }
 
 export async function generateMetadata() {
@@ -85,33 +93,61 @@ export default async function TeamAdminPage({
     );
   }
 
-  const teams = await prisma.team.findMany({
-    orderBy: {
-      createdAt: "asc",
-    },
-    select: {
-      id: true,
-      memberships: {
-        orderBy: {
-          createdAt: "asc",
-        },
-        select: {
-          role: true,
-          user: {
-            select: {
-              email: true,
-              name: true,
-            },
-          },
-          userId: true,
-        },
+  const currentTime = new Date();
+  const [teams, pendingInvitations] = await Promise.all([
+    prisma.team.findMany({
+      orderBy: {
+        createdAt: "asc",
       },
-      name: true,
-    },
-    where: {
-      organizationId: context.organization.id,
-    },
-  });
+      select: {
+        id: true,
+        memberships: {
+          orderBy: {
+            createdAt: "asc",
+          },
+          select: {
+            role: true,
+            user: {
+              select: {
+                email: true,
+                name: true,
+              },
+            },
+            userId: true,
+          },
+        },
+        name: true,
+      },
+      where: {
+        organizationId: context.organization.id,
+      },
+    }),
+    prisma.teamInvitation.findMany({
+      orderBy: {
+        expiresAt: "asc",
+      },
+      select: {
+        email: true,
+        expiresAt: true,
+        id: true,
+        organizationRole: true,
+        team: {
+          select: {
+            name: true,
+          },
+        },
+        teamRole: true,
+      },
+      where: {
+        acceptedAt: null,
+        expiresAt: {
+          gt: currentTime,
+        },
+        organizationId: context.organization.id,
+        revokedAt: null,
+      },
+    }),
+  ]);
 
   return (
     <main className={ui.page}>
@@ -189,6 +225,86 @@ export default async function TeamAdminPage({
             name: team.name,
           }))}
         />
+
+        <section className={`${ui.card} overflow-hidden`}>
+          <div className="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className={ui.eyebrow}>{copy.teamAdmin.invitationLifecycle}</p>
+              <h2 className="mt-2 text-xl font-semibold text-[#080f2f]">
+                {copy.teamAdmin.pendingInvitationsTitle}
+              </h2>
+            </div>
+            <span className="rounded-md bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">
+              {formatCopy(copy.teamAdmin.invitationCount, {
+                count: pendingInvitations.length,
+              })}
+            </span>
+          </div>
+
+          {pendingInvitations.length === 0 ? (
+            <div className="grid place-items-center px-6 py-12 text-center">
+              <IconTile accent="amber" icon="team" />
+              <p className="mt-4 max-w-md text-sm leading-6 text-slate-600">
+                {copy.teamAdmin.noPendingInvitations}
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-4 p-6 md:grid-cols-2 xl:grid-cols-3">
+              {pendingInvitations.map((invitation) => (
+                <article
+                  key={invitation.id}
+                  className="rounded-lg border border-slate-200 bg-white p-4"
+                >
+                  <p className="truncate text-sm font-semibold text-[#0b1535]">
+                    {invitation.email}
+                  </p>
+                  <p className="mt-1 truncate text-xs text-slate-500">
+                    {invitation.team.name}
+                  </p>
+                  <dl className="mt-3 grid gap-2 text-xs leading-5 text-slate-600">
+                    <div>
+                      <dt className="font-semibold text-slate-500">
+                        {copy.teamAdmin.organizationRole}
+                      </dt>
+                      <dd>
+                        {copy.adminAudit.organizationRoles[
+                          invitation.organizationRole
+                        ]}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold text-slate-500">
+                        {copy.teamAdmin.teamRole}
+                      </dt>
+                      <dd>{copy.adminAudit.teamRoles[invitation.teamRole]}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold text-slate-500">
+                        {copy.teamAdmin.expiresAt}
+                      </dt>
+                      <dd>{formatDateTime(invitation.expiresAt, locale)}</dd>
+                    </div>
+                  </dl>
+                  <RevokeTeamInvitationForm
+                    copy={{
+                      apiErrors: copy.apiErrors,
+                      cancel: copy.common.cancel,
+                      confirmRevokeInvitation:
+                        copy.teamAdmin.confirmRevokeInvitation,
+                      fallbackError: copy.teamAdmin.fallbackError,
+                      revokeInvitation: copy.teamAdmin.revokeInvitation,
+                      revokeInvitationWarning:
+                        copy.teamAdmin.revokeInvitationWarning,
+                      revokingInvitation: copy.teamAdmin.revokingInvitation,
+                    }}
+                    invitationId={invitation.id}
+                    organizationId={context.organization.id}
+                  />
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className={`${ui.card} overflow-hidden`}>
           <div className="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">

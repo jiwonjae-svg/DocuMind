@@ -43,6 +43,7 @@ model User {
   passwordResetTokens     PasswordResetToken[]     @relation("PasswordResetTokenUser")
   invitedTeamInvitations  TeamInvitation[]         @relation("TeamInvitationInviter")
   acceptedTeamInvitations TeamInvitation[]         @relation("TeamInvitationAccepter")
+  revokedTeamInvitations  TeamInvitation[]         @relation("TeamInvitationRevoker")
   memberships             OrganizationMembership[]
   teamMemberships         TeamMembership[]
   apiTokens               UserApiToken[]          @relation("UserApiTokenOwner")
@@ -147,6 +148,8 @@ model TeamInvitation {
   acceptedAt       DateTime?
   acceptedById     String?
   invitedById      String
+  revokedAt        DateTime?
+  revokedById      String?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
@@ -154,11 +157,14 @@ model TeamInvitation {
   team         Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
   invitedBy    User         @relation("TeamInvitationInviter", fields: [invitedById], references: [id], onDelete: Cascade)
   acceptedBy   User?        @relation("TeamInvitationAccepter", fields: [acceptedById], references: [id], onDelete: SetNull)
+  revokedBy    User?        @relation("TeamInvitationRevoker", fields: [revokedById], references: [id], onDelete: SetNull)
 
   @@index([email])
   @@index([organizationId])
   @@index([teamId])
   @@index([expiresAt])
+  @@index([revokedAt])
+  @@index([revokedById])
   @@map("team_invitations")
 }
 
