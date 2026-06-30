@@ -1,16 +1,27 @@
 import { auth } from "@/auth";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { buildReadableDocumentsWhere } from "@/lib/documents/access";
-import { getCurrentDictionary } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AskForm } from "./ask-form";
 
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.askPage.body,
+    title: copy.common.ask,
+  });
+}
+
 export default async function AskPage() {
   const session = await auth();
-  const copy = await getCurrentDictionary();
+  const { copy, locale } = await getCurrentI18n();
 
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/dashboard/ask");
@@ -35,6 +46,7 @@ export default async function AskPage() {
   return (
     <main className={ui.page}>
       <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
+        <LanguageSwitcher initialLocale={locale} />
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 

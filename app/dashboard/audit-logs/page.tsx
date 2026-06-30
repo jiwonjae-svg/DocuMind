@@ -1,14 +1,25 @@
 import { auth } from "@/auth";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { buildAuditLogOwnerWhere } from "@/lib/audit/access";
 import { formatAuditMetadata } from "@/lib/audit/formatting";
 import { formatAuditAction, formatAuditTimestamp } from "@/lib/audit/labels";
 import { formatCopy } from "@/lib/i18n/dictionaries";
-import { getCurrentI18n } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.audit.body,
+    title: copy.common.auditLogs,
+  });
+}
 
 export default async function AuditLogsPage() {
   const session = await auth();
@@ -39,6 +50,7 @@ export default async function AuditLogsPage() {
   return (
     <main className={ui.page}>
       <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
+        <LanguageSwitcher initialLocale={locale} />
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 

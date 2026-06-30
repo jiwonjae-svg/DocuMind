@@ -4,7 +4,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { normalizeLoginCallbackUrl } from "@/lib/auth/callback-url";
 import { getEnabledOAuthProviders } from "@/lib/auth/oauth-providers";
-import { getCurrentI18n } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignupForm } from "./signup-form";
@@ -15,6 +16,15 @@ type SignupPageProps = {
 
 function readParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.auth.createAccountBody,
+    title: copy.common.signup,
+  });
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {

@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
-import { getCurrentI18n } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ResetPasswordForm } from "./reset-password-form";
@@ -12,6 +13,15 @@ type ResetPasswordPageProps = {
 
 function readParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.auth.resetBody,
+    title: copy.common.resetPassword,
+  });
 }
 
 export default async function ResetPasswordPage({

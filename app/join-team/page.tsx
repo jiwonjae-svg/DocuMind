@@ -7,7 +7,8 @@ import {
   normalizeTeamInvitationToken,
 } from "@/lib/auth/team-invitations";
 import { normalizeEmailCredential } from "@/lib/auth/credentials";
-import { getCurrentI18n } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { AcceptTeamInvitationForm } from "./accept-team-invitation-form";
@@ -18,6 +19,15 @@ type JoinTeamPageProps = {
 
 function readParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.teamInvite.body,
+    title: copy.teamInvite.cardTitle,
+  });
 }
 
 export default async function JoinTeamPage({ searchParams }: JoinTeamPageProps) {

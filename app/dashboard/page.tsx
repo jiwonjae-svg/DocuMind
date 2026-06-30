@@ -2,7 +2,8 @@ import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
-import { getCurrentI18n } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -49,6 +50,15 @@ const roadmapMeta = [
   { icon: "team", accent: "violet" },
   { icon: "network", accent: "amber" },
 ] as const;
+
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.dashboard.heroBody,
+    title: copy.common.dashboard,
+  });
+}
 
 export default async function DashboardPage() {
   const session = await auth();

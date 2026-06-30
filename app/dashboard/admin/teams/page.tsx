@@ -1,11 +1,13 @@
 import { auth } from "@/auth";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import {
   getOrganizationAdminContext,
 } from "@/lib/auth/rbac";
 import { formatCopy } from "@/lib/i18n/dictionaries";
-import { getCurrentI18n } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -29,11 +31,20 @@ function formatMemberName(member: {
   return member.user.name ?? member.user.email;
 }
 
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.teamAdmin.body,
+    title: copy.teamAdmin.title,
+  });
+}
+
 export default async function TeamAdminPage({
   searchParams,
 }: TeamAdminPageProps) {
   const session = await auth();
-  const { copy } = await getCurrentI18n();
+  const { copy, locale } = await getCurrentI18n();
 
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/dashboard/admin/teams");
@@ -51,6 +62,7 @@ export default async function TeamAdminPage({
     return (
       <main className={ui.page}>
         <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
+          <LanguageSwitcher initialLocale={locale} />
           <LogoutButton label={copy.common.logout} />
         </AppHeader>
 
@@ -104,6 +116,7 @@ export default async function TeamAdminPage({
   return (
     <main className={ui.page}>
       <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
+        <LanguageSwitcher initialLocale={locale} />
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 

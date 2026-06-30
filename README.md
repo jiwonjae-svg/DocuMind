@@ -154,7 +154,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links with optional email delivery, and removing team memberships
-- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset and team invitation emails, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
+- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -455,6 +455,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
 - `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, validation, invite URL construction, and expiry calculation.
 - `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
+- `tests/i18n-metadata.test.ts`: localized page metadata coverage for the main product pages and language-switcher coverage for dashboard workspace surfaces.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
 - `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, bounds provider account identifiers, normalizes provider display values, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.

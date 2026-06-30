@@ -1,10 +1,20 @@
 import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
-import { getCurrentI18n } from "@/lib/i18n/server";
+import { buildPageMetadata } from "@/lib/i18n/metadata";
+import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ForgotPasswordForm } from "./forgot-password-form";
+
+export async function generateMetadata() {
+  const copy = await getCurrentDictionary();
+
+  return buildPageMetadata({
+    description: copy.auth.forgotBody,
+    title: copy.common.forgotPassword,
+  });
+}
 
 export default async function ForgotPasswordPage() {
   const session = await auth();
