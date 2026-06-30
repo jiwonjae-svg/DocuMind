@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { normalizeLoginCallbackUrl } from "@/lib/auth/callback-url";
 import { getEnabledOAuthProviders } from "@/lib/auth/oauth-providers";
@@ -28,6 +29,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   return (
     <main className={ui.page}>
       <AppHeader>
+        <LanguageSwitcher />
         <Link href="/" className={ui.secondaryButton}>
           <Icon name="home" className="h-4 w-4 text-blue-700" />
           Home

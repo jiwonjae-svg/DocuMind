@@ -20,6 +20,7 @@ import {
   ensureOAuthUser,
   findUserIdForOAuthAccount,
 } from "@/lib/auth/oauth";
+import { ensureUserDefaultOrganization } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 
@@ -89,6 +90,7 @@ const authProviders: Provider[] = [
           userId: user.id,
         }),
       });
+      await ensureUserDefaultOrganization(user.id);
 
       return {
         id: user.id,

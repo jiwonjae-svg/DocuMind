@@ -35,7 +35,10 @@ export type GroundedAnswerPersistenceDb = {
 };
 
 export type PersistGroundedAnswerInput = {
-  action: "agent_tool_ask_with_citations" | "question_ask";
+  action:
+    | "agent_tool_ask_with_citations"
+    | "mcp_tool_ask_with_citations"
+    | "question_ask";
   db: GroundedAnswerPersistenceDb;
   ipAddress: string | null;
   ownerId: string;

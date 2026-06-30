@@ -1,4 +1,3 @@
-import { rm } from "node:fs/promises";
 import { auth } from "@/auth";
 import {
   CROSS_ORIGIN_REQUEST_ERROR,
@@ -13,7 +12,10 @@ import {
   type DeleteOwnedDocumentDb,
 } from "@/lib/documents/deletion";
 import { normalizeDocumentId } from "@/lib/documents/access";
-import { resolveOptionalStoragePath } from "@/lib/documents/storage";
+import {
+  deleteStoredDocument,
+  validateOptionalStoragePath,
+} from "@/lib/documents/storage";
 import { prisma } from "@/lib/prisma";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
 import { NextRequest, NextResponse } from "next/server";
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
     db: prisma as unknown as DeleteOwnedDocumentDb,
     documentId,
     ipAddress: readIpAddress(request),
-    resolveStoragePath: resolveOptionalStoragePath,
+    validateStoragePath: validateOptionalStoragePath,
     userAgent: readUserAgent(request),
     ownerId: session.user.id,
   });
@@ -77,8 +79,8 @@ export async function POST(request: NextRequest, context: DeleteRouteContext) {
     return redirectToDocuments(request, { error: "not-found" });
   }
 
-  if (result.resolvedStoragePath) {
-    await rm(result.resolvedStoragePath, { force: true });
+  if (result.storagePath) {
+    await deleteStoredDocument({ storagePath: result.storagePath });
   }
 
   return redirectToDocuments(request, { deleted: "1" });

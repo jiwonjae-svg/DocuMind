@@ -2,6 +2,7 @@
 
 import { Icon, ui } from "@/components/ui";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
@@ -59,12 +60,20 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
         />
       </div>
       <div>
-        <label
-          htmlFor="password"
-          className={ui.label}
-        >
-          Password
-        </label>
+        <div className="flex items-center justify-between gap-3">
+          <label
+            htmlFor="password"
+            className={ui.label}
+          >
+            Password
+          </label>
+          <Link
+            href="/forgot-password"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <input
           id="password"
           name="password"

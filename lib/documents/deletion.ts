@@ -56,7 +56,7 @@ type DeleteOwnedDocumentOptions = {
   documentId: string;
   ipAddress?: string | null;
   ownerId: string;
-  resolveStoragePath: (storagePath: string | null) => string | null;
+  validateStoragePath: (storagePath: string | null) => string | null;
   userAgent?: string | null;
 };
 
@@ -66,7 +66,7 @@ type DeleteOwnedDocumentResult =
     }
   | {
       deleted: true;
-      resolvedStoragePath: string | null;
+      storagePath: string | null;
     };
 
 export async function deleteOwnedDocument({
@@ -74,7 +74,7 @@ export async function deleteOwnedDocument({
   documentId,
   ipAddress,
   ownerId,
-  resolveStoragePath,
+  validateStoragePath,
   userAgent,
 }: DeleteOwnedDocumentOptions): Promise<DeleteOwnedDocumentResult> {
   return db.$transaction(async (transaction) => {
@@ -94,7 +94,7 @@ export async function deleteOwnedDocument({
       return { deleted: false };
     }
 
-    const resolvedStoragePath = resolveStoragePath(document.storagePath);
+    const storagePath = validateStoragePath(document.storagePath);
     const deleted = await transaction.document.deleteMany({
       where: {
         id: document.id,
@@ -122,7 +122,7 @@ export async function deleteOwnedDocument({
 
     return {
       deleted: true,
-      resolvedStoragePath,
+      storagePath,
     };
   });
 }

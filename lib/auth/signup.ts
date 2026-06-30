@@ -6,6 +6,7 @@ import {
   normalizeEmailCredential,
   normalizePasswordCredential,
 } from "./credentials";
+import { createOwnedOrganizationForUser } from "./rbac";
 
 export const MIN_SIGNUP_PASSWORD_LENGTH = 12;
 export const SIGNUP_INVALID_INPUT_ERROR =
@@ -102,6 +103,8 @@ export async function createPasswordUser({
           name: true,
         },
       });
+
+      await createOwnedOrganizationForUser(transaction, createdUser);
 
       await transaction.auditLog.create({
         data: {

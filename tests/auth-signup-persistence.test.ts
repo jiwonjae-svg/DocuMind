@@ -6,6 +6,18 @@ const prismaMock = vi.hoisted(() => ({
   auditLog: {
     create: vi.fn(),
   },
+  organization: {
+    create: vi.fn(),
+  },
+  organizationMembership: {
+    create: vi.fn(),
+  },
+  team: {
+    create: vi.fn(),
+  },
+  teamMembership: {
+    create: vi.fn(),
+  },
   user: {
     create: vi.fn(),
     findUnique: vi.fn(),
@@ -41,6 +53,23 @@ describe("signup persistence", () => {
     prismaMock.$transaction.mockImplementation(async (operation) =>
       operation(prismaMock),
     );
+    prismaMock.organization.create.mockResolvedValue({
+      id: "org-1",
+      name: "New User's workspace",
+    });
+    prismaMock.organizationMembership.create.mockResolvedValue({
+      id: "membership-1",
+      organizationId: "org-1",
+      role: "OWNER",
+      userId: "user-1",
+    });
+    prismaMock.team.create.mockResolvedValue({
+      id: "team-1",
+      name: "General",
+    });
+    prismaMock.teamMembership.create.mockResolvedValue({
+      id: "team-membership-1",
+    });
   });
 
   it("stores password users and signup audit logs in one transaction", async () => {
@@ -76,6 +105,30 @@ describe("signup persistence", () => {
           email: "new.user@example.com",
           name: "New User",
           passwordHash: "scrypt:salt:hash",
+        },
+      }),
+    );
+    expect(prismaMock.organization.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          name: "New User's workspace",
+        },
+      }),
+    );
+    expect(prismaMock.organizationMembership.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          organizationId: "org-1",
+          role: "OWNER",
+          userId: "user-1",
+        },
+      }),
+    );
+    expect(prismaMock.team.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          name: "General",
+          organizationId: "org-1",
         },
       }),
     );

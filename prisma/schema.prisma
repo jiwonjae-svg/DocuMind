@@ -13,6 +13,18 @@ enum DocumentStatus {
   FAILED
 }
 
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum TeamRole {
+  MANAGER
+  MEMBER
+  VIEWER
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -22,14 +34,80 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  accounts  UserAccount[]  @relation("UserAccountOwner")
-  documents Document[]     @relation("DocumentOwner")
-  chunks    DocumentChunk[] @relation("DocumentChunkOwner")
-  questions Question[]     @relation("QuestionOwner")
-  answers   Answer[]       @relation("AnswerOwner")
-  auditLogs AuditLog[]     @relation("AuditLogActor")
+  accounts            UserAccount[]            @relation("UserAccountOwner")
+  documents           Document[]               @relation("DocumentOwner")
+  chunks              DocumentChunk[]          @relation("DocumentChunkOwner")
+  questions           Question[]               @relation("QuestionOwner")
+  answers             Answer[]                 @relation("AnswerOwner")
+  auditLogs           AuditLog[]               @relation("AuditLogActor")
+  passwordResetTokens PasswordResetToken[]     @relation("PasswordResetTokenUser")
+  memberships         OrganizationMembership[]
+  teamMemberships     TeamMembership[]
 
   @@map("users")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships OrganizationMembership[]
+  teams       Team[]
+
+  @@map("organizations")
+}
+
+model OrganizationMembership {
+  id             String           @id @default(cuid())
+  organizationId String
+  userId         String
+  role           OrganizationRole @default(MEMBER)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamRoles    TeamMembership[]
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId, role])
+  @@map("organization_memberships")
+}
+
+model Team {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships  TeamMembership[]
+
+  @@index([organizationId])
+  @@map("teams")
+}
+
+model TeamMembership {
+  id                       String   @id @default(cuid())
+  teamId                   String
+  organizationMembershipId String
+  userId                   String
+  role                     TeamRole @default(MEMBER)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  team                   Team                   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  organizationMembership OrganizationMembership @relation(fields: [organizationMembershipId], references: [id], onDelete: Cascade)
+  user                   User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([organizationMembershipId])
+  @@index([userId])
+  @@map("team_memberships")
 }
 
 model UserAccount {
@@ -60,7 +138,7 @@ model Document {
   sourceType         String         @default("upload")
   status             DocumentStatus @default(UPLOADED)
   processingError    String?
-  extractedCharCount Int      @default(0)
+  extractedCharCount Int            @default(0)
   locale             String?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
@@ -75,18 +153,18 @@ model Document {
 }
 
 model DocumentChunk {
-  id             String                    @id @default(cuid())
+  id             String                       @id @default(cuid())
   documentId     String
   ownerId        String
   chunkIndex     Int
-  content        String                    @db.Text
+  content        String                       @db.Text
   tokenCount     Int?
   metadata       Json?
   embedding      Unsupported("vector(1536)")?
   embeddingModel String?
   embeddedAt     DateTime?
-  createdAt      DateTime                  @default(now())
-  updatedAt      DateTime                  @updatedAt
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
 
   document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   owner    User     @relation("DocumentChunkOwner", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -150,4 +228,19 @@ model AuditLog {
   @@index([actorId])
   @@index([resourceType, resourceId])
   @@map("audit_logs")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation("PasswordResetTokenUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }

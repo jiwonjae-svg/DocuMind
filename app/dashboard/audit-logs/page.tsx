@@ -3,39 +3,10 @@ import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { buildAuditLogOwnerWhere } from "@/lib/audit/access";
 import { formatAuditMetadata } from "@/lib/audit/formatting";
+import { formatAuditAction, formatAuditTimestamp } from "@/lib/audit/labels";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-
-const auditActionLabels: Record<string, string> = {
-  agent_tool_ask_with_citations: "Agent ask with citations",
-  agent_tool_search_documents: "Agent document search",
-  agent_tool_summarize_document: "Agent document summary",
-  demo_user_seeded: "Legacy bootstrap user seeded",
-  document_search: "Document search",
-  document_delete: "Document deleted",
-  document_process_failed: "Document processing failed",
-  document_process_ready: "Document processing ready",
-  document_upload: "Document uploaded",
-  oauth_account_linked: "OAuth account linked",
-  oauth_user_created: "OAuth user created",
-  question_ask: "Question asked",
-  seed_user_created: "Bootstrap user seeded",
-  user_login: "User signed in",
-  user_login_failed: "User sign-in failed",
-  user_signed_up: "User signed up",
-};
-
-function formatAction(action: string) {
-  return auditActionLabels[action] ?? action.replaceAll("_", " ");
-}
-
-function formatTimestamp(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
 
 export default async function AuditLogsPage() {
   const session = await auth();
@@ -163,7 +134,7 @@ export default async function AuditLogsPage() {
                       />
                       <div className="min-w-0">
                         <h3 className="text-base font-semibold text-[#0b1535]">
-                          {formatAction(log.action)}
+                          {formatAuditAction(log.action)}
                         </h3>
                         <p className="mt-2 text-sm text-slate-600">
                           {log.resourceType}
@@ -180,7 +151,7 @@ export default async function AuditLogsPage() {
                       dateTime={log.createdAt.toISOString()}
                       className="text-sm font-medium text-slate-500 lg:text-right"
                     >
-                      {formatTimestamp(log.createdAt)}
+                      {formatAuditTimestamp(log.createdAt)}
                     </time>
                   </article>
                 );

@@ -2,7 +2,7 @@
 
 DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams.
 
-This repository contains a usable MVP with email/password signup, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, owner-scoped semantic search, and grounded question answering.
+This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, owner-scoped semantic search, and grounded question answering.
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
@@ -18,7 +18,7 @@ DocuMind は、日本・韓国チーム向けの社内ナレッジ検索 MVP で
 
 ## Portfolio Project Description
 
-DocuMind is a portfolio-ready backend/full-stack project for demonstrating how to build a secure retrieval-augmented knowledge product. It covers authenticated document ingestion, file validation, local development storage, Prisma data modeling, vector search, OpenAI integration, grounded answer generation, audit logging, and clean API endpoints that can later be wrapped by agents or MCP tools.
+DocuMind is a portfolio-ready backend/full-stack project for demonstrating how to build a secure retrieval-augmented knowledge product. It covers authenticated document ingestion, file validation, local or Vercel Blob document storage, Prisma data modeling, vector search, OpenAI integration, grounded answer generation, audit logging, scoped HTTP tool endpoints, and an authenticated MCP wrapper.
 
 ## Final Portfolio Copy
 
@@ -40,13 +40,16 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 
 ### Implemented
 
-- Auth.js email/password signup, credentials sign-in, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
+- Auth.js email/password signup, credentials sign-in, password reset, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
 - OAuth provider account IDs are bounded and reject control/format characters before lookup or linking.
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
 - Public signup is protected with same-origin checks, bounded JSON parsing, bounded password input validation, password hashing, and in-memory client/email/aggregate rate limiting.
+- Public password reset uses non-enumerating responses, same-origin checks, bounded JSON parsing, in-memory client/email/aggregate request rate limiting, hashed single-use reset tokens, expiry checks, server-side password hashing, and audit logs for reset requests and completed resets.
+- Password reset email delivery uses the Resend HTTP API when `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM` are configured, without adding a client-side secret or extra runtime dependency.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
+- Document storage provider abstraction with local filesystem storage for development and private Vercel Blob storage for durable Vercel deployments.
 - Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
 - Upload requests must include a valid `Content-Length`, and declared oversized requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components, control characters, and Unicode format characters while preserving Japanese/Korean names.
@@ -70,6 +73,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Password signup, verified OAuth user creation, and verified OAuth account linking write audit records in the same database transaction as the account change.
 - OAuth linking rechecks email collisions inside the account-linking transaction before creating provider links, and recovers cleanly when a concurrent sign-in creates the provider link first.
 - Password signup accepts duplicate-email submissions with the same public response shape as new-account submissions to reduce account enumeration.
+- New password and OAuth users receive a default organization, owner membership, default `General` team, and team manager membership for RBAC-ready workspace administration.
 - Text extraction and chunking with overlap metadata.
 - Extracted document text and PDF page counts are capped before chunking and embedding to bound processing cost.
 - Document processing status writes remain owner-scoped.
@@ -91,7 +95,9 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Request metadata stored in audit logs is stripped of control characters and length-bounded.
 - Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
+- Organization-wide admin audit log viewer for organization owners/admins, scoped to audit events created by current organization members.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
+- Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
 - Docker and Git ignore hygiene for secrets, local uploads, and generated outputs.
 - Docker runtime uses a non-root application user.
@@ -99,9 +105,9 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 
 ### Future / Production Hardening
 
-- MCP wrapper around the scoped HTTP tool endpoints.
-- Team workspaces, RBAC, and organization-wide admin audit review.
-- S3/GCS object storage with signed upload/download URLs.
+- MCP streaming/session transport hardening beyond the current authenticated JSON-RPC wrapper.
+- Team invitations, team-scoped document sharing, and role-scoped document access beyond the current owner/admin audit foundation.
+- Optional S3/GCS storage adapters if deploying outside the current Vercel Blob path.
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
 - Larger evaluation set for grounded answers and citation quality.
@@ -112,7 +118,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ```mermaid
 flowchart LR
   User["Authenticated user"] --> UI["Next.js App Router UI"]
-  Agent["Future agent or MCP wrapper"] --> Tools["Scoped /api/tools endpoints"]
+  Agent["Agent or MCP client"] --> Tools["Scoped /api/tools and /api/mcp endpoints"]
   UI --> AppAPI["App API routes"]
   Tools --> Auth["Auth.js session check"]
   AppAPI --> Auth
@@ -134,14 +140,18 @@ flowchart LR
 - Tailwind CSS
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
+- Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, and optional Resend email delivery
 - Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization with control/format-character rejection for email credentials, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup email/name/password validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
+- Bounded forgot-password and reset-password validation, non-enumerating reset request responses, per-client/per-email/aggregate reset request rate limiting, and one-time reset token consumption
 - PostgreSQL support through Prisma
 - Lazy Prisma client initialization for build-safe server imports
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
+- Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
+- EN/KO/JA locale helpers, shared dictionary, locale cookie API, and language switcher foundation
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked
@@ -149,6 +159,7 @@ flowchart LR
 - 16 KB JSON body limit and `application/json` requirement for search, ask, and agent tool APIs
 - Control/format-character normalization for search and ask inputs before AI-backed work or question persistence
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
+- Configurable document storage provider: `local` for development and `vercel-blob` for durable private object storage
 - Multipart content-type enforcement and parse-error handling for document uploads
 - Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
 - Per-user upload rate limiting before multipart body parsing and delete rate limiting before delete lookup
@@ -162,6 +173,7 @@ flowchart LR
 - Dashboard semantic search UI at `/dashboard/search`
 - Grounded question answering endpoint at `POST /api/ask`
 - Agent-ready tool endpoints under `/api/tools/*`
+- MCP JSON-RPC wrapper at `/api/mcp` for authenticated tool discovery and calls
 - Shared per-user rate limiting across AI-backed dashboard and tool endpoints
 - Ask UI with source citations at `/dashboard/ask`
 - Document upload/delete audit logs
@@ -170,7 +182,9 @@ flowchart LR
 - Agent tool usage audit logs
 - Failed credentials sign-in audit logs without raw credential values
 - Signup and OAuth account audit logs
+- Password reset request, completion, and delivery-failure audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
+- Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
@@ -212,6 +226,7 @@ Required environment variables:
 ```text
 DATABASE_URL=postgresql://documind:documind@localhost:5432/documind?schema=public
 AUTH_SECRET=replace-with-a-strong-random-secret
+AUTH_URL=http://localhost:3000
 AUTH_TRUST_HOST=true
 OPENAI_API_KEY=replace-with-openai-api-key
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
@@ -219,6 +234,14 @@ OPENAI_ANSWER_MODEL=gpt-5-mini
 ```
 
 `OPENAI_API_KEY` is only read in server-side document processing, search, and ask code. Do not expose it with a `NEXT_PUBLIC_` prefix.
+
+To enter OAuth and email secrets locally without pasting them into Codex chat, run:
+
+```powershell
+.\scripts\configure-local-auth-secrets.ps1 -LaunchNewWindow
+```
+
+The script opens a PowerShell prompt, reads secret values with `Read-Host -AsSecureString`, updates `.env.local`, and prints only the Google callback URL to register.
 
 Optional OAuth variables:
 
@@ -234,7 +257,28 @@ Google and GitHub buttons are shown only when both the provider ID and secret ar
 ```text
 http://localhost:3000/api/auth/callback/google
 http://localhost:3000/api/auth/callback/github
+https://documind-chi.vercel.app/api/auth/callback/google
 ```
+
+Optional password reset email variables:
+
+```text
+PASSWORD_RESET_BASE_URL=http://localhost:3000
+PASSWORD_RESET_EMAIL_FROM=
+RESEND_API_KEY=
+PASSWORD_RESET_DEBUG_LINKS=false
+```
+
+Set `PASSWORD_RESET_BASE_URL=https://documind-chi.vercel.app`, `PASSWORD_RESET_EMAIL_FROM`, and `RESEND_API_KEY` in production to send real reset emails. `PASSWORD_RESET_DEBUG_LINKS=true` is for local development only; outside production it returns a reset link in the forgot-password response so the flow can be tested without email delivery.
+
+Optional document storage variables:
+
+```text
+DOCUMENT_STORAGE_PROVIDER=local
+BLOB_READ_WRITE_TOKEN=
+```
+
+Use `DOCUMENT_STORAGE_PROVIDER=vercel-blob` and set `BLOB_READ_WRITE_TOKEN` on Vercel for durable private document storage. The database stores only a safe relative blob pathname; uploaded document bytes are read back on the server for extraction, chunking, and embedding.
 
 Start PostgreSQL with pgvector support:
 
@@ -291,7 +335,7 @@ docker compose exec app npm run test
 docker compose down
 ```
 
-The `app` service runs `npx prisma migrate deploy` before `npm run start`. Uploaded development files are stored in the `uploads-data` Docker volume. Set `OPENAI_API_KEY` in your shell or `.env` file before using embeddings, search, ask, or summarize flows that call OpenAI.
+The `app` service runs `npx prisma migrate deploy` before `npm run start`. With `DOCUMENT_STORAGE_PROVIDER=local`, uploaded development files are stored in the `uploads-data` Docker volume. With `DOCUMENT_STORAGE_PROVIDER=vercel-blob`, uploaded files are stored in Vercel Blob instead. Set `OPENAI_API_KEY` in your shell or `.env` file before using embeddings, search, ask, or summarize flows that call OpenAI.
 
 The Docker build context is intentionally bounded with `.dockerignore` so local secrets, `.vercel`, `uploads`, dependencies, test coverage, and framework build output are not copied into image builds. Git ignore rules also exclude non-example environment files while keeping `.env.example` tracked for reproducible setup. The production container runs as a non-root `nextjs` user, with the local uploads directory created before startup.
 
@@ -299,6 +343,8 @@ Example `.env` values for Docker:
 
 ```text
 AUTH_SECRET=replace-with-a-strong-random-secret
+AUTH_URL=http://localhost:3000
+AUTH_TRUST_HOST=true
 OPENAI_API_KEY=replace-with-openai-api-key
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 OPENAI_ANSWER_MODEL=gpt-5-mini
@@ -307,6 +353,11 @@ AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
 AUTH_GITHUB_ID=
 AUTH_GITHUB_SECRET=
+PASSWORD_RESET_BASE_URL=http://localhost:3000
+PASSWORD_RESET_EMAIL_FROM=
+RESEND_API_KEY=
+DOCUMENT_STORAGE_PROVIDER=local
+BLOB_READ_WRITE_TOKEN=
 ```
 
 ## AWS Deployment Plan
@@ -344,7 +395,7 @@ Unit tests use mocked `fetch` implementations for OpenAI helpers and do not requ
 The test suite is designed to cover the reliability and safety concerns that matter for AI-enabled internal tools:
 
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
-- `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, display-name control/format character stripping, storage path construction, and upload validation.
+- `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, display-name control/format character stripping, storage path construction, storage provider selection, and upload validation.
 - `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text while allowing known rate-limit notices.
 - `tests/document-ownership.test.ts`: owner-scoped filters and access control for document operations.
@@ -375,6 +426,10 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
 - `tests/auth-signup.test.ts`: signup input validation, display-name/password bounds, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
+- `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
+- `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, and provider failure handling.
+- `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
+- `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, and shared navigation dictionary coverage.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
 - `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, bounds provider account identifiers, normalizes provider display values, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
@@ -386,11 +441,11 @@ Run the suite with:
 npm run test
 ```
 
-Local verification on 2026-06-29:
+Local verification on 2026-06-30:
 
 ```text
-Test Files  34 passed (34)
-Tests       192 passed (192)
+Test Files  41 passed (41)
+Tests       246 passed (246)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -411,6 +466,8 @@ npm run prisma:seed
 
 After running migrations, create an account at [http://localhost:3000/signup](http://localhost:3000/signup). Email/password signup hashes the password on the server and then signs the new user in. If Google or GitHub OAuth variables are configured, the signup and login pages also show OAuth buttons. OAuth only provisions or links local users when the provider supplies a verified email; password accounts are not automatically linked by OAuth sign-in.
 
+Password users can start account recovery at [http://localhost:3000/forgot-password](http://localhost:3000/forgot-password). The app stores only a hashed reset token, sends a one-time reset link when Resend email delivery is configured, and accepts the new password at `/reset-password?token=...`. For local testing without email, set `PASSWORD_RESET_DEBUG_LINKS=true` outside production to show the reset link after requesting it.
+
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
 Recommended local verification flow:
@@ -421,6 +478,7 @@ Recommended local verification flow:
 4. Ask a grounded question using content from an uploaded document.
 5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
 6. Review owner-scoped audit log entries for your activity.
+7. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
 
 The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use. Seed credentials are bounded and normalized; production seeding rejects the documented default password.
 
@@ -439,7 +497,14 @@ The page is intentionally owner-scoped for the MVP:
 - Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
 - It does not expose other users' audit records.
 
-Organization-wide admin audit review is not implemented yet and remains a future production-hardening feature.
+Organization owners and admins can also review organization member activity at [http://localhost:3000/dashboard/admin/audit-logs](http://localhost:3000/dashboard/admin/audit-logs):
+
+- New users receive a default organization owner role and `General` team manager role.
+- Existing users without a membership receive a default organization the next time they sign in or open the admin audit view.
+- The admin view verifies the signed-in user has `OWNER` or `ADMIN` organization role.
+- It finds current organization members and filters audit records by those member `actorId` values.
+- It shows member organization roles and team roles next to recent organization-wide audit events.
+- Document reads, writes, search, ask, and tool execution still keep their existing owner-scoped authorization checks.
 
 ## Documents
 
@@ -452,13 +517,15 @@ Supported uploads:
 - `.pdf`
 - Maximum size: 10 MB
 
-Uploaded files are stored locally under:
+With `DOCUMENT_STORAGE_PROVIDER=local`, uploaded files are stored locally under:
 
 ```text
 uploads/documents
 ```
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and resolved paths must stay under the upload directory to prevent path traversal; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Upload file writes use exclusive file creation, and stored files are rechecked for size before text/PDF extraction. PDF text extraction rejects documents above the configured page limit before extracting page text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are resolved before the database record is deleted.
+With `DOCUMENT_STORAGE_PROVIDER=vercel-blob`, uploaded files are stored as private Vercel Blob objects using the same safe relative pathname stored in the database.
+
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and stored relative paths are validated before local or Blob reads/deletes; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Local upload file writes use exclusive file creation, Blob uploads disallow overwrite, and stored files are rechecked for size before text/PDF extraction. PDF text extraction rejects documents above the configured page limit before extracting page text. Users can only list and delete documents where `ownerId` matches their authenticated user ID. Delete lookups and delete mutations both include the owner filter, and stored paths are validated before the database record is deleted.
 
 After upload, documents are processed server-side:
 
@@ -570,7 +637,7 @@ The ask UI and API never call OpenAI from client components. The shared answer-g
 
 ## Agent Tool API
 
-These endpoints are not MCP tools yet. They are scoped HTTP endpoints that can be wrapped by MCP or another agent runtime later.
+DocuMind exposes both scoped HTTP tool endpoints and an authenticated JSON-RPC MCP wrapper. All tool surfaces require the same Auth.js session as the dashboard and keep owner-scoped retrieval rules.
 
 All tool endpoints require the same Auth.js session as the dashboard. Unauthenticated requests return `401`. Each endpoint filters by the authenticated user's `ownerId` and writes an agent tool audit log. Search and answer-generating tool endpoints share the same per-user in-memory rate limits as the dashboard APIs.
 
@@ -643,6 +710,49 @@ The endpoint verifies the document belongs to the current user and is `READY`, s
 
 Audit action: `agent_tool_summarize_document`.
 
+## MCP Wrapper
+
+Authenticated MCP-style clients can call:
+
+```http
+POST /api/mcp
+```
+
+The route accepts bounded JSON-RPC 2.0 requests and supports:
+
+- `initialize`
+- `tools/list`
+- `tools/call` with `search-documents`, `ask-with-citations`, or `summarize-document`
+
+Example `tools/list` request:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "tools-1",
+  "method": "tools/list"
+}
+```
+
+Example tool call:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "search-1",
+  "method": "tools/call",
+  "params": {
+    "name": "search-documents",
+    "arguments": {
+      "query": "approval workflow",
+      "limit": 5
+    }
+  }
+}
+```
+
+The MCP wrapper uses same-origin checks, Auth.js session authentication, bounded JSON parsing, owner-scoped retrieval, shared AI rate limits, and MCP-specific audit actions.
+
 ## Database
 
 Prisma schema:
@@ -661,30 +771,33 @@ prisma/migrations/20260602054500_embeddings_semantic_search/migration.sql
 prisma/migrations/20260603122222_deploy_managed_postgres/migration.sql
 prisma/migrations/20260603123000_restore_pgvector_hnsw_index/migration.sql
 prisma/migrations/20260629083000_signup_oauth_accounts/migration.sql
+prisma/migrations/20260630093000_password_reset_tokens/migration.sql
+prisma/migrations/20260630101500_organization_team_rbac/migration.sql
 ```
 
-The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer` for document access control. `UserAccount` stores OAuth provider links for stable local user IDs, and `AuditLog` records actor and resource fields for security-relevant events.
+The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer` for document access control. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, and `AuditLog` records actor and resource fields for security-relevant events.
 
 ## Known Limitations
 
-- Local file storage is intended for development; production should use object storage such as S3 or GCS.
+- Local file storage is intended for development; use `DOCUMENT_STORAGE_PROVIDER=vercel-blob` for durable Vercel uploads.
 - AI-backed search, answer, signup, and credentials sign-in endpoints use bounded in-memory rate limiters, which are not shared across multiple app instances.
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
-- MCP is not implemented yet; `/api/tools/*` endpoints are prepared so they can be wrapped later.
-- There is no organization-wide admin audit review UI yet; the MVP exposes only owner-scoped user audit logs.
+- Team invitations and team-scoped document sharing are not implemented yet; document operations remain owner-scoped.
+- Production password reset email requires `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM`; without them, reset requests still return safely but no email is delivered.
+- The MCP wrapper currently uses a bounded JSON-RPC POST endpoint; richer streaming/session transport can be added later.
 
 ## Future Improvements
 
-- Add S3/GCS storage and signed upload/download URLs.
+- Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add account-linking settings, team/workspace membership, and role-based access control.
-- Add organization-wide admin audit review and export controls.
-- Add Japanese/Korean/English i18n routing and localized dashboard copy.
+- Add account-linking settings, team invitations, and team-scoped document sharing.
+- Add organization-wide audit export controls.
+- Expand Japanese/Korean/English dictionary usage across every page and dashboard interaction.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.
 - Add production-grade rate limiting with Redis.
-- Wrap the scoped tool endpoints with MCP once the HTTP tool surface is stable.
+- Add richer MCP streaming/session transport once external client requirements are fixed.
 - Add screenshot assets and a short product walkthrough video for portfolio presentation.
 
 ## Health Check

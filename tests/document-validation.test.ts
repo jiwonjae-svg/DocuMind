@@ -16,8 +16,10 @@ import {
 } from "../lib/documents/validation";
 import {
   buildDocumentStoragePath,
+  getDocumentStorageProvider,
   resolveOptionalStoragePath,
   resolveStoragePath,
+  validateOptionalStoragePath,
 } from "../lib/documents/storage";
 
 describe("document upload validation", () => {
@@ -256,6 +258,30 @@ describe("document upload validation", () => {
       "uploads",
     );
     expect(() => resolveOptionalStoragePath("../outside.txt")).toThrow(
+      /upload directory/,
+    );
+  });
+
+  it("selects local storage by default and Vercel Blob when configured", () => {
+    expect(getDocumentStorageProvider({})).toBe("local");
+    expect(
+      getDocumentStorageProvider({
+        DOCUMENT_STORAGE_PROVIDER: "vercel-blob",
+      }),
+    ).toBe("vercel-blob");
+    expect(
+      getDocumentStorageProvider({
+        DOCUMENT_STORAGE_PROVIDER: "unknown",
+      }),
+    ).toBe("local");
+  });
+
+  it("validates stored relative paths without resolving them for remote providers", () => {
+    expect(validateOptionalStoragePath("")).toBeNull();
+    expect(validateOptionalStoragePath("user/document/file.txt")).toBe(
+      "user/document/file.txt",
+    );
+    expect(() => validateOptionalStoragePath("../outside.txt")).toThrow(
       /upload directory/,
     );
   });

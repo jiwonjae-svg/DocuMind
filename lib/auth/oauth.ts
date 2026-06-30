@@ -7,6 +7,10 @@ import {
   normalizeEmailCredential,
 } from "./credentials";
 import { getOAuthProviderName } from "./oauth-providers";
+import {
+  ensureUserDefaultOrganization,
+  ensureUserHasOrganizationMembership,
+} from "./rbac";
 
 export const OAUTH_ACCOUNT_EMAIL_CONFLICT_ERROR =
   "An account with this email already uses password sign-in. Sign in with your password first.";
@@ -108,7 +112,7 @@ async function updateLinkedOAuthUser({
     return null;
   }
 
-  return prisma.user.update({
+  const updatedUser = await prisma.user.update({
     where: {
       id: linkedUserId,
     },
@@ -123,6 +127,10 @@ async function updateLinkedOAuthUser({
       name: true,
     },
   });
+
+  await ensureUserDefaultOrganization(updatedUser.id);
+
+  return updatedUser;
 }
 
 export async function findUserIdForOAuthAccount(account: Account | null) {
@@ -240,6 +248,8 @@ export async function ensureOAuthUser({
               name: true,
             },
           });
+
+      await ensureUserHasOrganizationMembership(transaction, localUser);
 
       await transaction.userAccount.create({
         data: {

@@ -56,14 +56,13 @@ describe("document deletion", () => {
       documentId: "document-1",
       ipAddress: "127.0.0.1",
       ownerId: "user-1",
-      resolveStoragePath: (storagePath) =>
-        storagePath ? `/uploads/${storagePath}` : null,
+      validateStoragePath: (storagePath) => storagePath,
       userAgent: "vitest",
     });
 
     expect(result).toEqual({
       deleted: true,
-      resolvedStoragePath: "/uploads/user/document/policy.md",
+      storagePath: "user/document/policy.md",
     });
     expect(calls).toMatchObject([
       [
@@ -107,8 +106,7 @@ describe("document deletion", () => {
       db,
       documentId: "document-1",
       ownerId: "user-1",
-      resolveStoragePath: (storagePath) =>
-        storagePath ? `/uploads/${storagePath}` : null,
+      validateStoragePath: (storagePath) => storagePath,
     });
 
     expect(result).toEqual({ deleted: false });
@@ -126,7 +124,7 @@ describe("document deletion", () => {
         db,
         documentId: "document-1",
         ownerId: "user-1",
-        resolveStoragePath: () => {
+        validateStoragePath: () => {
           throw new Error("Stored document path escapes the upload directory.");
         },
       }),

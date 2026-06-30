@@ -5,11 +5,16 @@ import { describe, expect, it } from "vitest";
 const apiRoot = path.join(process.cwd(), "app", "api");
 const publicRouteSuffixes = [
   path.join("auth", "[...nextauth]", "route.ts"),
+  path.join("auth", "forgot-password", "route.ts"),
+  path.join("auth", "reset-password", "route.ts"),
   path.join("auth", "signup", "route.ts"),
   path.join("health", "route.ts"),
+  path.join("locale", "route.ts"),
 ];
 const jsonPostRouteSuffixes = [
   path.join("ask", "route.ts"),
+  path.join("locale", "route.ts"),
+  path.join("mcp", "route.ts"),
   path.join("search", "route.ts"),
   path.join("tools", "ask-with-citations", "route.ts"),
   path.join("tools", "search-documents", "route.ts"),
@@ -53,6 +58,7 @@ describe("API route security contracts", () => {
       path.join("ask", "route.ts"),
       path.join("documents", "[documentId]", "delete", "route.ts"),
       path.join("documents", "route.ts"),
+      path.join("mcp", "route.ts"),
       path.join("search", "route.ts"),
       path.join("tools", "ask-with-citations", "route.ts"),
       path.join("tools", "search-documents", "route.ts"),
@@ -100,6 +106,62 @@ describe("API route security contracts", () => {
     expect(createUserIndex).toBeGreaterThan(emailRateLimitIndex);
   });
 
+  it("keeps public password reset routes constrained when present", () => {
+    const forgotPasswordRoutePath = path.join(
+      apiRoot,
+      "auth",
+      "forgot-password",
+      "route.ts",
+    );
+    const resetPasswordRoutePath = path.join(
+      apiRoot,
+      "auth",
+      "reset-password",
+      "route.ts",
+    );
+
+    if (!existsSync(forgotPasswordRoutePath) || !existsSync(resetPasswordRoutePath)) {
+      return;
+    }
+
+    const forgotSource = readRoute(forgotPasswordRoutePath);
+    const resetSource = readRoute(resetPasswordRoutePath);
+    const forgotRateLimitIndex = forgotSource.indexOf(
+      "const clientRateLimit",
+    );
+    const forgotJsonBodyIndex = forgotSource.indexOf(
+      "readJsonBodyResult(request)",
+    );
+    const forgotEmailRateLimitIndex = forgotSource.indexOf(
+      "const emailRateLimit",
+    );
+    const forgotRequestIndex = forgotSource.indexOf(
+      "await requestPasswordReset",
+    );
+    const resetRateLimitIndex = resetSource.indexOf(
+      "const clientRateLimit",
+    );
+    const resetJsonBodyIndex = resetSource.indexOf(
+      "readJsonBodyResult(request)",
+    );
+    const resetCompleteIndex = resetSource.indexOf(
+      "await completePasswordReset",
+    );
+
+    expect(forgotSource).toContain("isSameOriginRequest(request)");
+    expect(forgotSource).toContain("PASSWORD_RESET_ACCEPTED_MESSAGE");
+    expect(forgotSource).not.toContain("result.user");
+    expect(forgotRateLimitIndex).toBeGreaterThanOrEqual(0);
+    expect(forgotJsonBodyIndex).toBeGreaterThan(forgotRateLimitIndex);
+    expect(forgotEmailRateLimitIndex).toBeGreaterThan(forgotJsonBodyIndex);
+    expect(forgotRequestIndex).toBeGreaterThan(forgotEmailRateLimitIndex);
+
+    expect(resetSource).toContain("isSameOriginRequest(request)");
+    expect(resetRateLimitIndex).toBeGreaterThanOrEqual(0);
+    expect(resetJsonBodyIndex).toBeGreaterThan(resetRateLimitIndex);
+    expect(resetCompleteIndex).toBeGreaterThan(resetJsonBodyIndex);
+  });
+
   it("keeps document uploads rate-limited before multipart parsing", () => {
     const source = readRoute(path.join(apiRoot, "documents", "route.ts"));
     const rateLimitIndex = source.indexOf("checkDocumentUploadRateLimit");
@@ -110,11 +172,16 @@ describe("API route security contracts", () => {
   });
 
   it("keeps document upload file writes exclusive", () => {
-    const source = readRoute(path.join(apiRoot, "documents", "route.ts"));
+    const routeSource = readRoute(path.join(apiRoot, "documents", "route.ts"));
+    const storageSource = readRoute(
+      path.join(process.cwd(), "lib", "documents", "storage.ts"),
+    );
 
-    expect(source).toContain(
+    expect(routeSource).toContain("putStoredDocument");
+    expect(storageSource).toContain(
       'writeFile(resolvedStoragePath, bytes, { flag: "wx" })',
     );
+    expect(storageSource).toContain("allowOverwrite: false");
   });
 
   it("keeps document deletes rate-limited before delete lookup", () => {

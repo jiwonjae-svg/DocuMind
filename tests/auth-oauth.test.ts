@@ -7,6 +7,19 @@ const prismaMock = vi.hoisted(() => ({
   auditLog: {
     create: vi.fn(),
   },
+  organization: {
+    create: vi.fn(),
+  },
+  organizationMembership: {
+    create: vi.fn(),
+    findFirst: vi.fn(),
+  },
+  team: {
+    create: vi.fn(),
+  },
+  teamMembership: {
+    create: vi.fn(),
+  },
   user: {
     create: vi.fn(),
     findUnique: vi.fn(),
@@ -77,6 +90,24 @@ describe("OAuth user provisioning", () => {
         : Promise.all(operation),
     );
     prismaMock.auditLog.create.mockResolvedValue({ id: "audit-1" });
+    prismaMock.organization.create.mockResolvedValue({
+      id: "org-1",
+      name: "Owner's workspace",
+    });
+    prismaMock.organizationMembership.create.mockResolvedValue({
+      id: "membership-1",
+      organizationId: "org-1",
+      role: "OWNER",
+      userId: "user-1",
+    });
+    prismaMock.organizationMembership.findFirst.mockResolvedValue(null);
+    prismaMock.team.create.mockResolvedValue({
+      id: "team-1",
+      name: "General",
+    });
+    prismaMock.teamMembership.create.mockResolvedValue({
+      id: "team-membership-1",
+    });
     prismaMock.userAccount.create.mockResolvedValue({ id: "account-1" });
   });
 
@@ -218,6 +249,25 @@ describe("OAuth user provisioning", () => {
           provider: "google",
           userId: "user-1",
         }),
+      }),
+    );
+    expect(prismaMock.organizationMembership.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          organizationId: "org-1",
+          role: "OWNER",
+          userId: "user-1",
+        },
+      }),
+    );
+    expect(prismaMock.teamMembership.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          organizationMembershipId: "membership-1",
+          role: "MANAGER",
+          teamId: "team-1",
+          userId: "user-1",
+        },
       }),
     );
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);

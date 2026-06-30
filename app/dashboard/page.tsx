@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import Link from "next/link";
@@ -37,6 +38,14 @@ const workspaceCards = [
     icon: "shield",
     accent: "amber",
   },
+  {
+    title: "Organization audit",
+    body: "Owners and admins can review recent activity across organization members.",
+    href: "/dashboard/admin/audit-logs",
+    action: "Review organization",
+    icon: "team",
+    accent: "blue",
+  },
 ] as const;
 
 const roadmap = [
@@ -47,9 +56,9 @@ const roadmap = [
     accent: "violet",
   },
   {
-    title: "Team access controls",
-    body: "Add team and role boundaries after the single-owner MVP is stable.",
-    icon: "shield",
+    title: "Durable storage and MCP wrapper",
+    body: "Add long-term object storage and wrap scoped HTTP tools with MCP.",
+    icon: "network",
     accent: "amber",
   },
 ] as const;
@@ -66,6 +75,7 @@ export default async function DashboardPage() {
   return (
     <main className={ui.page}>
       <AppHeader userName={displayName}>
+        <LanguageSwitcher />
         <LogoutButton />
       </AppHeader>
 
@@ -100,13 +110,17 @@ export default async function DashboardPage() {
                 <Icon name="shield" className="h-4 w-4 text-blue-700" />
                 Audit logs
               </Link>
+              <Link href="/dashboard/admin/audit-logs" className={ui.secondaryButton}>
+                <Icon name="team" className="h-4 w-4 text-blue-700" />
+                Organization
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       <section className={`${ui.container} py-8`}>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
           {workspaceCards.map((card) => (
             <article key={card.title} className={`${ui.subtleCard} p-6`}>
               <div className="flex items-start gap-5">

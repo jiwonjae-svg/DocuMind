@@ -1,6 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, rm, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { auth } from "@/auth";
 import {
   CROSS_ORIGIN_REQUEST_ERROR,
@@ -12,7 +10,8 @@ import {
 } from "@/lib/api/upload-rate-limit";
 import {
   buildDocumentStoragePath,
-  resolveStoragePath,
+  deleteStoredDocument,
+  putStoredDocument,
 } from "@/lib/documents/storage";
 import {
   DOCUMENT_UPLOAD_PARSE_ERROR,
@@ -134,10 +133,12 @@ export async function POST(request: NextRequest) {
     fileName: validation.safeFileName,
     userId: session.user.id,
   });
-  const resolvedStoragePath = resolveStoragePath(relativeStoragePath);
 
-  await mkdir(path.dirname(resolvedStoragePath), { recursive: true });
-  await writeFile(resolvedStoragePath, bytes, { flag: "wx" });
+  await putStoredDocument({
+    bytes,
+    mimeType: validation.mimeType,
+    storagePath: relativeStoragePath,
+  });
 
   try {
     await prisma.$transaction([
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
       }),
     ]);
   } catch (error) {
-    await rm(resolvedStoragePath, { force: true });
+    await deleteStoredDocument({ storagePath: relativeStoragePath });
     throw error;
   }
 
