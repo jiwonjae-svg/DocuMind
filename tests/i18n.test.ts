@@ -71,6 +71,7 @@ describe("i18n locale helpers", () => {
       (copy) => copy.teamAdmin.createTeamSubmit,
       (copy) => copy.teamAdmin.inviteMemberSubmit,
       (copy) => copy.teamAdmin.removeMember,
+      (copy) => copy.teamAdmin.successInvitationCreatedWithEmail,
       (copy) => copy.teamInvite.acceptInvitation,
       (copy) => copy.teamInvite.invalidTitle,
     ];

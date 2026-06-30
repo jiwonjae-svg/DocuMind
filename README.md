@@ -47,7 +47,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
 - Public signup is protected with same-origin checks, bounded JSON parsing, bounded password input validation, password hashing, and in-memory client/email/aggregate rate limiting.
 - Public password reset uses non-enumerating responses, same-origin checks, bounded JSON parsing, in-memory client/email/aggregate request rate limiting, hashed single-use reset tokens, expiry checks, server-side password hashing, and audit logs for reset requests and completed resets.
-- Password reset email delivery uses the Resend HTTP API when `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM` are configured, localizes the email subject/body from the current locale cookie or `Accept-Language`, and avoids client-side secrets or extra runtime dependencies.
+- Password reset and team invitation email delivery use the Resend HTTP API when `RESEND_API_KEY` and sender variables are configured, localize the email subject/body from the current locale cookie or `Accept-Language`, and avoid client-side secrets or extra runtime dependencies.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Document storage provider abstraction with local filesystem storage for development and private Vercel Blob storage for durable Vercel deployments.
@@ -108,7 +108,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Future / Production Hardening
 
 - MCP streaming/session transport hardening beyond the current authenticated JSON-RPC wrapper.
-- Automated invitation email delivery beyond the current admin-generated invite links.
+- Invitation revocation, resend, and expiry-management screens beyond current single-use invitation creation.
 - Optional S3/GCS storage adapters if deploying outside the current Vercel Blob path.
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
@@ -153,8 +153,8 @@ flowchart LR
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
-- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links, and removing team memberships
-- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset emails, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
+- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links with optional email delivery, and removing team memberships
+- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset and team invitation emails, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -189,7 +189,7 @@ flowchart LR
 - Password reset request, completion, and delivery-failure audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
-- Admin team-management API routes for creating teams, assigning existing users, creating team invitation links, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
+- Admin team-management API routes for creating teams, assigning existing users, creating team invitation links with optional email delivery, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
@@ -281,16 +281,17 @@ http://localhost:3000/api/auth/callback/github
 https://documind-chi.vercel.app/api/auth/callback/google
 ```
 
-Optional password reset email variables:
+Optional email variables:
 
 ```text
 PASSWORD_RESET_BASE_URL=http://localhost:3000
 PASSWORD_RESET_EMAIL_FROM=
+TEAM_INVITATION_EMAIL_FROM=
 RESEND_API_KEY=
 PASSWORD_RESET_DEBUG_LINKS=false
 ```
 
-Set `PASSWORD_RESET_BASE_URL=https://documind-chi.vercel.app`, `PASSWORD_RESET_EMAIL_FROM`, and `RESEND_API_KEY` in production to send real reset emails. `PASSWORD_RESET_DEBUG_LINKS=true` is for local development only; outside production it returns a reset link in the forgot-password response so the flow can be tested without email delivery.
+Set `PASSWORD_RESET_BASE_URL=https://documind-chi.vercel.app`, `PASSWORD_RESET_EMAIL_FROM`, and `RESEND_API_KEY` in production to send real reset emails. Team invitation emails use `TEAM_INVITATION_EMAIL_FROM` when set, otherwise they reuse `PASSWORD_RESET_EMAIL_FROM`; without a configured sender/API key, admins still receive a shareable invitation link. `PASSWORD_RESET_DEBUG_LINKS=true` is for local development only; outside production it returns a reset link in the forgot-password response so the flow can be tested without email delivery.
 
 Optional document storage variables:
 
@@ -376,6 +377,7 @@ AUTH_GITHUB_ID=
 AUTH_GITHUB_SECRET=
 PASSWORD_RESET_BASE_URL=http://localhost:3000
 PASSWORD_RESET_EMAIL_FROM=
+TEAM_INVITATION_EMAIL_FROM=
 RESEND_API_KEY=
 DOCUMENT_STORAGE_PROVIDER=local
 BLOB_READ_WRITE_TOKEN=
@@ -449,6 +451,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
 - `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
 - `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, EN/KO/JA email copy selection, and provider failure handling.
+- `tests/auth-team-invitation-email.test.ts`: optional Resend team invitation email delivery, sender fallback, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
 - `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, validation, invite URL construction, and expiry calculation.
 - `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
@@ -537,7 +540,7 @@ Organization owners and admins can manage team RBAC at [http://localhost:3000/da
 - Remove a user's team membership to revoke team-scoped document access.
 - `MANAGER` and `MEMBER` team roles can upload documents to that team; `VIEWER` can read team documents through document lists, search, ask, and summarize flows.
 - Team creation, invitation creation, invitation acceptance, member assignment, and member removal write bounded audit log records.
-- Invitation links are generated for admins to share manually; automated email invitation delivery is future scope.
+- Invitation emails are sent through Resend when configured; the generated link remains visible so admins can share it manually when email delivery is not configured or fails.
 
 ## Documents
 
@@ -818,15 +821,14 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
-- Automated team invitation email delivery is not implemented yet; admins can create invitation links and share them manually.
-- Production password reset email requires `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM`; without them, reset requests still return safely but no email is delivered.
+- Production email delivery requires `RESEND_API_KEY` plus `PASSWORD_RESET_EMAIL_FROM` and/or `TEAM_INVITATION_EMAIL_FROM`; without them, password reset requests still return safely and team invitation creation still returns a manual share link, but no email is delivered.
 - The MCP wrapper currently uses a bounded JSON-RPC POST endpoint; richer streaming/session transport can be added later.
 
 ## Future Improvements
 
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add account-linking settings and automated team invitation email delivery.
+- Add account-linking settings and richer invitation lifecycle controls.
 - Add organization-wide audit export controls.
 - Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.

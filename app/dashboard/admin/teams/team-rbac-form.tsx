@@ -31,6 +31,7 @@ type TeamRbacFormCopy = {
   organizationRole: string;
   successMemberAssigned: string;
   successInvitationCreated: string;
+  successInvitationCreatedWithEmail: string;
   successTeamCreated: string;
   team: string;
   teamName: string;
@@ -50,6 +51,7 @@ type TeamRbacFormsProps = {
 };
 
 type ApiResponse = {
+  emailSent?: boolean;
   error?: string;
   inviteUrl?: string;
 };
@@ -187,7 +189,11 @@ export function TeamRbacForms({
         );
       }
 
-      setInviteSuccess(copy.successInvitationCreated);
+      setInviteSuccess(
+        payload?.emailSent
+          ? copy.successInvitationCreatedWithEmail
+          : copy.successInvitationCreated,
+      );
       setInviteUrl(typeof payload?.inviteUrl === "string" ? payload.inviteUrl : null);
     } catch (error) {
       setInviteError(error instanceof Error ? error.message : copy.fallbackError);
