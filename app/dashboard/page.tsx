@@ -51,6 +51,12 @@ const workspaceCardMeta = [
     scope: "available",
   },
   {
+    href: "/dashboard/admin/readiness",
+    icon: "settings",
+    accent: "amber",
+    scope: "admin",
+  },
+  {
     href: "/dashboard/account",
     icon: "settings",
     accent: "blue",
@@ -122,6 +128,10 @@ export default async function DashboardPage() {
               <Link href="/dashboard/admin/audit-logs" className={ui.secondaryButton}>
                 <Icon name="team" className="h-4 w-4 text-blue-700" />
                 {copy.common.adminAudit}
+              </Link>
+              <Link href="/dashboard/admin/readiness" className={ui.secondaryButton}>
+                <Icon name="settings" className="h-4 w-4 text-blue-700" />
+                {copy.common.readiness}
               </Link>
               <Link href="/dashboard/api-tokens" className={ui.secondaryButton}>
                 <Icon name="network" className="h-4 w-4 text-blue-700" />

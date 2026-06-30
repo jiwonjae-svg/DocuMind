@@ -29,6 +29,7 @@ const en = {
     homeLink: "DocuMind home",
     primaryNavigation: "Primary navigation",
     resetPassword: "Reset password",
+    readiness: "Deployment readiness",
     search: "Search",
     signup: "Sign up",
     userFallback: "User",
@@ -302,6 +303,7 @@ const en = {
       ["Organization audit", "Owners and admins can review recent activity across organization members.", "Review organization"],
       ["Team RBAC", "Owners and admins can create teams, assign existing users, and send single-use team invitations.", "Manage teams"],
       ["MCP API tokens", "Create user-scoped bearer tokens for external MCP clients without sharing browser cookies.", "Manage API tokens"],
+      ["Deployment readiness", "Owners and admins can check production-critical configuration without exposing secret values.", "Check readiness"],
       ["Account security", "Review your sign-in methods and change your password from a protected account page.", "Manage account"],
     ],
     roadmap: [
@@ -589,6 +591,76 @@ const en = {
     },
     unknownActor: "Unknown actor",
   },
+  readiness: {
+    body:
+      "Check whether production-critical DocuMind configuration is present without displaying secret values.",
+    checkCount: "{ready} of {total} checks ready",
+    checksTitle: "Configuration checks",
+    missingCount: "{count} action required",
+    organizationBody:
+      "This view is limited to organization owners and admins. It reports only whether required values are configured.",
+    statusLabels: {
+      missing: "Action needed",
+      ready: "Ready",
+      warning: "Review",
+    },
+    summaryMissing:
+      "Some required production settings are missing. Configure them before relying on this deployment.",
+    summaryReady:
+      "All checked production settings are configured for this deployment.",
+    summaryWarning:
+      "Required settings are present, but at least one production hardening item should be reviewed.",
+    title: "Review deployment readiness",
+    warningCount: "{count} review",
+    checks: {
+      authSecret: {
+        missing: "Set AUTH_SECRET to a strong private value.",
+        ready: "AUTH_SECRET is configured.",
+        title: "Auth.js secret",
+        warning: "Review AUTH_SECRET before production use.",
+      },
+      authUrl: {
+        missing: "Set AUTH_URL to the production site URL for stable callbacks and emails.",
+        ready: "AUTH_URL is configured.",
+        title: "Application URL",
+        warning:
+          "AUTH_URL is missing. Vercel may infer the host, but explicit production URLs are safer for callbacks and email links.",
+      },
+      database: {
+        missing: "Set DATABASE_URL for PostgreSQL and pgvector persistence.",
+        ready: "DATABASE_URL is configured.",
+        title: "Database",
+        warning: "Review DATABASE_URL before production use.",
+      },
+      emailDelivery: {
+        missing:
+          "Set RESEND_API_KEY and PASSWORD_RESET_EMAIL_FROM for real password reset email delivery.",
+        ready: "Password reset email delivery is configured.",
+        title: "Email delivery",
+        warning: "Review email sender settings before production use.",
+      },
+      googleOAuth: {
+        missing: "Set AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET to enable Google OAuth.",
+        ready: "Google OAuth credentials are configured.",
+        title: "Google OAuth",
+        warning: "Review Google OAuth credentials before production use.",
+      },
+      openAi: {
+        missing: "Set OPENAI_API_KEY for embeddings, search, answers, and summaries.",
+        ready: "OPENAI_API_KEY is configured.",
+        title: "OpenAI",
+        warning: "Review OpenAI configuration before production use.",
+      },
+      storage: {
+        missing:
+          "Set DOCUMENT_STORAGE_PROVIDER=vercel-blob and BLOB_READ_WRITE_TOKEN for durable private uploads.",
+        ready: "Durable Vercel Blob storage is configured.",
+        title: "Document storage",
+        warning:
+          "Local file storage is active. Use Vercel Blob for durable production uploads.",
+      },
+    },
+  },
   teamAdmin: {
     addMemberBody:
       "Add an existing DocuMind user to this organization and assign a team role. New users must sign up before they can be added.",
@@ -703,6 +775,7 @@ const ko = {
     homeLink: "DocuMind 홈",
     primaryNavigation: "주요 탐색",
     resetPassword: "비밀번호 재설정",
+    readiness: "배포 준비 상태",
     search: "검색",
     signup: "회원가입",
     userFallback: "사용자",
@@ -972,6 +1045,7 @@ const ko = {
       ["조직 감사", "소유자와 관리자는 조직 구성원의 최근 활동을 검토할 수 있습니다.", "조직 검토"],
       ["팀 RBAC", "소유자와 관리자는 팀을 만들고 기존 사용자를 배정하며 1회용 팀 초대를 보낼 수 있습니다.", "팀 관리"],
       ["MCP API 토큰", "브라우저 쿠키를 공유하지 않고 외부 MCP 클라이언트용 사용자 범위 bearer 토큰을 만듭니다.", "API 토큰 관리"],
+      ["배포 준비 상태", "소유자와 관리자는 비밀값을 노출하지 않고 production 핵심 설정을 확인할 수 있습니다.", "준비 상태 확인"],
       ["계정 보안", "로그인 방식을 확인하고 보호된 계정 페이지에서 비밀번호를 변경합니다.", "계정 관리"],
     ],
     roadmap: [
@@ -1259,6 +1333,77 @@ const ko = {
     },
     unknownActor: "알 수 없는 사용자",
   },
+  readiness: {
+    ...en.readiness,
+    body:
+      "비밀값을 표시하지 않고 DocuMind production 핵심 설정이 준비되었는지 확인합니다.",
+    checkCount: "{total}개 중 {ready}개 확인 완료",
+    checksTitle: "설정 점검",
+    missingCount: "조치 필요 {count}개",
+    organizationBody:
+      "이 화면은 조직 소유자와 관리자에게만 표시됩니다. 필요한 값이 설정되었는지만 보고합니다.",
+    statusLabels: {
+      missing: "조치 필요",
+      ready: "준비됨",
+      warning: "검토 필요",
+    },
+    summaryMissing:
+      "일부 필수 production 설정이 누락되었습니다. 이 배포를 실제로 사용하기 전에 설정하세요.",
+    summaryReady:
+      "점검한 production 설정이 모두 이 배포에 구성되어 있습니다.",
+    summaryWarning:
+      "필수 설정은 있지만 production hardening 항목 중 검토할 내용이 있습니다.",
+    title: "배포 준비 상태 검토",
+    warningCount: "검토 {count}개",
+    checks: {
+      authSecret: {
+        missing: "AUTH_SECRET을 강력한 비공개 값으로 설정하세요.",
+        ready: "AUTH_SECRET이 설정되어 있습니다.",
+        title: "Auth.js secret",
+        warning: "production 사용 전에 AUTH_SECRET을 검토하세요.",
+      },
+      authUrl: {
+        missing: "안정적인 callback과 이메일 링크를 위해 AUTH_URL을 production 사이트 URL로 설정하세요.",
+        ready: "AUTH_URL이 설정되어 있습니다.",
+        title: "애플리케이션 URL",
+        warning:
+          "AUTH_URL이 없습니다. Vercel이 호스트를 추론할 수 있지만 callback과 이메일 링크에는 명시적인 production URL이 더 안전합니다.",
+      },
+      database: {
+        missing: "PostgreSQL 및 pgvector 영속성을 위해 DATABASE_URL을 설정하세요.",
+        ready: "DATABASE_URL이 설정되어 있습니다.",
+        title: "데이터베이스",
+        warning: "production 사용 전에 DATABASE_URL을 검토하세요.",
+      },
+      emailDelivery: {
+        missing:
+          "실제 비밀번호 재설정 이메일 발송을 위해 RESEND_API_KEY와 PASSWORD_RESET_EMAIL_FROM을 설정하세요.",
+        ready: "비밀번호 재설정 이메일 발송이 설정되어 있습니다.",
+        title: "이메일 발송",
+        warning: "production 사용 전에 이메일 발신자 설정을 검토하세요.",
+      },
+      googleOAuth: {
+        missing: "Google OAuth를 사용하려면 AUTH_GOOGLE_ID와 AUTH_GOOGLE_SECRET을 설정하세요.",
+        ready: "Google OAuth 자격 증명이 설정되어 있습니다.",
+        title: "Google OAuth",
+        warning: "production 사용 전에 Google OAuth 자격 증명을 검토하세요.",
+      },
+      openAi: {
+        missing: "임베딩, 검색, 답변, 요약을 위해 OPENAI_API_KEY를 설정하세요.",
+        ready: "OPENAI_API_KEY가 설정되어 있습니다.",
+        title: "OpenAI",
+        warning: "production 사용 전에 OpenAI 설정을 검토하세요.",
+      },
+      storage: {
+        missing:
+          "내구성 있는 비공개 업로드를 위해 DOCUMENT_STORAGE_PROVIDER=vercel-blob 및 BLOB_READ_WRITE_TOKEN을 설정하세요.",
+        ready: "내구성 있는 Vercel Blob 스토리지가 설정되어 있습니다.",
+        title: "문서 스토리지",
+        warning:
+          "로컬 파일 스토리지가 활성화되어 있습니다. production 업로드에는 Vercel Blob을 사용하세요.",
+      },
+    },
+  },
   teamAdmin: {
     addMemberBody:
       "기존 DocuMind 사용자를 이 조직에 추가하고 팀 역할을 배정합니다. 새 사용자는 먼저 가입해야 합니다.",
@@ -1373,6 +1518,7 @@ const ja = {
     homeLink: "DocuMindホーム",
     primaryNavigation: "主要ナビゲーション",
     resetPassword: "パスワード再設定",
+    readiness: "デプロイ準備状況",
     search: "検索",
     signup: "登録",
     userFallback: "ユーザー",
@@ -1645,6 +1791,7 @@ const ja = {
       ["組織監査", "オーナーと管理者は組織メンバーの最近の活動を確認できます。", "組織を確認"],
       ["チームRBAC", "オーナーと管理者はチームを作成し、既存ユーザーを割り当て、1回限りのチーム招待を送信できます。", "チームを管理"],
       ["MCP APIトークン", "ブラウザーCookieを共有せず、外部MCPクライアント向けのユーザースコープbearerトークンを作成します。", "APIトークンを管理"],
+      ["デプロイ準備状況", "オーナーと管理者はシークレット値を公開せずにproduction重要設定を確認できます。", "準備状況を確認"],
       ["アカウントセキュリティ", "ログイン方法を確認し、保護されたアカウントページでパスワードを変更します。", "アカウント管理"],
     ],
     roadmap: [
@@ -1931,6 +2078,79 @@ const ja = {
       VIEWER: "閲覧者",
     },
     unknownActor: "不明なユーザー",
+  },
+  readiness: {
+    ...en.readiness,
+    body:
+      "シークレット値を表示せず、DocuMindのproduction重要設定が揃っているか確認します。",
+    checkCount: "{total}件中{ready}件が準備完了",
+    checksTitle: "設定チェック",
+    missingCount: "対応必要 {count}件",
+    organizationBody:
+      "このビューは組織オーナーと管理者だけが利用できます。必要な値が設定されているかだけを報告します。",
+    statusLabels: {
+      missing: "対応必要",
+      ready: "準備完了",
+      warning: "要確認",
+    },
+    summaryMissing:
+      "一部の必須production設定が不足しています。このデプロイを本番利用する前に設定してください。",
+    summaryReady:
+      "チェック対象のproduction設定はすべてこのデプロイに構成されています。",
+    summaryWarning:
+      "必須設定はありますが、production hardening項目に確認が必要です。",
+    title: "デプロイ準備状況を確認",
+    warningCount: "確認 {count}件",
+    checks: {
+      authSecret: {
+        missing: "AUTH_SECRETを強力な非公開値に設定してください。",
+        ready: "AUTH_SECRETが設定されています。",
+        title: "Auth.js secret",
+        warning: "production利用前にAUTH_SECRETを確認してください。",
+      },
+      authUrl: {
+        missing:
+          "安定したcallbackとメールリンクのため、AUTH_URLをproductionサイトURLに設定してください。",
+        ready: "AUTH_URLが設定されています。",
+        title: "アプリケーションURL",
+        warning:
+          "AUTH_URLがありません。Vercelがホストを推測できる場合もありますが、callbackとメールリンクには明示的なproduction URLが安全です。",
+      },
+      database: {
+        missing: "PostgreSQLとpgvectorの永続化のため、DATABASE_URLを設定してください。",
+        ready: "DATABASE_URLが設定されています。",
+        title: "データベース",
+        warning: "production利用前にDATABASE_URLを確認してください。",
+      },
+      emailDelivery: {
+        missing:
+          "実際のパスワードリセットメール送信のため、RESEND_API_KEYとPASSWORD_RESET_EMAIL_FROMを設定してください。",
+        ready: "パスワードリセットメール送信が設定されています。",
+        title: "メール送信",
+        warning: "production利用前にメール送信者設定を確認してください。",
+      },
+      googleOAuth: {
+        missing:
+          "Google OAuthを有効にするにはAUTH_GOOGLE_IDとAUTH_GOOGLE_SECRETを設定してください。",
+        ready: "Google OAuth認証情報が設定されています。",
+        title: "Google OAuth",
+        warning: "production利用前にGoogle OAuth認証情報を確認してください。",
+      },
+      openAi: {
+        missing: "埋め込み、検索、回答、要約のため、OPENAI_API_KEYを設定してください。",
+        ready: "OPENAI_API_KEYが設定されています。",
+        title: "OpenAI",
+        warning: "production利用前にOpenAI設定を確認してください。",
+      },
+      storage: {
+        missing:
+          "耐久性のある非公開アップロードのため、DOCUMENT_STORAGE_PROVIDER=vercel-blobとBLOB_READ_WRITE_TOKENを設定してください。",
+        ready: "耐久性のあるVercel Blobストレージが設定されています。",
+        title: "文書ストレージ",
+        warning:
+          "ローカルファイルストレージが有効です。productionアップロードにはVercel Blobを使用してください。",
+      },
+    },
   },
   teamAdmin: {
     addMemberBody:

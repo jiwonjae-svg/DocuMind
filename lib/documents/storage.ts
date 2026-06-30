@@ -6,6 +6,7 @@ import {
 } from "./validation";
 
 export type DocumentStorageProvider = "local" | "vercel-blob";
+type DocumentStorageEnv = Record<string, string | undefined>;
 
 type StoredDocumentInput = {
   bytes: Buffer;
@@ -24,7 +25,7 @@ export function getUploadRoot() {
 }
 
 export function getDocumentStorageProvider(
-  env: NodeJS.ProcessEnv = process.env,
+  env: DocumentStorageEnv = process.env,
 ): DocumentStorageProvider {
   return env.DOCUMENT_STORAGE_PROVIDER === "vercel-blob"
     ? "vercel-blob"

@@ -169,6 +169,10 @@ export default async function TeamAdminPage({
                 <Icon name="shield" className="h-4 w-4 text-blue-700" />
                 {copy.common.adminAudit}
               </Link>
+              <Link href="/dashboard/admin/readiness" className={ui.secondaryButton}>
+                <Icon name="settings" className="h-4 w-4 text-blue-700" />
+                {copy.common.readiness}
+              </Link>
               <Link href="/dashboard/documents" className={ui.secondaryButton}>
                 <Icon name="document" className="h-4 w-4 text-blue-700" />
                 {copy.common.documents}

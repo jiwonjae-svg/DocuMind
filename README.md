@@ -101,6 +101,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Owner-scoped audit log viewer in the dashboard.
 - Organization-wide admin audit log viewer for organization owners/admins, scoped to audit events created by current organization members.
 - Organization audit CSV export for owners/admins, with admin-scoped filtering, no-store attachment headers, spreadsheet formula neutralization, and an export audit event.
+- Organization owner/admin deployment readiness page that reports critical production configuration status without exposing secret values.
 - Team-scoped document upload, listing, original download, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read/download, and only the uploading owner can delete the stored file.
 - Pending and expired team invitations can be renewed from the team admin screen, issuing a new seven-day single-use link and optionally resending email without storing the raw token.
 - Pending team invitation revocation from the team admin screen; revoked invitations are rejected by the join flow and recorded in audit logs.
@@ -161,7 +162,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating, renewing, revoking, and optionally emailing single-use team invitation links, and removing team memberships
-- EN/KO/JA localized landing, auth, OAuth callback errors, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, locale-prefixed URL rewrites such as `/ko/dashboard`, Accept-Language fallback, and language switcher across the main workspace surfaces
+- EN/KO/JA localized landing, auth, OAuth callback errors, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit/readiness UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, locale-prefixed URL rewrites such as `/ko/dashboard`, Accept-Language fallback, and language switcher across the main workspace surfaces
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -201,6 +202,7 @@ flowchart LR
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
 - Organization audit CSV export at `/api/admin/audit-logs/export` with organization-admin authorization and an `organization_audit_exported` audit event
+- Organization-admin deployment readiness page at `/dashboard/admin/readiness` for checking `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`, `OPENAI_API_KEY`, Google OAuth, Resend email, and durable storage configuration without rendering secret values
 - Admin team-management API routes for creating teams, assigning existing users, creating/renewing team invitation links with optional email delivery, revoking pending invitations, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, token-hash replacement on renewal, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
@@ -489,8 +491,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  52 passed (52)
-Tests       325 passed (325)
+Test Files  53 passed (53)
+Tests       328 passed (328)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -529,6 +531,7 @@ Recommended local verification flow:
 8. Open API tokens and create a bearer token only if an external MCP client needs access.
 9. Review owner-scoped audit log entries for your activity.
 10. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
+11. Open Deployment readiness as an organization owner/admin to check production-critical configuration without exposing secrets.
 
 The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use. Seed credentials are bounded and normalized; production seeding rejects the documented default password.
 
@@ -569,6 +572,13 @@ Organization owners and admins can manage team RBAC at [http://localhost:3000/da
 - `MANAGER` and `MEMBER` team roles can upload documents to that team; `VIEWER` can read team documents through document lists, search, ask, and summarize flows.
 - Team creation, invitation creation, invitation renewal, invitation acceptance, invitation revocation, member assignment, and member removal write bounded audit log records.
 - Invitation emails are sent through Resend when configured; generated and renewed links remain visible so admins can share them manually when email delivery is not configured or fails.
+
+Organization owners and admins can review deployment readiness at [http://localhost:3000/dashboard/admin/readiness](http://localhost:3000/dashboard/admin/readiness):
+
+- The page repeats the organization `OWNER`/`ADMIN` authorization check before rendering.
+- It reports only configured/missing/review status, never raw secret values.
+- It checks production-critical settings for PostgreSQL, Auth.js secret and URL, OpenAI API access, Google OAuth, password reset email delivery, and document storage.
+- It warns when local file storage is active so operators can switch to `DOCUMENT_STORAGE_PROVIDER=vercel-blob` and `BLOB_READ_WRITE_TOKEN` for durable Vercel uploads.
 
 ## Documents
 
@@ -920,3 +930,11 @@ Expected response:
   "service": "documind"
 }
 ```
+
+Organization owners/admins can also open:
+
+```text
+http://localhost:3000/dashboard/admin/readiness
+```
+
+That page checks production-critical configuration without rendering secret values.
