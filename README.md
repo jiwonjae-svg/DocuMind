@@ -2,7 +2,7 @@
 
 DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams.
 
-This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload, original file download, document processing, OpenAI embeddings, access-scoped semantic search, grounded question answering, and user-managed MCP API tokens.
+This repository contains a usable MVP with email/password signup, password reset, account password changes, optional Google/GitHub OAuth, document upload, original file download, document processing, OpenAI embeddings, access-scoped semantic search, grounded question answering, and user-managed MCP API tokens.
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
@@ -42,6 +42,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 
 - Auth.js email/password signup, credentials sign-in, password reset, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
 - Auth forms include localized password visibility controls, live status/error regions, and disabled submit states for a more production-like account flow.
+- Signed-in password users can change their password from `/dashboard/account`; the route verifies the current password, rate-limits attempts, hashes the new password server-side, and writes a `password_changed` audit event.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
 - OAuth provider account IDs are bounded and reject control/format characters before lookup or linking.
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
@@ -145,6 +146,7 @@ flowchart LR
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
 - Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, and optional EN/KO/JA Resend email delivery
+- Account security page at `/dashboard/account` for reviewing sign-in methods and changing password-account credentials with server-side current-password verification
 - Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization with control/format-character rejection for email credentials, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
@@ -156,7 +158,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links with optional email delivery, and removing team memberships
-- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
+- EN/KO/JA localized landing, auth, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -191,6 +193,7 @@ flowchart LR
 - Failed credentials sign-in audit logs without raw credential values
 - Signup and OAuth account audit logs
 - Password reset request, completion, and delivery-failure audit logs
+- Password change audit logs
 - API token creation and revocation audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
@@ -457,6 +460,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-signup.test.ts`: signup input validation, display-name/password bounds, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
 - `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
+- `tests/auth-account-password.test.ts`: signed-in password changes validate current/new password input, reject OAuth-only users, avoid password reuse, handle concurrent update races, write audit events, and rate-limit repeated attempts.
 - `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-team-invitation-email.test.ts`: optional Resend team invitation email delivery, sender fallback, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
@@ -477,8 +481,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  46 passed (46)
-Tests       284 passed (284)
+Test Files  47 passed (47)
+Tests       293 passed (293)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -501,6 +505,8 @@ After running migrations, create an account at [http://localhost:3000/signup](ht
 
 Password users can start account recovery at [http://localhost:3000/forgot-password](http://localhost:3000/forgot-password). The app stores only a hashed reset token, sends a localized one-time reset link when Resend email delivery is configured, and accepts the new password at `/reset-password?token=...`. For local testing without email, set `PASSWORD_RESET_DEBUG_LINKS=true` outside production to show the reset link after requesting it.
 
+Signed-in password users can open [http://localhost:3000/dashboard/account](http://localhost:3000/dashboard/account) to review their profile, linked sign-in methods, and change their password. Password changes require the current password, use the same 12-character minimum as signup/reset, are rate-limited, hash the new password server-side, and write a `password_changed` audit log. OAuth-only users see their connected provider method and manage credentials with that provider.
+
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
 Recommended local verification flow:
@@ -511,9 +517,10 @@ Recommended local verification flow:
 4. Run semantic search from the Search page and inspect matching chunks, snippets, and scores.
 5. Ask a grounded question using content from an uploaded document.
 6. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
-7. Open API tokens and create a bearer token only if an external MCP client needs access.
-8. Review owner-scoped audit log entries for your activity.
-9. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
+7. Open Account and change the password for a password-based account if needed.
+8. Open API tokens and create a bearer token only if an external MCP client needs access.
+9. Review owner-scoped audit log entries for your activity.
+10. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
 
 The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use. Seed credentials are bounded and normalized; production seeding rejects the documented default password.
 
@@ -528,7 +535,7 @@ The page is intentionally owner-scoped for the MVP:
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
 - Metadata display is normalized and capped to keep control characters, long filenames, provider/model details, or nested values from dominating the audit screen.
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
-- Login, failed login, upload, download, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control/format characters normalized and IP metadata validated before persistence.
+- Login, failed login, password change, upload, download, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control/format characters normalized and IP metadata validated before persistence.
 - Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
 - API token creation and revocation store token IDs only, not raw bearer token values.
 - It does not expose other users' audit records.

@@ -10,6 +10,7 @@ const localizedMetadataPages = [
   "app/reset-password/page.tsx",
   "app/join-team/page.tsx",
   "app/dashboard/page.tsx",
+  "app/dashboard/account/page.tsx",
   "app/dashboard/documents/page.tsx",
   "app/dashboard/search/page.tsx",
   "app/dashboard/ask/page.tsx",
@@ -21,6 +22,7 @@ const localizedMetadataPages = [
 
 const dashboardLanguageSwitcherPages = [
   "app/dashboard/page.tsx",
+  "app/dashboard/account/page.tsx",
   "app/dashboard/documents/page.tsx",
   "app/dashboard/search/page.tsx",
   "app/dashboard/ask/page.tsx",

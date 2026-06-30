@@ -7,6 +7,7 @@ const en = {
     title: "DocuMind",
   },
   common: {
+    account: "Account",
     adminAudit: "Organization audit",
     apiTokens: "API tokens",
     ask: "Ask questions",
@@ -49,6 +50,7 @@ const en = {
     "API token not found.": "API token not found.",
     "Content-Type must be application/json.": "Content-Type must be application/json.",
     "Cross-origin request blocked.": "Cross-origin request blocked.",
+    "Current password is incorrect.": "Current password is incorrect.",
     "documentId is required.": "documentId is required.",
     "Document must be READY before summarization.":
       "Document must be READY before summarization.",
@@ -59,6 +61,8 @@ const en = {
     "Enter a valid email address.": "Enter a valid email address.",
     "Enter a valid email, name, and password.":
       "Enter a valid email, name, and password.",
+    "Enter your current password and a valid new password.":
+      "Enter your current password and a valid new password.",
     "Enter a valid reset token and password.":
       "Enter a valid reset token and password.",
     "Invalid JSON body.": "Invalid JSON body.",
@@ -68,6 +72,9 @@ const en = {
       "JSON request body must be 16 KB or smaller.",
     "Password must be at least 12 characters.":
       "Password must be at least 12 characters.",
+    "Password change failed.": "Password change failed.",
+    "Password sign-in is required to change a password.":
+      "Password sign-in is required to change a password.",
     "Question must be between 1 and 1000 characters.":
       "Question must be between 1 and 1000 characters.",
     "Search failed.": "Search failed.",
@@ -85,12 +92,18 @@ const en = {
     "Team not found.": "Team not found.",
     "This password reset link is invalid or expired.":
       "This password reset link is invalid or expired.",
+    "New password confirmation does not match.":
+      "New password confirmation does not match.",
+    "New password must be different from the current password.":
+      "New password must be different from the current password.",
     "Too many account creation attempts. Try again shortly.":
       "Too many account creation attempts. Try again shortly.",
     "Too many answer requests. Try again shortly.":
       "Too many answer requests. Try again shortly.",
     "Too many password reset attempts. Try again shortly.":
       "Too many password reset attempts. Try again shortly.",
+    "Too many password change attempts. Try again shortly.":
+      "Too many password change attempts. Try again shortly.",
     "Too many search requests. Try again shortly.":
       "Too many search requests. Try again shortly.",
     "Unsupported locale.": "Unsupported locale.",
@@ -268,6 +281,7 @@ const en = {
       ["Organization audit", "Owners and admins can review recent activity across organization members.", "Review organization"],
       ["Team RBAC", "Owners and admins can create teams, assign existing users, and send single-use team invitations.", "Manage teams"],
       ["MCP API tokens", "Create user-scoped bearer tokens for external MCP clients without sharing browser cookies.", "Manage API tokens"],
+      ["Account security", "Review your sign-in methods and change your password from a protected account page.", "Manage account"],
     ],
     roadmap: [
       ["Invitation lifecycle controls", "Add revoke, resend, and expiry-management screens for team invitations."],
@@ -305,6 +319,30 @@ const en = {
     title: "Manage MCP API tokens",
     tokenHelp: "The token is stored only as a server-side hash.",
     tokenLabel: "Bearer token",
+  },
+  account: {
+    authMethods: "Sign-in methods",
+    body:
+      "Review your DocuMind account details and change your password without exposing credentials to the client.",
+    changePassword: "Change password",
+    changingPassword: "Changing password...",
+    confirmNewPassword: "Confirm new password",
+    currentPassword: "Current password",
+    fallbackError: "Unable to update account security.",
+    noAuthMethods: "No sign-in methods are linked.",
+    noName: "No name set",
+    passwordMethod: "Email and password",
+    passwordUnavailable:
+      "This account currently uses OAuth sign-in only. Use the connected provider to manage credentials.",
+    profileTitle: "Profile",
+    securityBody:
+      "Password updates run on the server, are rate-limited, and write a bounded audit event.",
+    securityTitle: "Account security",
+    successChanged: "Password changed.",
+    title: "Manage account security",
+    updateBody:
+      "Enter your current password before setting a new password with at least 12 characters.",
+    updateTitle: "Change password",
   },
   documents: {
     acceptedFormats: "Accepted formats: .txt, .md, .pdf. Maximum size: 10 MB.",
@@ -596,6 +634,7 @@ const ko = {
     title: "DocuMind",
   },
   common: {
+    account: "계정",
     adminAudit: "조직 감사",
     apiTokens: "API 토큰",
     ask: "질문하기",
@@ -703,6 +742,7 @@ const ko = {
     "API token not found.": "API 토큰을 찾을 수 없습니다.",
     "Content-Type must be application/json.": "Content-Type은 application/json이어야 합니다.",
     "Cross-origin request blocked.": "교차 출처 요청이 차단되었습니다.",
+    "Current password is incorrect.": "현재 비밀번호가 올바르지 않습니다.",
     "documentId is required.": "documentId가 필요합니다.",
     "Document must be READY before summarization.":
       "요약하기 전에 문서가 READY 상태여야 합니다.",
@@ -713,6 +753,8 @@ const ko = {
     "Enter a valid email address.": "유효한 이메일 주소를 입력하세요.",
     "Enter a valid email, name, and password.":
       "유효한 이메일, 이름, 비밀번호를 입력하세요.",
+    "Enter your current password and a valid new password.":
+      "현재 비밀번호와 유효한 새 비밀번호를 입력하세요.",
     "Enter a valid reset token and password.":
       "유효한 재설정 토큰과 비밀번호를 입력하세요.",
     "Invalid JSON body.": "JSON 본문이 올바르지 않습니다.",
@@ -722,6 +764,9 @@ const ko = {
       "JSON 요청 본문은 16 KB 이하여야 합니다.",
     "Password must be at least 12 characters.":
       "비밀번호는 12자 이상이어야 합니다.",
+    "Password change failed.": "비밀번호 변경에 실패했습니다.",
+    "Password sign-in is required to change a password.":
+      "비밀번호를 변경하려면 비밀번호 로그인 계정이 필요합니다.",
     "Question must be between 1 and 1000 characters.":
       "질문은 1자 이상 1000자 이하여야 합니다.",
     "Search failed.": "검색에 실패했습니다.",
@@ -739,12 +784,18 @@ const ko = {
     "Team not found.": "팀을 찾을 수 없습니다.",
     "This password reset link is invalid or expired.":
       "비밀번호 재설정 링크가 잘못되었거나 만료되었습니다.",
+    "New password confirmation does not match.":
+      "새 비밀번호 확인이 일치하지 않습니다.",
+    "New password must be different from the current password.":
+      "새 비밀번호는 현재 비밀번호와 달라야 합니다.",
     "Too many account creation attempts. Try again shortly.":
       "계정 생성 시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
     "Too many answer requests. Try again shortly.":
       "답변 요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
     "Too many password reset attempts. Try again shortly.":
       "비밀번호 재설정 시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "Too many password change attempts. Try again shortly.":
+      "비밀번호 변경 시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
     "Too many search requests. Try again shortly.":
       "검색 요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
     "Unsupported locale.": "지원하지 않는 언어입니다.",
@@ -854,6 +905,7 @@ const ko = {
       ["조직 감사", "소유자와 관리자는 조직 구성원의 최근 활동을 검토할 수 있습니다.", "조직 검토"],
       ["팀 RBAC", "소유자와 관리자는 팀을 만들고 기존 사용자를 배정하며 1회용 팀 초대를 보낼 수 있습니다.", "팀 관리"],
       ["MCP API 토큰", "브라우저 쿠키를 공유하지 않고 외부 MCP 클라이언트용 사용자 범위 bearer 토큰을 만듭니다.", "API 토큰 관리"],
+      ["계정 보안", "로그인 방식을 확인하고 보호된 계정 페이지에서 비밀번호를 변경합니다.", "계정 관리"],
     ],
     roadmap: [
       ["초대 수명주기 제어", "팀 초대를 취소, 재전송하고 만료를 관리하는 화면을 추가합니다."],
@@ -892,6 +944,31 @@ const ko = {
     title: "MCP API 토큰 관리",
     tokenHelp: "토큰은 서버 측 해시로만 저장됩니다.",
     tokenLabel: "Bearer 토큰",
+  },
+  account: {
+    ...en.account,
+    authMethods: "로그인 방식",
+    body:
+      "클라이언트에 자격 증명을 노출하지 않고 DocuMind 계정 정보와 비밀번호를 관리합니다.",
+    changePassword: "비밀번호 변경",
+    changingPassword: "비밀번호 변경 중...",
+    confirmNewPassword: "새 비밀번호 확인",
+    currentPassword: "현재 비밀번호",
+    fallbackError: "계정 보안을 업데이트할 수 없습니다.",
+    noAuthMethods: "연결된 로그인 방식이 없습니다.",
+    noName: "설정된 이름 없음",
+    passwordMethod: "이메일과 비밀번호",
+    passwordUnavailable:
+      "이 계정은 현재 OAuth 로그인만 사용합니다. 연결된 제공자에서 자격 증명을 관리하세요.",
+    profileTitle: "프로필",
+    securityBody:
+      "비밀번호 업데이트는 서버에서 실행되고 rate limit이 적용되며 제한된 감사 이벤트를 기록합니다.",
+    securityTitle: "계정 보안",
+    successChanged: "비밀번호가 변경되었습니다.",
+    title: "계정 보안 관리",
+    updateBody:
+      "현재 비밀번호를 입력한 뒤 12자 이상의 새 비밀번호를 설정하세요.",
+    updateTitle: "비밀번호 변경",
   },
   documents: {
     ...en.documents,
@@ -1181,6 +1258,7 @@ const ja = {
     title: "DocuMind",
   },
   common: {
+    account: "アカウント",
     adminAudit: "組織監査",
     apiTokens: "APIトークン",
     ask: "質問する",
@@ -1289,6 +1367,7 @@ const ja = {
     "API token not found.": "APIトークンが見つかりません。",
     "Content-Type must be application/json.": "Content-Typeはapplication/jsonである必要があります。",
     "Cross-origin request blocked.": "クロスオリジンリクエストがブロックされました。",
+    "Current password is incorrect.": "現在のパスワードが正しくありません。",
     "documentId is required.": "documentIdは必須です。",
     "Document must be READY before summarization.":
       "要約する前に文書がREADY状態である必要があります。",
@@ -1299,6 +1378,8 @@ const ja = {
     "Enter a valid email address.": "有効なメールアドレスを入力してください。",
     "Enter a valid email, name, and password.":
       "有効なメール、名前、パスワードを入力してください。",
+    "Enter your current password and a valid new password.":
+      "現在のパスワードと有効な新しいパスワードを入力してください。",
     "Enter a valid reset token and password.":
       "有効な再設定トークンとパスワードを入力してください。",
     "Invalid JSON body.": "JSON本文が正しくありません。",
@@ -1308,6 +1389,9 @@ const ja = {
       "JSONリクエスト本文は16 KB以下である必要があります。",
     "Password must be at least 12 characters.":
       "パスワードは12文字以上である必要があります。",
+    "Password change failed.": "パスワード変更に失敗しました。",
+    "Password sign-in is required to change a password.":
+      "パスワードを変更するにはパスワードログインアカウントが必要です。",
     "Question must be between 1 and 1000 characters.":
       "質問は1文字以上1000文字以下である必要があります。",
     "Search failed.": "検索に失敗しました。",
@@ -1325,12 +1409,18 @@ const ja = {
     "Team not found.": "チームが見つかりません。",
     "This password reset link is invalid or expired.":
       "このパスワード再設定リンクは無効または期限切れです。",
+    "New password confirmation does not match.":
+      "新しいパスワードの確認が一致しません。",
+    "New password must be different from the current password.":
+      "新しいパスワードは現在のパスワードと異なる必要があります。",
     "Too many account creation attempts. Try again shortly.":
       "アカウント作成の試行が多すぎます。しばらくしてから再試行してください。",
     "Too many answer requests. Try again shortly.":
       "回答リクエストが多すぎます。しばらくしてから再試行してください。",
     "Too many password reset attempts. Try again shortly.":
       "パスワード再設定の試行が多すぎます。しばらくしてから再試行してください。",
+    "Too many password change attempts. Try again shortly.":
+      "パスワード変更の試行が多すぎます。しばらくしてから再試行してください。",
     "Too many search requests. Try again shortly.":
       "検索リクエストが多すぎます。しばらくしてから再試行してください。",
     "Unsupported locale.": "サポートされていないロケールです。",
@@ -1440,6 +1530,7 @@ const ja = {
       ["組織監査", "オーナーと管理者は組織メンバーの最近の活動を確認できます。", "組織を確認"],
       ["チームRBAC", "オーナーと管理者はチームを作成し、既存ユーザーを割り当て、1回限りのチーム招待を送信できます。", "チームを管理"],
       ["MCP APIトークン", "ブラウザーCookieを共有せず、外部MCPクライアント向けのユーザースコープbearerトークンを作成します。", "APIトークンを管理"],
+      ["アカウントセキュリティ", "ログイン方法を確認し、保護されたアカウントページでパスワードを変更します。", "アカウント管理"],
     ],
     roadmap: [
       ["招待ライフサイクル制御", "チーム招待の取り消し、再送、期限管理画面を追加します。"],
@@ -1478,6 +1569,31 @@ const ja = {
     title: "MCP APIトークン管理",
     tokenHelp: "トークンはサーバー側ハッシュとしてのみ保存されます。",
     tokenLabel: "Bearerトークン",
+  },
+  account: {
+    ...en.account,
+    authMethods: "ログイン方法",
+    body:
+      "認証情報をクライアントに公開せずに、DocuMindアカウント情報とパスワードを管理します。",
+    changePassword: "パスワードを変更",
+    changingPassword: "変更中...",
+    confirmNewPassword: "新しいパスワードを確認",
+    currentPassword: "現在のパスワード",
+    fallbackError: "アカウントセキュリティを更新できません。",
+    noAuthMethods: "連携済みログイン方法はありません。",
+    noName: "名前未設定",
+    passwordMethod: "メールとパスワード",
+    passwordUnavailable:
+      "このアカウントは現在OAuthログインのみを使用しています。接続済みプロバイダーで認証情報を管理してください。",
+    profileTitle: "プロフィール",
+    securityBody:
+      "パスワード更新はサーバーで実行され、レート制限され、制限付き監査イベントを記録します。",
+    securityTitle: "アカウントセキュリティ",
+    successChanged: "パスワードを変更しました。",
+    title: "アカウントセキュリティ管理",
+    updateBody:
+      "現在のパスワードを入力してから、12文字以上の新しいパスワードを設定してください。",
+    updateTitle: "パスワード変更",
   },
   documents: {
     ...en.documents,

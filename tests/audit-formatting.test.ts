@@ -93,6 +93,14 @@ describe("audit metadata formatting", () => {
     );
   });
 
+  it("localizes password change audit actions", () => {
+    expect(formatAuditAction("password_changed", "en")).toBe(
+      "Password changed",
+    );
+    expect(formatAuditAction("password_changed", "ko")).toBe("비밀번호 변경");
+    expect(formatAuditAction("password_changed", "ja")).toBe("パスワード変更");
+  });
+
   it("limits displayed metadata entries", () => {
     const metadata = {
       one: 1,
