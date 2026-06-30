@@ -21,6 +21,26 @@ type AskResponse = {
   matchedSnippets: MatchedSnippet[];
 };
 
+type AskFormCopy = {
+  answer: string;
+  ask: string;
+  asking: string;
+  chunk: string;
+  citations: string;
+  fallbackError: string;
+  insufficient: string;
+  invalidResponse: string;
+  invalidSources: string;
+  matchedSnippets: string;
+  noCitations: string;
+  noMatches: string;
+  placeholder: string;
+  question: string;
+  required: string;
+  retrieval: string;
+  sources: string;
+};
+
 function formatScore(score: number) {
   return `${Math.round(score * 100)}%`;
 }
@@ -47,7 +67,7 @@ function isMatchedSnippet(value: unknown): value is MatchedSnippet {
   return Number.isFinite((value as Partial<MatchedSnippet>).similarityScore);
 }
 
-export function AskForm() {
+export function AskForm({ copy }: { copy: AskFormCopy }) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [question, setQuestion] = useState("");
@@ -59,7 +79,7 @@ export function AskForm() {
     const trimmedQuestion = question.trim();
 
     if (!trimmedQuestion) {
-      setError("Enter a question.");
+      setError(copy.required);
       setResult(null);
       return;
     }
@@ -80,7 +100,7 @@ export function AskForm() {
         | null;
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? "Question failed.");
+        throw new Error(payload?.error ?? copy.fallbackError);
       }
 
       if (
@@ -88,7 +108,7 @@ export function AskForm() {
         !Array.isArray(payload.citations) ||
         !Array.isArray(payload.matchedSnippets)
       ) {
-        throw new Error("Question response was not valid.");
+        throw new Error(copy.invalidResponse);
       }
 
       const citations = payload.citations.filter(isCitation);
@@ -98,7 +118,7 @@ export function AskForm() {
         citations.length !== payload.citations.length ||
         matchedSnippets.length !== payload.matchedSnippets.length
       ) {
-        throw new Error("Question response contained invalid sources.");
+        throw new Error(copy.invalidSources);
       }
 
       setResult({
@@ -111,7 +131,7 @@ export function AskForm() {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : "Question failed.",
+          : copy.fallbackError,
       );
       setResult(null);
     } finally {
@@ -127,7 +147,7 @@ export function AskForm() {
             htmlFor="question"
             className={ui.label}
           >
-            Question
+            {copy.question}
           </label>
           <textarea
             id="question"
@@ -136,7 +156,7 @@ export function AskForm() {
             maxLength={MAX_SEARCH_QUERY_LENGTH}
             rows={4}
             className={`mt-2 block min-h-32 resize-y leading-6 ${ui.input}`}
-            placeholder="What does the onboarding guide say about approval steps?"
+            placeholder={copy.placeholder}
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-slate-500">
@@ -148,7 +168,7 @@ export function AskForm() {
               className={`${ui.primaryButton} w-full sm:w-auto`}
             >
               <Icon name="question" className="h-4 w-4" />
-              {isPending ? "Asking..." : "Ask"}
+              {isPending ? copy.asking : copy.ask}
             </button>
           </div>
         </form>
@@ -163,11 +183,11 @@ export function AskForm() {
           <section className={`${ui.subtleCard} mt-6 p-5`}>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-semibold text-[#0b1535]">
-                Answer
+                {copy.answer}
               </h2>
               {result.insufficientInformation ? (
                 <span className="rounded-md bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                  Insufficient information
+                  {copy.insufficient}
                 </span>
               ) : null}
             </div>
@@ -183,9 +203,9 @@ export function AskForm() {
           <div className="flex items-center gap-3">
             <IconTile accent="blue" icon="document" className="h-10 w-10" />
             <div>
-              <p className={ui.eyebrow}>Sources</p>
+              <p className={ui.eyebrow}>{copy.sources}</p>
               <h2 className="mt-1 text-base font-semibold text-[#0b1535]">
-                Citations
+                {copy.citations}
               </h2>
             </div>
           </div>
@@ -200,7 +220,7 @@ export function AskForm() {
                     {citation.documentTitle}
                   </p>
                   <p className="mt-1 text-xs font-semibold text-blue-700">
-                    Chunk {citation.chunkIndex}
+                    {copy.chunk} {citation.chunkIndex}
                   </p>
                   <p className="mt-2 text-xs leading-5 text-slate-600">
                     {citation.snippet}
@@ -210,7 +230,7 @@ export function AskForm() {
             </div>
           ) : (
             <p className="mt-4 text-sm leading-6 text-slate-500">
-              No citations yet.
+              {copy.noCitations}
             </p>
           )}
         </section>
@@ -219,9 +239,9 @@ export function AskForm() {
           <div className="flex items-center gap-3">
             <IconTile accent="emerald" icon="search" className="h-10 w-10" />
             <div>
-              <p className={ui.eyebrow}>Retrieval</p>
+              <p className={ui.eyebrow}>{copy.retrieval}</p>
               <h2 className="mt-1 text-base font-semibold text-[#0b1535]">
-                Matched snippets
+                {copy.matchedSnippets}
               </h2>
             </div>
           </div>
@@ -238,7 +258,7 @@ export function AskForm() {
                         {snippet.documentTitle}
                       </p>
                       <p className="mt-1 text-xs font-semibold text-blue-700">
-                        Chunk {snippet.chunkIndex}
+                        {copy.chunk} {snippet.chunkIndex}
                       </p>
                     </div>
                     <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
@@ -253,7 +273,7 @@ export function AskForm() {
             </div>
           ) : (
             <p className="mt-4 text-sm leading-6 text-slate-500">
-              No matches yet.
+              {copy.noMatches}
             </p>
           )}
         </section>

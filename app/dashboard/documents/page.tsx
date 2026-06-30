@@ -3,6 +3,8 @@ import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { getDocumentOperationNotice } from "@/lib/documents/notices";
 import { formatStoredDocumentProcessingError } from "@/lib/documents/processing-errors";
+import { formatCopy, lookupCopy } from "@/lib/i18n/dictionaries";
+import { getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -34,6 +36,7 @@ export default async function DocumentsPage({
   searchParams,
 }: DocumentsPageProps) {
   const session = await auth();
+  const { copy, locale } = await getCurrentI18n();
 
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/dashboard/documents");
@@ -65,12 +68,13 @@ export default async function DocumentsPage({
       },
     },
   });
-  const displayName = session.user.name ?? session.user.email ?? "User";
+  const displayName =
+    session.user.name ?? session.user.email ?? copy.common.userFallback;
 
   return (
     <main className={ui.page}>
       <AppHeader userName={displayName}>
-        <LogoutButton />
+        <LogoutButton label={copy.common.logout} />
       </AppHeader>
 
       <section className={ui.gradientBand}>
@@ -81,44 +85,42 @@ export default async function DocumentsPage({
               className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-900"
             >
               <Icon name="arrow" className="h-4 w-4 rotate-180" />
-              Back to dashboard
+              {copy.common.backToDashboard}
             </Link>
             <div className="flex flex-wrap gap-2 sm:justify-end">
               <Link href="/dashboard/search" className={ui.secondaryButton}>
                 <Icon name="search" className="h-4 w-4 text-blue-700" />
-                Search
+                {copy.common.search}
               </Link>
               <Link href="/dashboard/ask" className={ui.secondaryButton}>
                 <Icon name="question" className="h-4 w-4 text-blue-700" />
-                Ask questions
+                {copy.common.ask}
               </Link>
               <Link href="/dashboard/audit-logs" className={ui.secondaryButton}>
                 <Icon name="shield" className="h-4 w-4 text-blue-700" />
-                Audit logs
+                {copy.common.auditLogs}
               </Link>
             </div>
           </div>
 
           <div className={`${ui.card} grid gap-6 p-6 lg:grid-cols-[1fr_380px]`}>
             <div>
-              <p className={ui.eyebrow}>Documents</p>
+              <p className={ui.eyebrow}>{copy.common.documents}</p>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#080f2f] sm:text-4xl">
-                Upload and manage knowledge files
+                {copy.documents.cardTitle}
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">
-                Add text, Markdown, or PDF files to your private workspace.
-                Every list and delete action is scoped to the signed-in user.
+                {copy.documents.cardBody}
               </p>
             </div>
 
             <div className={`${ui.subtleCard} hidden p-5 lg:block`}>
               <IconTile accent="blue" icon="upload" />
               <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
-                Development storage
+                {copy.documents.storageTitle}
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Files are saved locally for the MVP while metadata and chunks
-                stay in PostgreSQL.
+                {copy.documents.storageBody}
               </p>
             </div>
           </div>
@@ -134,7 +136,7 @@ export default async function DocumentsPage({
                 : "border-red-200 bg-red-50 text-red-700"
             }`}
           >
-            {notice.text}
+            {lookupCopy(copy.documents.notices, notice.text)}
           </div>
         ) : null}
 
@@ -147,7 +149,7 @@ export default async function DocumentsPage({
           >
             <div>
               <label htmlFor="file" className={ui.label}>
-                Upload document
+                {copy.documents.uploadDocument}
               </label>
               <input
                 id="file"
@@ -158,13 +160,13 @@ export default async function DocumentsPage({
                 className={`mt-2 block ${ui.input} file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-blue-700`}
               />
               <p className="mt-2 text-xs text-slate-500">
-                Accepted formats: .txt, .md, .pdf. Maximum size: 10 MB.
+                {copy.documents.acceptedFormats}
               </p>
             </div>
             <div className="flex items-end">
               <button type="submit" className={`${ui.primaryButton} w-full md:w-auto`}>
                 <Icon name="upload" className="h-4 w-4" />
-                Upload
+                {copy.documents.upload}
               </button>
             </div>
           </form>
@@ -173,13 +175,15 @@ export default async function DocumentsPage({
         <div className={`${ui.card} mt-6 overflow-hidden`}>
           <div className="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className={ui.eyebrow}>Library</p>
+              <p className={ui.eyebrow}>{copy.documents.library}</p>
               <h2 className="mt-2 text-xl font-semibold text-[#080f2f]">
-                Uploaded documents
+                {copy.documents.uploadedDocuments}
               </h2>
             </div>
             <span className="rounded-md bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
-              {documents.length} files
+              {formatCopy(copy.documents.countLabel, {
+                count: documents.length,
+              })}
             </span>
           </div>
 
@@ -187,11 +191,10 @@ export default async function DocumentsPage({
             <div className="grid place-items-center px-6 py-14 text-center">
               <IconTile accent="blue" icon="document" />
               <h3 className="mt-4 text-lg font-semibold text-[#0b1535]">
-                No documents uploaded yet
+                {copy.documents.emptyTitle}
               </h3>
               <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
-                Upload a supported file to create chunks for semantic search and
-                grounded answers.
+                {copy.documents.emptyBody}
               </p>
             </div>
           ) : (
@@ -200,6 +203,9 @@ export default async function DocumentsPage({
                 const processingError = formatStoredDocumentProcessingError(
                   document.processingError,
                 );
+                const processingErrorText = processingError
+                  ? lookupCopy(copy.documents.processingErrors, processingError)
+                  : null;
 
                 return (
                   <div
@@ -220,7 +226,7 @@ export default async function DocumentsPage({
                           <span
                             className={`rounded-md px-2.5 py-1 text-xs font-semibold ${statusStyles[document.status]}`}
                           >
-                            {document.status}
+                            {copy.documents.status[document.status]}
                           </span>
                         </div>
                         <p className="mt-2 truncate text-sm text-slate-600">
@@ -228,13 +234,13 @@ export default async function DocumentsPage({
                         </p>
                         <p className="mt-2 text-xs leading-5 text-slate-500">
                           {formatBytes(document.sizeBytes)} / {document.mimeType} /{" "}
-                          {document._count.chunks} chunks /{" "}
-                          {document.extractedCharCount} characters /{" "}
-                          {document.createdAt.toLocaleDateString("en-US")}
+                          {document._count.chunks} {copy.documents.chunks} /{" "}
+                          {document.extractedCharCount} {copy.documents.characters} /{" "}
+                          {document.createdAt.toLocaleDateString(locale)}
                         </p>
-                        {processingError ? (
+                        {processingErrorText ? (
                           <p className="mt-2 text-xs leading-5 text-red-700">
-                            {processingError}
+                            {processingErrorText}
                           </p>
                         ) : null}
                       </div>
@@ -246,7 +252,7 @@ export default async function DocumentsPage({
                     >
                       <button type="submit" className={ui.dangerButton}>
                         <Icon name="trash" className="h-4 w-4" />
-                        Delete
+                        {copy.common.delete}
                       </button>
                     </form>
                   </div>

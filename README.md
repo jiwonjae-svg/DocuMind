@@ -111,7 +111,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
 - Larger evaluation set for grounded answers and citation quality.
-- Japanese/Korean/English localized dashboard routing.
+- Locale-prefixed URL routing and a managed translation review workflow.
 
 ## Architecture
 
@@ -151,7 +151,7 @@ flowchart LR
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
-- EN/KO/JA locale helpers, shared dictionary, locale cookie API, and language switcher foundation
+- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, and organization admin audit UI with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked
@@ -429,7 +429,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
 - `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, and provider failure handling.
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
-- `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, and shared navigation dictionary coverage.
+- `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
 - `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, bounds provider account identifiers, normalizes provider display values, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
 - `tests/password.test.ts`: scrypt password hashing and missing-hash rejection for OAuth-only users.
@@ -445,7 +445,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  41 passed (41)
-Tests       246 passed (246)
+Tests       248 passed (248)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -794,7 +794,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Move document processing and embedding generation to a job queue.
 - Add account-linking settings, team invitations, and team-scoped document sharing.
 - Add organization-wide audit export controls.
-- Expand Japanese/Korean/English dictionary usage across every page and dashboard interaction.
+- Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.
 - Add production-grade rate limiting with Redis.
 - Add richer MCP streaming/session transport once external client requirements are fixed.

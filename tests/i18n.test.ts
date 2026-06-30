@@ -6,7 +6,12 @@ import {
   normalizeLocale,
   readPreferredLocaleFromAcceptLanguage,
 } from "../lib/i18n/config";
-import { translate } from "../lib/i18n/dictionaries";
+import {
+  formatCopy,
+  getDictionary,
+  lookupCopy,
+  translate,
+} from "../lib/i18n/dictionaries";
 
 describe("i18n locale helpers", () => {
   it("normalizes supported locale values", () => {
@@ -35,5 +40,51 @@ describe("i18n locale helpers", () => {
     expect(translate("en", "login")).toBe("Sign in");
     expect(translate("ko", "login")).toBe("로그인");
     expect(translate("ja", "login")).toBe("ログイン");
+  });
+
+  it("keeps core product surfaces localized beyond the common nav", () => {
+    const english = getDictionary("en");
+    const localizedChecks: Array<(copy: typeof english) => string> = [
+      (copy) => copy.auth.loginTitle,
+      (copy) => copy.oauth.separator,
+      (copy) => copy.home.implementedEyebrow,
+      (copy) => copy.dashboard.title,
+      (copy) => copy.documents.cardTitle,
+      (copy) => copy.documents.status.READY,
+      (copy) => copy.searchPage.title,
+      (copy) => copy.searchForm.scopeEyebrow,
+      (copy) => copy.askPage.title,
+      (copy) => copy.askForm.answer,
+      (copy) => copy.audit.title,
+      (copy) => copy.adminAudit.accessTitle,
+      (copy) => copy.adminAudit.organizationRoles.OWNER,
+      (copy) => copy.adminAudit.teamRoles.VIEWER,
+    ];
+
+    for (const locale of ["ko", "ja"] as const) {
+      const dictionary = getDictionary(locale);
+
+      for (const readCopy of localizedChecks) {
+        const localizedValue = readCopy(dictionary);
+
+        expect(localizedValue).toBeTruthy();
+        expect(localizedValue).not.toBe(readCopy(english));
+      }
+    }
+  });
+
+  it("formats and looks up localized display copy", () => {
+    const ko = getDictionary("ko");
+    const ja = getDictionary("ja");
+
+    expect(formatCopy(ko.documents.countLabel, { count: 3 })).toBe(
+      "3개 파일",
+    );
+    expect(lookupCopy(ko.documents.notices, "Document deleted.")).toBe(
+      "문서를 삭제했습니다.",
+    );
+    expect(
+      lookupCopy(ja.documents.processingErrors, "Document processing failed."),
+    ).toBe("文書処理に失敗しました。");
   });
 });

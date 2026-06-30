@@ -7,13 +7,23 @@ import { FormEvent, useState } from "react";
 
 type SignupFormProps = {
   callbackUrl: string;
+  copy: {
+    createAccount: string;
+    createAccountPending: string;
+    email: string;
+    name: string;
+    password: string;
+    passwordHelp: string;
+    signInExistingAccount: string;
+    signupError: string;
+  };
 };
 
 type SignupResponse = {
   error?: string;
 };
 
-export function SignupForm({ callbackUrl }: SignupFormProps) {
+export function SignupForm({ callbackUrl, copy }: SignupFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +52,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
 
     if (!response.ok) {
       setIsSubmitting(false);
-      setError(payload.error ?? "Unable to create the account.");
+      setError(payload.error ?? copy.signupError);
       return;
     }
 
@@ -55,7 +65,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
     setIsSubmitting(false);
 
     if (!signInResult || signInResult.error) {
-      setError("If this account exists, sign in with its current password.");
+      setError(copy.signInExistingAccount);
       return;
     }
 
@@ -67,7 +77,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
     <form method="post" onSubmit={handleSubmit} className="mt-7 space-y-5">
       <div>
         <label htmlFor="name" className={ui.label}>
-          Name
+          {copy.name}
         </label>
         <input
           id="name"
@@ -80,7 +90,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
       </div>
       <div>
         <label htmlFor="email" className={ui.label}>
-          Email
+          {copy.email}
         </label>
         <input
           id="email"
@@ -93,7 +103,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
       </div>
       <div>
         <label htmlFor="password" className={ui.label}>
-          Password
+          {copy.password}
         </label>
         <input
           id="password"
@@ -105,7 +115,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
           className={`mt-2 ${ui.input}`}
         />
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Use at least 12 characters.
+          {copy.passwordHelp}
         </p>
       </div>
       {error ? (
@@ -119,7 +129,7 @@ export function SignupForm({ callbackUrl }: SignupFormProps) {
         className={`${ui.primaryButton} w-full`}
       >
         <Icon name="team" className="h-4 w-4" />
-        {isSubmitting ? "Creating account..." : "Create account"}
+        {isSubmitting ? copy.createAccountPending : copy.createAccount}
       </button>
     </form>
   );

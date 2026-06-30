@@ -8,9 +8,17 @@ import { FormEvent, useState } from "react";
 
 type LoginFormProps = {
   callbackUrl: string;
+  copy: {
+    email: string;
+    error: string;
+    forgotPassword: string;
+    password: string;
+    submit: string;
+    submitting: string;
+  };
 };
 
-export function LoginForm({ callbackUrl }: LoginFormProps) {
+export function LoginForm({ callbackUrl, copy }: LoginFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +41,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
     setIsSubmitting(false);
 
       if (!result || result.error) {
-      setError("Check your email and password, then try again.");
+      setError(copy.error);
       return;
     }
 
@@ -48,7 +56,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           htmlFor="email"
           className={ui.label}
         >
-          Email
+          {copy.email}
         </label>
         <input
           id="email"
@@ -65,13 +73,13 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
             htmlFor="password"
             className={ui.label}
           >
-            Password
+            {copy.password}
           </label>
           <Link
             href="/forgot-password"
             className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
-            Forgot password?
+            {copy.forgotPassword}
           </Link>
         </div>
         <input
@@ -94,7 +102,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
         className={`${ui.primaryButton} w-full`}
       >
         <Icon name="lock" className="h-4 w-4" />
-        {isSubmitting ? "Signing in..." : "Sign in"}
+        {isSubmitting ? copy.submitting : copy.submit}
       </button>
     </form>
   );

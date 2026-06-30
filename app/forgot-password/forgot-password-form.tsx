@@ -10,7 +10,18 @@ type ForgotPasswordResponse = {
   resetUrl?: string;
 };
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({
+  copy,
+}: {
+  copy: {
+    email: string;
+    error: string;
+    localResetLink: string;
+    submit: string;
+    submitting: string;
+    success: string;
+  };
+}) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [resetUrl, setResetUrl] = useState<string | null>(null);
@@ -40,13 +51,13 @@ export function ForgotPasswordForm() {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setError(payload.error ?? "Unable to request a password reset.");
+      setError(payload.error ?? copy.error);
       return;
     }
 
     setMessage(
       payload.message ??
-        "If an account exists, password reset instructions have been sent.",
+        copy.success,
     );
     setResetUrl(payload.resetUrl ?? null);
   }
@@ -55,7 +66,7 @@ export function ForgotPasswordForm() {
     <form method="post" onSubmit={handleSubmit} className="mt-7 space-y-5">
       <div>
         <label htmlFor="email" className={ui.label}>
-          Email
+          {copy.email}
         </label>
         <input
           id="email"
@@ -79,7 +90,7 @@ export function ForgotPasswordForm() {
               href={resetUrl}
               className="mt-2 inline-flex font-semibold text-emerald-900 underline underline-offset-4"
             >
-              Open local reset link
+              {copy.localResetLink}
             </Link>
           ) : null}
         </div>
@@ -90,7 +101,7 @@ export function ForgotPasswordForm() {
         className={`${ui.primaryButton} w-full`}
       >
         <Icon name="lock" className="h-4 w-4" />
-        {isSubmitting ? "Sending instructions..." : "Send reset instructions"}
+        {isSubmitting ? copy.submitting : copy.submit}
       </button>
     </form>
   );

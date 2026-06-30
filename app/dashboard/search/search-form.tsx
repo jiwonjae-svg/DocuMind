@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon, IconTile, ui } from "@/components/ui";
+import { formatCopy } from "@/lib/i18n/dictionaries";
 import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
 import { FormEvent, useState } from "react";
 
@@ -13,6 +14,28 @@ type SearchResult = {
 
 type SearchResponse = {
   results: SearchResult[];
+};
+
+type SearchFormCopy = {
+  auditBody: string;
+  auditEyebrow: string;
+  auditTitle: string;
+  chunk: string;
+  empty: string;
+  fallbackError: string;
+  invalidResponse: string;
+  invalidResult: string;
+  matches: string;
+  pending: string;
+  placeholder: string;
+  queryLabel: string;
+  required: string;
+  results: string;
+  scopeBody: string;
+  scopeEyebrow: string;
+  scopeTitle: string;
+  submit: string;
+  topMatches: string;
 };
 
 function formatScore(score: number) {
@@ -34,7 +57,7 @@ function isSearchResult(value: unknown): value is SearchResult {
   );
 }
 
-export function SearchForm() {
+export function SearchForm({ copy }: { copy: SearchFormCopy }) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [query, setQuery] = useState("");
@@ -46,7 +69,7 @@ export function SearchForm() {
     const trimmedQuery = query.trim();
 
     if (!trimmedQuery) {
-      setError("Enter a search query.");
+      setError(copy.required);
       setResults(null);
       return;
     }
@@ -67,23 +90,23 @@ export function SearchForm() {
         | null;
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? "Search failed.");
+        throw new Error(payload?.error ?? copy.fallbackError);
       }
 
       if (!Array.isArray(payload?.results)) {
-        throw new Error("Search response was not valid.");
+        throw new Error(copy.invalidResponse);
       }
 
       const normalizedResults = payload.results.filter(isSearchResult);
 
       if (normalizedResults.length !== payload.results.length) {
-        throw new Error("Search response contained invalid results.");
+        throw new Error(copy.invalidResult);
       }
 
       setResults(normalizedResults);
     } catch (caughtError) {
       setError(
-        caughtError instanceof Error ? caughtError.message : "Search failed.",
+        caughtError instanceof Error ? caughtError.message : copy.fallbackError,
       );
       setResults(null);
     } finally {
@@ -96,7 +119,7 @@ export function SearchForm() {
       <div className={`${ui.card} p-6`}>
         <form onSubmit={handleSubmit}>
           <label htmlFor="query" className={ui.label}>
-            Search query
+            {copy.queryLabel}
           </label>
           <textarea
             id="query"
@@ -105,7 +128,7 @@ export function SearchForm() {
             maxLength={MAX_SEARCH_QUERY_LENGTH}
             rows={3}
             className={`mt-2 block min-h-28 resize-y leading-6 ${ui.input}`}
-            placeholder="Search policies, onboarding guides, and project notes..."
+            placeholder={copy.placeholder}
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-slate-500">
@@ -117,7 +140,7 @@ export function SearchForm() {
               className={`${ui.primaryButton} w-full sm:w-auto`}
             >
               <Icon name="search" className="h-4 w-4" />
-              {isPending ? "Searching..." : "Search"}
+              {isPending ? copy.pending : copy.submit}
             </button>
           </div>
         </form>
@@ -132,19 +155,19 @@ export function SearchForm() {
           <section className={`${ui.subtleCard} mt-6 p-5`}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className={ui.eyebrow}>Results</p>
+                <p className={ui.eyebrow}>{copy.results}</p>
                 <h2 className="mt-2 text-base font-semibold text-[#0b1535]">
-                  Top matching chunks
+                  {copy.topMatches}
                 </h2>
               </div>
               <span className="rounded-md bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
-                {results.length} matches
+                {formatCopy(copy.matches, { count: results.length })}
               </span>
             </div>
 
             {results.length === 0 ? (
               <p className="mt-5 text-sm leading-6 text-slate-600">
-                No ready document chunks matched this query.
+                {copy.empty}
               </p>
             ) : (
               <div className="mt-5 grid gap-4">
@@ -159,7 +182,7 @@ export function SearchForm() {
                           {result.documentTitle}
                         </h3>
                         <p className="mt-1 text-xs font-semibold text-blue-700">
-                          Chunk {result.chunkIndex}
+                          {copy.chunk} {result.chunkIndex}
                         </p>
                       </div>
                       <span className="w-fit rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
@@ -182,15 +205,14 @@ export function SearchForm() {
           <div className="flex items-center gap-3">
             <IconTile accent="emerald" icon="shield" className="h-10 w-10" />
             <div>
-              <p className={ui.eyebrow}>Scope</p>
+              <p className={ui.eyebrow}>{copy.scopeEyebrow}</p>
               <h2 className="mt-1 text-base font-semibold text-[#0b1535]">
-                Owner-scoped retrieval
+                {copy.scopeTitle}
               </h2>
             </div>
           </div>
           <p className="mt-4 text-sm leading-6 text-slate-600">
-            Search runs through the server API and filters ready chunks by the
-            current user&apos;s owner ID before ranking with pgvector.
+            {copy.scopeBody}
           </p>
         </section>
 
@@ -198,15 +220,14 @@ export function SearchForm() {
           <div className="flex items-center gap-3">
             <IconTile accent="violet" icon="check" className="h-10 w-10" />
             <div>
-              <p className={ui.eyebrow}>Audit</p>
+              <p className={ui.eyebrow}>{copy.auditEyebrow}</p>
               <h2 className="mt-1 text-base font-semibold text-[#0b1535]">
-                Search activity
+                {copy.auditTitle}
               </h2>
             </div>
           </div>
           <p className="mt-4 text-sm leading-6 text-slate-600">
-            Successful searches write an audit event with result count, limit,
-            and query length without exposing OpenAI credentials to the client.
+            {copy.auditBody}
           </p>
         </section>
       </aside>

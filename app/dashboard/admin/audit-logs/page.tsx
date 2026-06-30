@@ -7,6 +7,8 @@ import {
   buildOrganizationAuditLogWhere,
   getOrganizationAdminContext,
 } from "@/lib/auth/rbac";
+import { formatCopy } from "@/lib/i18n/dictionaries";
+import { getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -32,6 +34,7 @@ export default async function AdminAuditLogsPage({
   searchParams,
 }: AdminAuditLogsPageProps) {
   const session = await auth();
+  const { copy, locale } = await getCurrentI18n();
 
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/dashboard/admin/audit-logs");
@@ -42,28 +45,28 @@ export default async function AdminAuditLogsPage({
     organizationId: readParam(params.organizationId),
     userId: session.user.id,
   });
-  const displayName = session.user.name ?? session.user.email ?? "User";
+  const displayName =
+    session.user.name ?? session.user.email ?? copy.common.userFallback;
 
   if (!context) {
     return (
       <main className={ui.page}>
         <AppHeader userName={displayName}>
-          <LogoutButton />
+          <LogoutButton label={copy.common.logout} />
         </AppHeader>
 
         <section className={`${ui.container} py-10`}>
           <div className={`${ui.card} p-6`}>
             <IconTile accent="red" icon="shield" />
             <h1 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
-              Admin access required
+              {copy.adminAudit.accessTitle}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              Organization-wide audit logs are available only to organization
-              owners and admins.
+              {copy.adminAudit.accessBody}
             </p>
             <Link href="/dashboard" className={`mt-6 ${ui.secondaryButton}`}>
               <Icon name="arrow" className="h-4 w-4 rotate-180 text-blue-700" />
-              Back to dashboard
+              {copy.common.backToDashboard}
             </Link>
           </div>
         </section>
@@ -100,7 +103,7 @@ export default async function AdminAuditLogsPage({
   return (
     <main className={ui.page}>
       <AppHeader userName={displayName}>
-        <LogoutButton />
+        <LogoutButton label={copy.common.logout} />
       </AppHeader>
 
       <section className={ui.gradientBand}>
@@ -111,44 +114,46 @@ export default async function AdminAuditLogsPage({
               className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-900"
             >
               <Icon name="arrow" className="h-4 w-4 rotate-180" />
-              Back to dashboard
+              {copy.common.backToDashboard}
             </Link>
             <div className="flex flex-wrap gap-2 sm:justify-end">
               <Link href="/dashboard/audit-logs" className={ui.secondaryButton}>
                 <Icon name="shield" className="h-4 w-4 text-blue-700" />
-                My audit logs
+                {copy.adminAudit.myAuditLogs}
               </Link>
               <Link href="/dashboard/documents" className={ui.secondaryButton}>
                 <Icon name="document" className="h-4 w-4 text-blue-700" />
-                Documents
+                {copy.common.documents}
               </Link>
             </div>
           </div>
 
           <div className={`${ui.card} grid gap-6 p-6 lg:grid-cols-[1fr_360px]`}>
             <div>
-              <p className={ui.eyebrow}>Organization audit</p>
+              <p className={ui.eyebrow}>{copy.common.adminAudit}</p>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#080f2f] sm:text-4xl">
                 {context.organization.name}
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">
-                This admin view shows recent audit events created by members of
-                the organization. It reuses the same bounded audit metadata
-                formatting as the personal activity log.
+                {copy.adminAudit.body}
               </p>
             </div>
 
             <div className={`${ui.subtleCard} p-5`}>
               <IconTile accent="amber" icon="team" />
               <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
-                Admin role
+                {copy.adminAudit.adminRole}
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                You are viewing this workspace as an organization{" "}
-                {context.role.toLowerCase()}.
+                {formatCopy(copy.adminAudit.roleBody, {
+                  role: copy.adminAudit.organizationRoles[context.role],
+                })}
               </p>
               <p className="mt-3 text-sm font-semibold text-blue-700">
-                {members.length} members / {auditLogs.length} events shown
+                {formatCopy(copy.adminAudit.count, {
+                  events: auditLogs.length,
+                  members: members.length,
+                })}
               </p>
             </div>
           </div>
@@ -158,9 +163,9 @@ export default async function AdminAuditLogsPage({
       <section className={`${ui.container} grid gap-6 py-4 sm:py-8 xl:grid-cols-[360px_1fr]`}>
         <aside className={`${ui.card} self-start overflow-hidden`}>
           <div className="border-b border-slate-200 px-6 py-5">
-            <p className={ui.eyebrow}>RBAC</p>
+            <p className={ui.eyebrow}>{copy.adminAudit.rbac}</p>
             <h2 className="mt-2 text-xl font-semibold text-[#080f2f]">
-              Members and teams
+              {copy.adminAudit.membersAndTeams}
             </h2>
           </div>
           <div className="divide-y divide-slate-200">
@@ -174,14 +179,16 @@ export default async function AdminAuditLogsPage({
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                    Org {member.role.toLowerCase()}
+                    {copy.adminAudit.memberRolePrefix}{" "}
+                    {copy.adminAudit.organizationRoles[member.role]}
                   </span>
                   {member.teamRoles.map((teamRole) => (
                     <span
                       key={`${teamRole.team.id}-${teamRole.role}`}
                       className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
                     >
-                      {teamRole.team.name} {teamRole.role.toLowerCase()}
+                      {teamRole.team.name}{" "}
+                      {copy.adminAudit.teamRoles[teamRole.role]}
                     </span>
                   ))}
                 </div>
@@ -193,13 +200,13 @@ export default async function AdminAuditLogsPage({
         <div className={`${ui.card} overflow-hidden`}>
           <div className="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className={ui.eyebrow}>Latest activity</p>
+              <p className={ui.eyebrow}>{copy.audit.latest}</p>
               <h2 className="mt-2 text-xl font-semibold text-[#080f2f]">
-                Organization-wide audit events
+                {copy.adminAudit.latestEvents}
               </h2>
             </div>
             <span className="rounded-md bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
-              {auditLogs.length} shown
+              {formatCopy(copy.audit.countShown, { count: auditLogs.length })}
             </span>
           </div>
 
@@ -207,11 +214,10 @@ export default async function AdminAuditLogsPage({
             <div className="grid place-items-center px-6 py-14 text-center">
               <IconTile accent="amber" icon="shield" />
               <h3 className="mt-4 text-lg font-semibold text-[#0b1535]">
-                No organization audit events yet
+                {copy.adminAudit.emptyTitle}
               </h3>
               <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
-                Member activity such as sign-in, document upload, search, ask,
-                and agent tool usage will appear here.
+                {copy.adminAudit.emptyBody}
               </p>
             </div>
           ) : (
@@ -220,7 +226,7 @@ export default async function AdminAuditLogsPage({
                 const metadata = formatAuditMetadata(log.metadata);
                 const actorName = log.actor
                   ? (log.actor.name ?? log.actor.email)
-                  : "Unknown actor";
+                  : copy.adminAudit.unknownActor;
 
                 return (
                   <article
@@ -235,7 +241,7 @@ export default async function AdminAuditLogsPage({
                       />
                       <div className="min-w-0">
                         <h3 className="text-base font-semibold text-[#0b1535]">
-                          {formatAuditAction(log.action)}
+                          {formatAuditAction(log.action, locale)}
                         </h3>
                         <p className="mt-2 break-words text-sm text-slate-600">
                           {actorName} / {log.resourceType}
@@ -252,7 +258,7 @@ export default async function AdminAuditLogsPage({
                       dateTime={log.createdAt.toISOString()}
                       className="text-sm font-medium text-slate-500 lg:text-right"
                     >
-                      {formatAuditTimestamp(log.createdAt)}
+                      {formatAuditTimestamp(log.createdAt, locale)}
                     </time>
                   </article>
                 );

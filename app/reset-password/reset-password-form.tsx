@@ -5,6 +5,15 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type ResetPasswordFormProps = {
+  copy: {
+    error: string;
+    newPassword: string;
+    passwordHelp: string;
+    signIn: string;
+    submit: string;
+    submitting: string;
+    success: string;
+  };
   token: string;
 };
 
@@ -13,7 +22,7 @@ type ResetPasswordResponse = {
   message?: string;
 };
 
-export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+export function ResetPasswordForm({ copy, token }: ResetPasswordFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,13 +52,13 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setError(payload.error ?? "Unable to reset this password.");
+      setError(payload.error ?? copy.error);
       return;
     }
 
     form.reset();
     setMessage(
-      payload.message ?? "Your password has been reset. Sign in again.",
+      payload.message ?? copy.success,
     );
   }
 
@@ -57,7 +66,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     <form method="post" onSubmit={handleSubmit} className="mt-7 space-y-5">
       <div>
         <label htmlFor="password" className={ui.label}>
-          New password
+          {copy.newPassword}
         </label>
         <input
           id="password"
@@ -69,7 +78,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           className={`mt-2 ${ui.input}`}
         />
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Use at least 12 characters.
+          {copy.passwordHelp}
         </p>
       </div>
       {error ? (
@@ -84,7 +93,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             href="/login"
             className="mt-2 inline-flex font-semibold text-emerald-900 underline underline-offset-4"
           >
-            Sign in
+            {copy.signIn}
           </Link>
         </div>
       ) : null}
@@ -94,7 +103,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         className={`${ui.primaryButton} w-full`}
       >
         <Icon name="lock" className="h-4 w-4" />
-        {isSubmitting ? "Resetting password..." : "Reset password"}
+        {isSubmitting ? copy.submitting : copy.submit}
       </button>
     </form>
   );

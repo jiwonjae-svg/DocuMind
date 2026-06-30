@@ -1,36 +1,96 @@
-const auditActionLabels: Record<string, string> = {
-  agent_tool_ask_with_citations: "Agent ask with citations",
-  agent_tool_search_documents: "Agent document search",
-  agent_tool_summarize_document: "Agent document summary",
-  demo_user_seeded: "Legacy bootstrap user seeded",
-  document_delete: "Document deleted",
-  document_process_failed: "Document processing failed",
-  document_process_ready: "Document processing ready",
-  document_search: "Document search",
-  document_upload: "Document uploaded",
-  mcp_tool_ask_with_citations: "MCP ask with citations",
-  mcp_tool_search_documents: "MCP document search",
-  mcp_tool_summarize_document: "MCP document summary",
-  oauth_account_linked: "OAuth account linked",
-  oauth_user_created: "OAuth user created",
-  organization_created: "Organization created",
-  password_reset_completed: "Password reset completed",
-  password_reset_email_failed: "Password reset email failed",
-  password_reset_requested: "Password reset requested",
-  question_ask: "Question asked",
-  seed_user_created: "Bootstrap user seeded",
-  team_created: "Team created",
-  user_login: "User signed in",
-  user_login_failed: "User sign-in failed",
-  user_signed_up: "User signed up",
+import type { SupportedLocale } from "../i18n/config";
+
+const auditActionLabels: Record<SupportedLocale, Record<string, string>> = {
+  en: {
+    agent_tool_ask_with_citations: "Agent ask with citations",
+    agent_tool_search_documents: "Agent document search",
+    agent_tool_summarize_document: "Agent document summary",
+    demo_user_seeded: "Legacy bootstrap user seeded",
+    document_delete: "Document deleted",
+    document_process_failed: "Document processing failed",
+    document_process_ready: "Document processing ready",
+    document_search: "Document search",
+    document_upload: "Document uploaded",
+    mcp_tool_ask_with_citations: "MCP ask with citations",
+    mcp_tool_search_documents: "MCP document search",
+    mcp_tool_summarize_document: "MCP document summary",
+    oauth_account_linked: "OAuth account linked",
+    oauth_user_created: "OAuth user created",
+    organization_created: "Organization created",
+    password_reset_completed: "Password reset completed",
+    password_reset_email_failed: "Password reset email failed",
+    password_reset_requested: "Password reset requested",
+    question_ask: "Question asked",
+    seed_user_created: "Bootstrap user seeded",
+    team_created: "Team created",
+    user_login: "User signed in",
+    user_login_failed: "User sign-in failed",
+    user_signed_up: "User signed up",
+  },
+  ja: {
+    agent_tool_ask_with_citations: "エージェントの引用付き質問",
+    agent_tool_search_documents: "エージェント文書検索",
+    agent_tool_summarize_document: "エージェント文書要約",
+    demo_user_seeded: "旧デモユーザー作成",
+    document_delete: "文書削除",
+    document_process_failed: "文書処理失敗",
+    document_process_ready: "文書処理完了",
+    document_search: "文書検索",
+    document_upload: "文書アップロード",
+    mcp_tool_ask_with_citations: "MCP引用付き質問",
+    mcp_tool_search_documents: "MCP文書検索",
+    mcp_tool_summarize_document: "MCP文書要約",
+    oauth_account_linked: "OAuthアカウント連携",
+    oauth_user_created: "OAuthユーザー作成",
+    organization_created: "組織作成",
+    password_reset_completed: "パスワード再設定完了",
+    password_reset_email_failed: "再設定メール失敗",
+    password_reset_requested: "パスワード再設定リクエスト",
+    question_ask: "質問",
+    seed_user_created: "ブートストラップユーザー作成",
+    team_created: "チーム作成",
+    user_login: "ユーザーログイン",
+    user_login_failed: "ログイン失敗",
+    user_signed_up: "ユーザー登録",
+  },
+  ko: {
+    agent_tool_ask_with_citations: "에이전트 출처 질문",
+    agent_tool_search_documents: "에이전트 문서 검색",
+    agent_tool_summarize_document: "에이전트 문서 요약",
+    demo_user_seeded: "레거시 데모 사용자 생성",
+    document_delete: "문서 삭제",
+    document_process_failed: "문서 처리 실패",
+    document_process_ready: "문서 처리 완료",
+    document_search: "문서 검색",
+    document_upload: "문서 업로드",
+    mcp_tool_ask_with_citations: "MCP 출처 질문",
+    mcp_tool_search_documents: "MCP 문서 검색",
+    mcp_tool_summarize_document: "MCP 문서 요약",
+    oauth_account_linked: "OAuth 계정 연결",
+    oauth_user_created: "OAuth 사용자 생성",
+    organization_created: "조직 생성",
+    password_reset_completed: "비밀번호 재설정 완료",
+    password_reset_email_failed: "재설정 이메일 실패",
+    password_reset_requested: "비밀번호 재설정 요청",
+    question_ask: "질문",
+    seed_user_created: "부트스트랩 사용자 생성",
+    team_created: "팀 생성",
+    user_login: "사용자 로그인",
+    user_login_failed: "로그인 실패",
+    user_signed_up: "사용자 가입",
+  },
 };
 
-export function formatAuditAction(action: string) {
-  return auditActionLabels[action] ?? action.replaceAll("_", " ");
+export function formatAuditAction(action: string, locale: SupportedLocale = "en") {
+  return (
+    auditActionLabels[locale]?.[action] ??
+    auditActionLabels.en[action] ??
+    action.replaceAll("_", " ")
+  );
 }
 
-export function formatAuditTimestamp(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
+export function formatAuditTimestamp(date: Date, locale: SupportedLocale = "en") {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);

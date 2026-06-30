@@ -6,6 +6,7 @@ import {
   SUPPORTED_LOCALES,
   type SupportedLocale,
 } from "@/lib/i18n/config";
+import { translate } from "@/lib/i18n/dictionaries";
 import { useState } from "react";
 
 const localeLabels: Record<SupportedLocale, string> = {
@@ -34,6 +35,7 @@ export function LanguageSwitcher() {
   const [currentLocale, setCurrentLocale] =
     useState<SupportedLocale>(() => readLocaleCookie());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const label = translate(currentLocale, "language");
 
   async function updateLocale(locale: SupportedLocale) {
     if (locale === currentLocale || isSubmitting) {
@@ -61,7 +63,7 @@ export function LanguageSwitcher() {
 
   return (
     <div
-      aria-label="Language"
+      aria-label={label}
       className="inline-flex h-10 overflow-hidden rounded-md border border-slate-300 bg-white shadow-sm"
       role="group"
     >

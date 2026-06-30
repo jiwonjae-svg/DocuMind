@@ -4,6 +4,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { normalizeLoginCallbackUrl } from "@/lib/auth/callback-url";
 import { getEnabledOAuthProviders } from "@/lib/auth/oauth-providers";
+import { getCurrentDictionary } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./login-form";
@@ -19,6 +20,7 @@ function readParam(value: string | string[] | undefined) {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
   const params = searchParams ? await searchParams : {};
+  const copy = await getCurrentDictionary();
   const callbackUrl = normalizeLoginCallbackUrl(readParam(params.callbackUrl));
   const oauthProviders = getEnabledOAuthProviders();
 
@@ -32,46 +34,44 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <LanguageSwitcher />
         <Link href="/" className={ui.secondaryButton}>
           <Icon name="home" className="h-4 w-4 text-blue-700" />
-          Home
+          {copy.common.home}
         </Link>
         <Link
           href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
           className={ui.primaryButton}
         >
           <Icon name="team" className="h-4 w-4" />
-          Sign up
+          {copy.common.signup}
         </Link>
       </AppHeader>
 
       <section className={`${ui.gradientBand} min-h-[calc(100vh-64px)]`}>
         <div className={`${ui.container} grid gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_480px] lg:py-16`}>
           <div className="order-2 flex flex-col justify-center lg:order-1">
-            <p className={ui.eyebrow}>Secure access</p>
+            <p className={ui.eyebrow}>{copy.auth.serverSideAuth}</p>
             <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-normal text-[#080f2f] sm:text-5xl">
-              Sign in to a secure knowledge workspace
+              {copy.auth.loginTitle}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
-              Use your workspace account or an enabled OAuth provider to access
-              private document management, semantic search, grounded answers,
-              and owner-scoped audit records.
+              {copy.auth.loginBody}
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <div className={`${ui.subtleCard} p-5`}>
                 <IconTile accent="blue" icon="shield" />
                 <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
-                  Server-side auth
+                  {copy.auth.serverSideAuth}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Protected pages and API routes verify the current session.
+                  {copy.auth.serverSideAuthBody}
                 </p>
               </div>
               <div className={`${ui.subtleCard} p-5`}>
                 <IconTile accent="emerald" icon="document" />
                 <h2 className="mt-4 text-base font-semibold text-[#0b1535]">
-                  Owner-scoped data
+                  {copy.auth.ownerScopedData}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Documents, chunks, and answers stay scoped to one user.
+                  {copy.auth.ownerScopedDataBody}
                 </p>
               </div>
             </div>
@@ -80,28 +80,38 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div className={`${ui.card} order-1 self-center p-6 sm:p-7 lg:order-2`}>
             <p className={ui.eyebrow}>DocuMind</p>
             <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
-              Sign in
+              {copy.common.login}
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Enter your email and password. If OAuth is configured for this
-              deployment, you can continue with a connected provider.
+              {copy.auth.emailPasswordDescription}
             </p>
             {oauthProviders.length > 0 ? (
               <div className="mt-7">
                 <OAuthButtons
                   callbackUrl={callbackUrl}
+                  copy={copy.oauth}
                   providers={oauthProviders}
                 />
               </div>
             ) : null}
-            <LoginForm callbackUrl={callbackUrl} />
+            <LoginForm
+              callbackUrl={callbackUrl}
+              copy={{
+                email: copy.common.email,
+                error: copy.auth.loginError,
+                forgotPassword: copy.common.forgotPassword,
+                password: copy.common.password,
+                submit: copy.common.login,
+                submitting: copy.auth.loginPending,
+              }}
+            />
             <p className="mt-5 text-center text-sm text-slate-600">
-              Need an account?{" "}
+              {copy.auth.needAccount}{" "}
               <Link
                 href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
                 className="font-semibold text-blue-700 hover:text-blue-900"
               >
-                Create one
+                {copy.common.signup}
               </Link>
             </p>
           </div>

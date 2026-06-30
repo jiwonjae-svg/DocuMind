@@ -10,6 +10,11 @@ import { useState } from "react";
 
 type OAuthButtonsProps = {
   callbackUrl: string;
+  copy?: {
+    continueWith: string;
+    opening: string;
+    separator: string;
+  };
   providers: EnabledOAuthProvider[];
 };
 
@@ -18,7 +23,19 @@ const providerIcons: Record<OAuthProviderId, IconName> = {
   google: "google",
 };
 
-export function OAuthButtons({ callbackUrl, providers }: OAuthButtonsProps) {
+function formatProviderCopy(template: string, providerName: string) {
+  return template.replace("{provider}", providerName);
+}
+
+export function OAuthButtons({
+  callbackUrl,
+  copy = {
+    continueWith: "Continue with {provider}",
+    opening: "Opening {provider}...",
+    separator: "or",
+  },
+  providers,
+}: OAuthButtonsProps) {
   const [pendingProvider, setPendingProvider] = useState<string | null>(null);
 
   if (providers.length === 0) {
@@ -41,8 +58,8 @@ export function OAuthButtons({ callbackUrl, providers }: OAuthButtonsProps) {
           >
             <Icon name={providerIcons[provider.id]} className="h-4 w-4" />
             {pendingProvider === provider.id
-              ? `Opening ${provider.name}...`
-              : `Continue with ${provider.name}`}
+              ? formatProviderCopy(copy.opening, provider.name)
+              : formatProviderCopy(copy.continueWith, provider.name)}
           </button>
         ))}
       </div>
@@ -50,7 +67,7 @@ export function OAuthButtons({ callbackUrl, providers }: OAuthButtonsProps) {
       <div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-slate-200" />
         <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-          or
+          {copy.separator}
         </span>
         <span className="h-px flex-1 bg-slate-200" />
       </div>
