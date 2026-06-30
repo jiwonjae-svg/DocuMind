@@ -68,6 +68,8 @@ const en = {
       "Search query must be between 1 and 1000 characters.",
     "Team name must be between 1 and 80 characters.":
       "Team name must be between 1 and 80 characters.",
+    "Team and user are required.": "Team and user are required.",
+    "Team member not found.": "Team member not found.",
     "Team not found.": "Team not found.",
     "This password reset link is invalid or expired.":
       "This password reset link is invalid or expired.",
@@ -489,10 +491,15 @@ const en = {
     currentTeams: "Current teams",
     existingUsersOnly: "Users must create an account before an admin can assign them to a team.",
     fallbackError: "Team RBAC update failed.",
+    confirmRemoveMember: "Remove member",
     memberEmail: "User email",
     memberCount: "{count} members",
     noTeams: "No teams yet. Create a team to start assigning roles.",
     organizationRole: "Organization role",
+    removeMember: "Remove",
+    removeMemberWarning:
+      "This removes the user's team role and access to documents shared only through this team.",
+    removingMember: "Removing...",
     successMemberAssigned: "Team member assigned.",
     successTeamCreated: "Team created.",
     team: "Team",
@@ -637,6 +644,8 @@ const ko = {
       "검색어는 1자 이상 1000자 이하여야 합니다.",
     "Team name must be between 1 and 80 characters.":
       "팀 이름은 1자 이상 80자 이하여야 합니다.",
+    "Team and user are required.": "팀과 사용자가 필요합니다.",
+    "Team member not found.": "팀 멤버를 찾을 수 없습니다.",
     "Team not found.": "팀을 찾을 수 없습니다.",
     "This password reset link is invalid or expired.":
       "비밀번호 재설정 링크가 잘못되었거나 만료되었습니다.",
@@ -988,10 +997,15 @@ const ko = {
     currentTeams: "현재 팀",
     existingUsersOnly: "관리자가 팀에 배정하려면 사용자가 먼저 계정을 만들어야 합니다.",
     fallbackError: "팀 RBAC 업데이트에 실패했습니다.",
+    confirmRemoveMember: "멤버 제거",
     memberEmail: "사용자 이메일",
     memberCount: "{count}명",
     noTeams: "아직 팀이 없습니다. 역할 배정을 시작하려면 팀을 만드세요.",
     organizationRole: "조직 역할",
+    removeMember: "제거",
+    removeMemberWarning:
+      "이 사용자의 팀 역할과 이 팀을 통해서만 공유된 문서 접근 권한을 제거합니다.",
+    removingMember: "제거 중...",
     successMemberAssigned: "팀 멤버를 배정했습니다.",
     successTeamCreated: "팀을 생성했습니다.",
     team: "팀",
@@ -1137,6 +1151,8 @@ const ja = {
       "検索クエリは1文字以上1000文字以下である必要があります。",
     "Team name must be between 1 and 80 characters.":
       "チーム名は1文字以上80文字以下である必要があります。",
+    "Team and user are required.": "チームとユーザーは必須です。",
+    "Team member not found.": "チームメンバーが見つかりません。",
     "Team not found.": "チームが見つかりません。",
     "This password reset link is invalid or expired.":
       "このパスワード再設定リンクは無効または期限切れです。",
@@ -1488,10 +1504,15 @@ const ja = {
     currentTeams: "現在のチーム",
     existingUsersOnly: "管理者がチームに割り当てるには、ユーザーが先にアカウントを作成する必要があります。",
     fallbackError: "チームRBACの更新に失敗しました。",
+    confirmRemoveMember: "メンバーを削除",
     memberEmail: "ユーザーメール",
     memberCount: "{count}人",
     noTeams: "まだチームはありません。ロール割り当てを始めるにはチームを作成してください。",
     organizationRole: "組織ロール",
+    removeMember: "削除",
+    removeMemberWarning:
+      "このユーザーのチームロールと、このチーム経由でのみ共有される文書へのアクセスを削除します。",
+    removingMember: "削除中...",
     successMemberAssigned: "チームメンバーを割り当てました。",
     successTeamCreated: "チームを作成しました。",
     team: "チーム",

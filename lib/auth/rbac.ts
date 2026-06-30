@@ -8,6 +8,7 @@ export const TEAM_DOCUMENT_WRITE_ROLES = ["MANAGER", "MEMBER"] as const;
 export const ASSIGNABLE_TEAM_ROLES = ["MANAGER", "MEMBER", "VIEWER"] as const;
 export const DEFAULT_TEAM_NAME = "General";
 export const MAX_TEAM_NAME_LENGTH = 80;
+export const MAX_RBAC_RESOURCE_ID_LENGTH = 128;
 
 type OrganizationRoleValue = (typeof ORGANIZATION_ADMIN_ROLES)[number] | "MEMBER";
 type TeamRoleValue = (typeof TEAM_MANAGER_ROLES)[number] | "MEMBER" | "VIEWER";
@@ -50,6 +51,20 @@ export function normalizeTeamName(value: unknown) {
   }
 
   return name;
+}
+
+export function normalizeRbacResourceId(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+
+  return normalized.length > 0 &&
+    normalized.length <= MAX_RBAC_RESOURCE_ID_LENGTH &&
+    /^[A-Za-z0-9_-]+$/.test(normalized)
+    ? normalized
+    : null;
 }
 
 export function normalizeAssignableOrganizationRole(

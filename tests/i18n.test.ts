@@ -69,6 +69,7 @@ describe("i18n locale helpers", () => {
       (copy) => copy.adminAudit.teamRoles.VIEWER,
       (copy) => copy.teamAdmin.title,
       (copy) => copy.teamAdmin.createTeamSubmit,
+      (copy) => copy.teamAdmin.removeMember,
     ];
 
     for (const locale of ["ko", "ja"] as const) {

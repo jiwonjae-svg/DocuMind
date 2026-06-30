@@ -10,6 +10,7 @@ import {
   buildSearchAuditMetadata,
   buildSummaryAuditMetadata,
 } from "../lib/audit/metadata";
+import { formatAuditAction } from "../lib/audit/labels";
 
 describe("audit metadata formatting", () => {
   it("formats primitive metadata values", () => {
@@ -45,6 +46,16 @@ describe("audit metadata formatting", () => {
     expect(formatAuditMetadata(null)).toBeNull();
     expect(formatAuditMetadata([])).toBeNull();
     expect(formatAuditMetadata({ blank: "" })).toBeNull();
+  });
+
+  it("localizes team membership removal audit actions", () => {
+    expect(formatAuditAction("team_member_removed", "en")).toBe(
+      "Team member removed",
+    );
+    expect(formatAuditAction("team_member_removed", "ko")).toBe("팀 멤버 제거");
+    expect(formatAuditAction("team_member_removed", "ja")).toBe(
+      "チームメンバー削除",
+    );
   });
 
   it("limits displayed metadata entries", () => {

@@ -33,6 +33,7 @@ import {
   ensureUserDefaultOrganization,
   normalizeAssignableOrganizationRole,
   normalizeAssignableTeamRole,
+  normalizeRbacResourceId,
   normalizeTeamName,
 } from "../lib/auth/rbac";
 
@@ -87,6 +88,10 @@ describe("RBAC helpers", () => {
     expect(normalizeAssignableTeamRole("MEMBER")).toBe("MEMBER");
     expect(normalizeAssignableTeamRole("VIEWER")).toBe("VIEWER");
     expect(normalizeAssignableTeamRole("OWNER")).toBeNull();
+
+    expect(normalizeRbacResourceId("  team_123-abc  ")).toBe("team_123-abc");
+    expect(normalizeRbacResourceId("bad/team")).toBeNull();
+    expect(normalizeRbacResourceId("x".repeat(129))).toBeNull();
   });
 
   it("builds organization audit log filters from member user IDs", () => {

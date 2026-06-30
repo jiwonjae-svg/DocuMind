@@ -1,6 +1,6 @@
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
-import { getCurrentDictionary } from "@/lib/i18n/server";
+import { getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 
 const previewResultMeta = [
@@ -24,7 +24,7 @@ const repositoryUrl = "https://github.com/jiwonjae-svg/DocuMind";
 const implementationUrl = `${repositoryUrl}/blob/main/README.md`;
 
 export default async function Home() {
-  const copy = await getCurrentDictionary();
+  const { copy, locale } = await getCurrentI18n();
 
   return (
     <main className={ui.page}>
@@ -33,7 +33,7 @@ export default async function Home() {
           aria-label={copy.common.primaryNavigation}
           className="flex flex-wrap items-center justify-end gap-2 sm:gap-3"
         >
-          <LanguageSwitcher />
+          <LanguageSwitcher initialLocale={locale} />
           <Link href="/dashboard" className={ui.secondaryButton}>
             {copy.common.dashboard}
           </Link>

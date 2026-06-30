@@ -31,10 +31,15 @@ function readLocaleCookie(): SupportedLocale {
     : DEFAULT_LOCALE;
 }
 
-export function LanguageSwitcher() {
-  const [currentLocale, setCurrentLocale] =
-    useState<SupportedLocale>(() => readLocaleCookie());
+export function LanguageSwitcher({
+  initialLocale,
+}: {
+  initialLocale: SupportedLocale;
+}) {
+  const [optimisticLocale, setOptimisticLocale] =
+    useState<SupportedLocale | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const currentLocale = optimisticLocale ?? initialLocale;
   const label = translate(currentLocale, "language");
 
   async function updateLocale(locale: SupportedLocale) {
@@ -46,6 +51,7 @@ export function LanguageSwitcher() {
 
     const response = await fetch("/api/locale", {
       body: JSON.stringify({ locale }),
+      credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
       },
@@ -53,11 +59,12 @@ export function LanguageSwitcher() {
     });
 
     if (response.ok) {
-      setCurrentLocale(locale);
+      setOptimisticLocale(locale);
       window.location.reload();
       return;
     }
 
+    setOptimisticLocale(readLocaleCookie());
     setIsSubmitting(false);
   }
 

@@ -9,6 +9,7 @@ import {
   getOrganizationAdminContext,
   normalizeAssignableOrganizationRole,
   normalizeAssignableTeamRole,
+  normalizeRbacResourceId,
 } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/prisma";
 import { readIpAddress, readUserAgent } from "@/lib/tools/response";
@@ -18,6 +19,10 @@ export const runtime = "nodejs";
 
 function readString(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function readBodyObject(body: unknown) {
+  return body && typeof body === "object" && !Array.isArray(body) ? body : null;
 }
 
 export async function POST(request: NextRequest) {
@@ -180,4 +185,120 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json(result);
+}
+
+export async function DELETE(request: NextRequest) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json(
+      { error: CROSS_ORIGIN_REQUEST_ERROR },
+      { status: 403 },
+    );
+  }
+
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  const bodyResult = await readJsonBodyResult(request);
+
+  if (!bodyResult.ok) {
+    return NextResponse.json(
+      { error: bodyResult.error },
+      { status: bodyResult.status },
+    );
+  }
+
+  const body = readBodyObject(bodyResult.body);
+
+  if (!body) {
+    return NextResponse.json({ error: "Invalid team membership request." }, { status: 400 });
+  }
+
+  const rawOrganizationId =
+    "organizationId" in body ? body.organizationId : null;
+  const organizationId =
+    rawOrganizationId === null || rawOrganizationId === ""
+      ? null
+      : normalizeRbacResourceId(rawOrganizationId);
+  const teamId = "teamId" in body ? normalizeRbacResourceId(body.teamId) : null;
+  const userId = "userId" in body ? normalizeRbacResourceId(body.userId) : null;
+
+  if (rawOrganizationId !== null && rawOrganizationId !== "" && !organizationId) {
+    return NextResponse.json(
+      { error: "Invalid team membership request." },
+      { status: 400 },
+    );
+  }
+
+  if (!teamId || !userId) {
+    return NextResponse.json(
+      { error: "Team and user are required." },
+      { status: 400 },
+    );
+  }
+
+  const context = await getOrganizationAdminContext({
+    organizationId,
+    userId: session.user.id,
+  });
+
+  if (!context) {
+    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+  }
+
+  const membership = await prisma.teamMembership.findFirst({
+    select: {
+      id: true,
+      role: true,
+      team: {
+        select: {
+          id: true,
+          organizationId: true,
+        },
+      },
+      userId: true,
+    },
+    where: {
+      teamId,
+      userId,
+      team: {
+        organizationId: context.organization.id,
+      },
+    },
+  });
+
+  if (!membership) {
+    return NextResponse.json(
+      { error: "Team member not found." },
+      { status: 404 },
+    );
+  }
+
+  await prisma.$transaction(async (transaction) => {
+    await transaction.teamMembership.delete({
+      where: {
+        id: membership.id,
+      },
+    });
+
+    await transaction.auditLog.create({
+      data: {
+        action: "team_member_removed",
+        actorId: session.user.id,
+        ipAddress: readIpAddress(request),
+        metadata: {
+          organizationId: context.organization.id,
+          removedTeamRole: membership.role,
+          removedUserId: membership.userId,
+        },
+        resourceId: membership.team.id,
+        resourceType: "Team",
+        userAgent: readUserAgent(request),
+      },
+    });
+  });
+
+  return NextResponse.json({ removed: true });
 }

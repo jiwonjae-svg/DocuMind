@@ -153,7 +153,7 @@ flowchart LR
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
-- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams and assigning existing users to organization and team roles
+- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, and removing team memberships
 - EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset emails, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
@@ -189,7 +189,7 @@ flowchart LR
 - Password reset request, completion, and delivery-failure audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
-- Admin team-management API routes for creating teams and assigning existing users, with same-origin checks, bounded JSON parsing, role validation, and audit logs
+- Admin team-management API routes for creating teams, assigning existing users, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
@@ -466,7 +466,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  41 passed (41)
-Tests       253 passed (253)
+Tests       256 passed (256)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -532,8 +532,9 @@ Organization owners and admins can manage team RBAC at [http://localhost:3000/da
 - Create teams inside the current organization.
 - Assign existing DocuMind users by email to organization `ADMIN`/`MEMBER` roles.
 - Assign existing users to team `MANAGER`/`MEMBER`/`VIEWER` roles.
+- Remove a user's team membership to revoke team-scoped document access.
 - `MANAGER` and `MEMBER` team roles can upload documents to that team; `VIEWER` can read team documents through document lists, search, ask, and summarize flows.
-- Team creation and member assignment write bounded audit log records.
+- Team creation, member assignment, and member removal write bounded audit log records.
 - Users must sign up before an admin can assign them to a team; email invitation delivery is future scope.
 
 ## Documents

@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
-import { getCurrentDictionary } from "@/lib/i18n/server";
+import { getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ResetPasswordForm } from "./reset-password-form";
@@ -19,7 +19,7 @@ export default async function ResetPasswordPage({
 }: ResetPasswordPageProps) {
   const session = await auth();
   const params = searchParams ? await searchParams : {};
-  const copy = await getCurrentDictionary();
+  const { copy, locale } = await getCurrentI18n();
   const token = readParam(params.token)?.trim() ?? "";
 
   if (session?.user) {
@@ -29,7 +29,7 @@ export default async function ResetPasswordPage({
   return (
     <main className={ui.page}>
       <AppHeader homeAriaLabel={copy.common.homeLink}>
-        <LanguageSwitcher />
+        <LanguageSwitcher initialLocale={locale} />
         <Link href="/" className={ui.secondaryButton}>
           <Icon name="home" className="h-4 w-4 text-blue-700" />
           {copy.common.home}

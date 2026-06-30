@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
-import { getCurrentDictionary } from "@/lib/i18n/server";
+import { getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -52,7 +52,7 @@ const roadmapMeta = [
 
 export default async function DashboardPage() {
   const session = await auth();
-  const copy = await getCurrentDictionary();
+  const { copy, locale } = await getCurrentI18n();
 
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/dashboard");
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
   return (
     <main className={ui.page}>
       <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
-        <LanguageSwitcher />
+        <LanguageSwitcher initialLocale={locale} />
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 

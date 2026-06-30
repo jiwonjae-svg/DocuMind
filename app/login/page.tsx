@@ -4,7 +4,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { normalizeLoginCallbackUrl } from "@/lib/auth/callback-url";
 import { getEnabledOAuthProviders } from "@/lib/auth/oauth-providers";
-import { getCurrentDictionary } from "@/lib/i18n/server";
+import { getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./login-form";
@@ -20,7 +20,7 @@ function readParam(value: string | string[] | undefined) {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
   const params = searchParams ? await searchParams : {};
-  const copy = await getCurrentDictionary();
+  const { copy, locale } = await getCurrentI18n();
   const callbackUrl = normalizeLoginCallbackUrl(readParam(params.callbackUrl));
   const oauthProviders = getEnabledOAuthProviders();
 
@@ -31,7 +31,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className={ui.page}>
       <AppHeader homeAriaLabel={copy.common.homeLink}>
-        <LanguageSwitcher />
+        <LanguageSwitcher initialLocale={locale} />
         <Link href="/" className={ui.secondaryButton}>
           <Icon name="home" className="h-4 w-4 text-blue-700" />
           {copy.common.home}

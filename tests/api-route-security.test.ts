@@ -22,6 +22,9 @@ const jsonPostRouteSuffixes = [
   path.join("tools", "search-documents", "route.ts"),
   path.join("tools", "summarize-document", "route.ts"),
 ];
+const jsonDeleteRouteSuffixes = [
+  path.join("admin", "team-memberships", "route.ts"),
+];
 
 function findRouteFiles(directory: string): string[] {
   return readdirSync(directory).flatMap((entry) => {
@@ -54,6 +57,11 @@ describe("API route security contracts", () => {
       !publicRouteSuffixes.includes(relativePath)
     );
   });
+  const protectedDeleteRoutes = routeFiles.filter((filePath) => {
+    const source = readRoute(filePath);
+
+    return source.includes("export async function DELETE");
+  });
 
   it("keeps every protected POST route authenticated and same-origin checked", () => {
     expect(protectedPostRoutes.map(toApiRelativePath).sort()).toEqual([
@@ -79,11 +87,39 @@ describe("API route security contracts", () => {
     }
   });
 
+  it("keeps every protected DELETE route authenticated and same-origin checked", () => {
+    expect(protectedDeleteRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("admin", "team-memberships", "route.ts"),
+    ]);
+
+    for (const routeFile of protectedDeleteRoutes) {
+      const source = readRoute(routeFile);
+
+      expect(source, toApiRelativePath(routeFile)).toContain("auth()");
+      expect(source, toApiRelativePath(routeFile)).toContain(
+        "isSameOriginRequest(request)",
+      );
+    }
+  });
+
   it("keeps JSON POST routes on bounded JSON body parsing", () => {
     for (const relativePath of jsonPostRouteSuffixes) {
       const source = readRoute(path.join(apiRoot, relativePath));
 
       expect(source, relativePath).toContain("readJsonBodyResult(request)");
+    }
+  });
+
+  it("keeps JSON DELETE routes on bounded JSON body parsing", () => {
+    for (const relativePath of jsonDeleteRouteSuffixes) {
+      const source = readRoute(path.join(apiRoot, relativePath));
+      const deleteIndex = source.indexOf("export async function DELETE");
+      const jsonBodyIndex = source.indexOf(
+        "readJsonBodyResult(request)",
+        deleteIndex,
+      );
+
+      expect(jsonBodyIndex, relativePath).toBeGreaterThan(deleteIndex);
     }
   });
 

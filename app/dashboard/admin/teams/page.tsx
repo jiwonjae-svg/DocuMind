@@ -9,6 +9,7 @@ import { getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { RemoveTeamMemberForm } from "./remove-team-member-form";
 import { TeamRbacForms } from "./team-rbac-form";
 
 type TeamAdminPageProps = {
@@ -225,6 +226,22 @@ export default async function TeamAdminPage({
                         <p className="mt-3 text-xs font-semibold text-blue-700">
                           {copy.adminAudit.teamRoles[membership.role]}
                         </p>
+                        <RemoveTeamMemberForm
+                          copy={{
+                            apiErrors: copy.apiErrors,
+                            cancel: copy.common.cancel,
+                            confirmRemoveMember:
+                              copy.teamAdmin.confirmRemoveMember,
+                            fallbackError: copy.teamAdmin.fallbackError,
+                            removeMember: copy.teamAdmin.removeMember,
+                            removeMemberWarning:
+                              copy.teamAdmin.removeMemberWarning,
+                            removingMember: copy.teamAdmin.removingMember,
+                          }}
+                          organizationId={context.organization.id}
+                          teamId={team.id}
+                          userId={membership.userId}
+                        />
                       </div>
                     ))}
                   </div>
