@@ -7,6 +7,7 @@ import {
   type SupportedLocale,
 } from "@/lib/i18n/config";
 import { translate } from "@/lib/i18n/dictionaries";
+import { buildLocalePrefixedPath } from "@/lib/i18n/routing";
 import { useState } from "react";
 
 const localeLabels: Record<SupportedLocale, string> = {
@@ -60,7 +61,12 @@ export function LanguageSwitcher({
 
     if (response.ok) {
       setOptimisticLocale(locale);
-      window.location.reload();
+      window.location.assign(
+        `${buildLocalePrefixedPath({
+          locale,
+          pathname: window.location.pathname,
+        })}${window.location.search}${window.location.hash}`,
+      );
       return;
     }
 

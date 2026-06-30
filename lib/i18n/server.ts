@@ -5,13 +5,17 @@ import {
   normalizeLocale,
 } from "./config";
 import { getDictionary } from "./dictionaries";
+import { I18N_LOCALE_HEADER } from "./routing";
 
 export async function getCurrentLocale() {
   const cookieStore = await cookies();
   const headerStore = await headers();
+  const routeLocale = headerStore.get(I18N_LOCALE_HEADER);
   const cookieLocale = cookieStore.get(I18N_COOKIE_NAME)?.value;
 
-  return cookieLocale
+  return routeLocale
+    ? normalizeLocale(routeLocale)
+    : cookieLocale
     ? normalizeLocale(cookieLocale)
     : readPreferredLocaleFromAcceptLanguage(headerStore.get("accept-language"));
 }

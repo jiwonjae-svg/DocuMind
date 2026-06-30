@@ -119,7 +119,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
 - Larger evaluation set for grounded answers and citation quality.
-- Locale-prefixed URL routing and a managed translation review workflow.
+- Managed translation review workflow beyond the current checked EN/KO/JA dictionary.
 
 ## Architecture
 
@@ -161,7 +161,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating, renewing, revoking, and optionally emailing single-use team invitation links, and removing team memberships
-- EN/KO/JA localized landing, auth, OAuth callback errors, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
+- EN/KO/JA localized landing, auth, OAuth callback errors, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, locale-prefixed URL rewrites such as `/ko/dashboard`, Accept-Language fallback, and language switcher across the main workspace surfaces
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -472,6 +472,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
 - `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, create/revoke/renew validation, invite URL construction, and expiry calculation.
 - `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
+- `tests/i18n-routing.test.ts`: locale-prefixed URL parsing/building, shared locale cookie settings, proxy rewrite coverage, and language-switcher prefixed navigation coverage.
 - `tests/i18n-metadata.test.ts`: localized page metadata coverage for the main product pages and language-switcher coverage for dashboard workspace surfaces.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
 - `tests/auth-oauth-account-management.test.ts`: OAuth provider unlink validation, owner-scoped deletion, last-sign-in-method protection, and unlink audit logging.
@@ -488,8 +489,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  50 passed (50)
-Tests       315 passed (315)
+Test Files  51 passed (51)
+Tests       319 passed (319)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -867,7 +868,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
 - Add self-service OAuth provider add/link flow from account settings.
-- Add locale-prefixed URLs and a managed translation review workflow.
+- Add a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.
 - Add production-grade rate limiting with Redis.
 - Add richer MCP streaming/session transport once external client requirements are fixed.

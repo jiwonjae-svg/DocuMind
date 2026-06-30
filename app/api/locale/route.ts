@@ -7,6 +7,7 @@ import {
   I18N_COOKIE_NAME,
   isSupportedLocale,
 } from "@/lib/i18n/config";
+import { getLocaleCookieOptions } from "@/lib/i18n/routing";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -45,12 +46,7 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.json({ locale });
 
-  response.cookies.set(I18N_COOKIE_NAME, locale, {
-    maxAge: 60 * 60 * 24 * 365,
-    path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  response.cookies.set(I18N_COOKIE_NAME, locale, getLocaleCookieOptions());
 
   return response;
 }
