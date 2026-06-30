@@ -12,12 +12,14 @@ const publicRouteSuffixes = [
   path.join("locale", "route.ts"),
 ];
 const jsonPostRouteSuffixes = [
+  path.join("admin", "team-invitations", "route.ts"),
   path.join("admin", "team-memberships", "route.ts"),
   path.join("admin", "teams", "route.ts"),
   path.join("ask", "route.ts"),
   path.join("locale", "route.ts"),
   path.join("mcp", "route.ts"),
   path.join("search", "route.ts"),
+  path.join("team-invitations", "accept", "route.ts"),
   path.join("tools", "ask-with-citations", "route.ts"),
   path.join("tools", "search-documents", "route.ts"),
   path.join("tools", "summarize-document", "route.ts"),
@@ -65,6 +67,7 @@ describe("API route security contracts", () => {
 
   it("keeps every protected POST route authenticated and same-origin checked", () => {
     expect(protectedPostRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("admin", "team-invitations", "route.ts"),
       path.join("admin", "team-memberships", "route.ts"),
       path.join("admin", "teams", "route.ts"),
       path.join("ask", "route.ts"),
@@ -72,6 +75,7 @@ describe("API route security contracts", () => {
       path.join("documents", "route.ts"),
       path.join("mcp", "route.ts"),
       path.join("search", "route.ts"),
+      path.join("team-invitations", "accept", "route.ts"),
       path.join("tools", "ask-with-citations", "route.ts"),
       path.join("tools", "search-documents", "route.ts"),
       path.join("tools", "summarize-document", "route.ts"),

@@ -22,9 +22,15 @@ type TeamRbacFormCopy = {
   creatingTeam: string;
   existingUsersOnly: string;
   fallbackError: string;
+  invitationLink: string;
+  inviteMemberBody: string;
+  inviteMemberSubmit: string;
+  inviteMemberTitle: string;
+  invitingMember: string;
   memberEmail: string;
   organizationRole: string;
   successMemberAssigned: string;
+  successInvitationCreated: string;
   successTeamCreated: string;
   team: string;
   teamName: string;
@@ -45,6 +51,7 @@ type TeamRbacFormsProps = {
 
 type ApiResponse = {
   error?: string;
+  inviteUrl?: string;
 };
 
 async function readApiError(
@@ -68,6 +75,10 @@ export function TeamRbacForms({
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [memberError, setMemberError] = useState<string | null>(null);
   const [memberSuccess, setMemberSuccess] = useState<string | null>(null);
 
@@ -143,8 +154,50 @@ export function TeamRbacForms({
     }
   }
 
+  async function handleCreateInvitation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setInviteError(null);
+    setInviteSuccess(null);
+    setInviteUrl(null);
+    setIsInviting(true);
+
+    const formData = new FormData(event.currentTarget);
+
+    try {
+      const response = await fetch("/api/admin/team-invitations", {
+        body: JSON.stringify({
+          email: String(formData.get("email") ?? ""),
+          organizationId,
+          organizationRole: String(formData.get("organizationRole") ?? ""),
+          teamId: String(formData.get("teamId") ?? ""),
+          teamRole: String(formData.get("teamRole") ?? ""),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | ApiResponse
+        | null;
+
+      if (!response.ok) {
+        throw new Error(
+          lookupApiError(copy.apiErrors, payload?.error, copy.fallbackError),
+        );
+      }
+
+      setInviteSuccess(copy.successInvitationCreated);
+      setInviteUrl(typeof payload?.inviteUrl === "string" ? payload.inviteUrl : null);
+    } catch (error) {
+      setInviteError(error instanceof Error ? error.message : copy.fallbackError);
+    } finally {
+      setIsInviting(false);
+    }
+  }
+
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-6 xl:grid-cols-3">
       <section className={`${ui.card} p-6`}>
         <h2 className="text-xl font-semibold text-[#080f2f]">
           {copy.createTeamTitle}
@@ -183,6 +236,112 @@ export function TeamRbacForms({
           >
             <Icon name="team" className="h-4 w-4" />
             {isCreating ? copy.creatingTeam : copy.createTeamSubmit}
+          </button>
+        </form>
+      </section>
+
+      <section className={`${ui.card} p-6`}>
+        <h2 className="text-xl font-semibold text-[#080f2f]">
+          {copy.inviteMemberTitle}
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          {copy.inviteMemberBody}
+        </p>
+        <form onSubmit={handleCreateInvitation} className="mt-5 space-y-4">
+          <div>
+            <label htmlFor="invite-email" className={ui.label}>
+              {copy.memberEmail}
+            </label>
+            <input
+              id="invite-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              className={`mt-2 ${ui.input}`}
+            />
+          </div>
+          <div>
+            <label htmlFor="invite-team-id" className={ui.label}>
+              {copy.team}
+            </label>
+            <select
+              id="invite-team-id"
+              name="teamId"
+              required
+              disabled={teams.length === 0}
+              className={`mt-2 ${ui.input}`}
+            >
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="invite-organization-role" className={ui.label}>
+                {copy.organizationRole}
+              </label>
+              <select
+                id="invite-organization-role"
+                name="organizationRole"
+                required
+                className={`mt-2 ${ui.input}`}
+                defaultValue="MEMBER"
+              >
+                <option value="MEMBER">{roleCopy.organizationRoles.MEMBER}</option>
+                <option value="ADMIN">{roleCopy.organizationRoles.ADMIN}</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="invite-team-role" className={ui.label}>
+                {copy.teamRole}
+              </label>
+              <select
+                id="invite-team-role"
+                name="teamRole"
+                required
+                className={`mt-2 ${ui.input}`}
+                defaultValue="MEMBER"
+              >
+                <option value="VIEWER">{roleCopy.teamRoles.VIEWER}</option>
+                <option value="MEMBER">{roleCopy.teamRoles.MEMBER}</option>
+                <option value="MANAGER">{roleCopy.teamRoles.MANAGER}</option>
+              </select>
+            </div>
+          </div>
+          {inviteError ? (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {inviteError}
+            </p>
+          ) : null}
+          {inviteSuccess ? (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+              {inviteSuccess}
+            </p>
+          ) : null}
+          {inviteUrl ? (
+            <div>
+              <label htmlFor="invite-url" className={ui.label}>
+                {copy.invitationLink}
+              </label>
+              <input
+                id="invite-url"
+                readOnly
+                value={inviteUrl}
+                className={`mt-2 ${ui.input}`}
+              />
+            </div>
+          ) : null}
+          <button
+            type="submit"
+            disabled={isInviting || teams.length === 0}
+            className={`${ui.primaryButton} w-full sm:w-auto`}
+          >
+            <Icon name="team" className="h-4 w-4" />
+            {isInviting ? copy.invitingMember : copy.inviteMemberSubmit}
           </button>
         </form>
       </section>

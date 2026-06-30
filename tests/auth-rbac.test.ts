@@ -35,6 +35,8 @@ import {
   normalizeAssignableTeamRole,
   normalizeRbacResourceId,
   normalizeTeamName,
+  readStrongerOrganizationRole,
+  readStrongerTeamRole,
 } from "../lib/auth/rbac";
 
 describe("RBAC helpers", () => {
@@ -100,6 +102,16 @@ describe("RBAC helpers", () => {
         in: ["user-1", "user-2"],
       },
     });
+  });
+
+  it("preserves stronger roles when accepting invitations", () => {
+    expect(readStrongerOrganizationRole("OWNER", "MEMBER")).toBe("OWNER");
+    expect(readStrongerOrganizationRole("MEMBER", "ADMIN")).toBe("ADMIN");
+    expect(readStrongerOrganizationRole(null, "MEMBER")).toBe("MEMBER");
+
+    expect(readStrongerTeamRole("MANAGER", "VIEWER")).toBe("MANAGER");
+    expect(readStrongerTeamRole("VIEWER", "MEMBER")).toBe("MEMBER");
+    expect(readStrongerTeamRole(undefined, "VIEWER")).toBe("VIEWER");
   });
 
   it("creates an owner organization and default manager team for new users", async () => {

@@ -108,7 +108,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Future / Production Hardening
 
 - MCP streaming/session transport hardening beyond the current authenticated JSON-RPC wrapper.
-- Team invitations and self-service join workflows beyond assigning existing users from the admin screen.
+- Automated invitation email delivery beyond the current admin-generated invite links.
 - Optional S3/GCS storage adapters if deploying outside the current Vercel Blob path.
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
@@ -153,7 +153,7 @@ flowchart LR
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
-- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, and removing team memberships
+- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links, and removing team memberships
 - EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset emails, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
@@ -189,7 +189,7 @@ flowchart LR
 - Password reset request, completion, and delivery-failure audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
-- Admin team-management API routes for creating teams, assigning existing users, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
+- Admin team-management API routes for creating teams, assigning existing users, creating team invitation links, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
@@ -450,6 +450,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
 - `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
+- `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, validation, invite URL construction, and expiry calculation.
 - `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
 - `tests/auth-oauth.test.ts`: OAuth provisioning requires verified provider emails, bounds provider account identifiers, normalizes provider display values, preserves already-linked accounts, blocks automatic linking into password accounts, and recovers from provider-link unique races.
@@ -465,8 +466,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  41 passed (41)
-Tests       256 passed (256)
+Test Files  42 passed (42)
+Tests       263 passed (263)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -532,10 +533,11 @@ Organization owners and admins can manage team RBAC at [http://localhost:3000/da
 - Create teams inside the current organization.
 - Assign existing DocuMind users by email to organization `ADMIN`/`MEMBER` roles.
 - Assign existing users to team `MANAGER`/`MEMBER`/`VIEWER` roles.
+- Create a single-use invitation link for a not-yet-assigned email address, then let the invited user sign in or sign up and accept it at `/join-team`.
 - Remove a user's team membership to revoke team-scoped document access.
 - `MANAGER` and `MEMBER` team roles can upload documents to that team; `VIEWER` can read team documents through document lists, search, ask, and summarize flows.
-- Team creation, member assignment, and member removal write bounded audit log records.
-- Users must sign up before an admin can assign them to a team; email invitation delivery is future scope.
+- Team creation, invitation creation, invitation acceptance, member assignment, and member removal write bounded audit log records.
+- Invitation links are generated for admins to share manually; automated email invitation delivery is future scope.
 
 ## Documents
 
@@ -807,7 +809,7 @@ prisma/migrations/20260630101500_organization_team_rbac/migration.sql
 prisma/migrations/20260630151500_document_team_scope/migration.sql
 ```
 
-The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer`, plus optional `Document.teamId` for team-scoped read access. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, and `AuditLog` records actor and resource fields for security-relevant events.
+The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer`, plus optional `Document.teamId` for team-scoped read access. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, `TeamInvitation` stores hashed single-use join tokens, and `AuditLog` records actor and resource fields for security-relevant events.
 
 ## Known Limitations
 
@@ -816,7 +818,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
-- Email invitations and self-service team join flows are not implemented yet; team assignment currently requires an existing user and an organization owner/admin.
+- Automated team invitation email delivery is not implemented yet; admins can create invitation links and share them manually.
 - Production password reset email requires `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM`; without them, reset requests still return safely but no email is delivered.
 - The MCP wrapper currently uses a bounded JSON-RPC POST endpoint; richer streaming/session transport can be added later.
 
@@ -824,7 +826,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add account-linking settings, email invitations, and self-service team join flows.
+- Add account-linking settings and automated team invitation email delivery.
 - Add organization-wide audit export controls.
 - Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.

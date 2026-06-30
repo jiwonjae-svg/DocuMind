@@ -13,6 +13,18 @@ export const MAX_RBAC_RESOURCE_ID_LENGTH = 128;
 type OrganizationRoleValue = (typeof ORGANIZATION_ADMIN_ROLES)[number] | "MEMBER";
 type TeamRoleValue = (typeof TEAM_MANAGER_ROLES)[number] | "MEMBER" | "VIEWER";
 
+const organizationRoleRank: Record<OrganizationRoleValue, number> = {
+  ADMIN: 1,
+  MEMBER: 0,
+  OWNER: 2,
+};
+
+const teamRoleRank: Record<TeamRoleValue, number> = {
+  MANAGER: 2,
+  MEMBER: 1,
+  VIEWER: 0,
+};
+
 type RbacTransaction = Pick<
   Prisma.TransactionClient,
   "organization" | "organizationMembership" | "team" | "teamMembership" | "user"
@@ -106,6 +118,25 @@ export function canManageOrganization(
 
 export function canManageTeam(role: TeamRoleValue | null | undefined) {
   return role === "MANAGER";
+}
+
+export function readStrongerOrganizationRole(
+  currentRole: OrganizationRoleValue | null | undefined,
+  nextRole: OrganizationRoleValue,
+): OrganizationRoleValue {
+  return currentRole &&
+    organizationRoleRank[currentRole] > organizationRoleRank[nextRole]
+    ? currentRole
+    : nextRole;
+}
+
+export function readStrongerTeamRole(
+  currentRole: TeamRoleValue | null | undefined,
+  nextRole: TeamRoleValue,
+): TeamRoleValue {
+  return currentRole && teamRoleRank[currentRole] > teamRoleRank[nextRole]
+    ? currentRole
+    : nextRole;
 }
 
 export function buildOrganizationAuditLogWhere(memberUserIds: string[]) {

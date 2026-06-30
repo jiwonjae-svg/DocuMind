@@ -7,11 +7,16 @@ function isDashboardPath(pathname: string) {
   return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 }
 
+function isJoinTeamPath(pathname: string) {
+  return pathname === "/join-team";
+}
+
 function isAuthRedirectPath(pathname: string) {
   return (
     pathname === "/" ||
     pathname === "/login" ||
     pathname === "/signup" ||
+    isJoinTeamPath(pathname) ||
     isDashboardPath(pathname)
   );
 }
@@ -46,7 +51,7 @@ export function normalizeLoginCallbackUrl(value: unknown) {
 
     if (
       parsed.origin !== LOGIN_CALLBACK_ORIGIN ||
-      !isDashboardPath(parsed.pathname) ||
+      !(isDashboardPath(parsed.pathname) || isJoinTeamPath(parsed.pathname)) ||
       hasEncodedPathSeparator(parsed.pathname)
     ) {
       return DEFAULT_LOGIN_CALLBACK_URL;

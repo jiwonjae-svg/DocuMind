@@ -20,6 +20,9 @@ describe("login callback URL normalization", () => {
     expect(normalizeLoginCallbackUrl("/dashboard/ask#answer")).toBe(
       "/dashboard/ask#answer",
     );
+    expect(normalizeLoginCallbackUrl("/join-team?token=invite_123")).toBe(
+      "/join-team?token=invite_123",
+    );
   });
 
   it("rejects external callback URLs", () => {
@@ -87,6 +90,12 @@ describe("login callback URL normalization", () => {
         url: `${baseUrl}/signup?callbackUrl=%2Fdashboard`,
       }),
     ).toBe(`${baseUrl}/signup?callbackUrl=%2Fdashboard`);
+    expect(
+      normalizeAuthRedirectUrl({
+        baseUrl,
+        url: `${baseUrl}/join-team?token=invite_123`,
+      }),
+    ).toBe(`${baseUrl}/join-team?token=invite_123`);
   });
 
   it("rejects external or unexpected Auth.js redirect targets", () => {

@@ -69,6 +69,11 @@ const en = {
     "Team name must be between 1 and 80 characters.":
       "Team name must be between 1 and 80 characters.",
     "Team and user are required.": "Team and user are required.",
+    "Team invitation belongs to another email address.":
+      "Team invitation belongs to another email address.",
+    "Team invitation is invalid or expired.":
+      "Team invitation is invalid or expired.",
+    "Invalid team invitation request.": "Invalid team invitation request.",
     "Team member not found.": "Team member not found.",
     "Team not found.": "Team not found.",
     "This password reset link is invalid or expired.":
@@ -492,6 +497,12 @@ const en = {
     existingUsersOnly: "Users must create an account before an admin can assign them to a team.",
     fallbackError: "Team RBAC update failed.",
     confirmRemoveMember: "Remove member",
+    invitationLink: "Invitation link",
+    inviteMemberBody:
+      "Create a single-use invite link for a person who should join this organization and team.",
+    inviteMemberSubmit: "Create invitation",
+    inviteMemberTitle: "Invite by link",
+    invitingMember: "Creating invitation...",
     memberEmail: "User email",
     memberCount: "{count} members",
     noTeams: "No teams yet. Create a team to start assigning roles.",
@@ -501,12 +512,38 @@ const en = {
       "This removes the user's team role and access to documents shared only through this team.",
     removingMember: "Removing...",
     successMemberAssigned: "Team member assigned.",
+    successInvitationCreated: "Team invitation created.",
     successTeamCreated: "Team created.",
     team: "Team",
     teamCount: "{count} teams",
     teamName: "Team name",
     teamRole: "Team role",
     title: "Manage team RBAC",
+  },
+  teamInvite: {
+    accepted: "Team invitation accepted. You can now open the workspace.",
+    accepting: "Accepting...",
+    acceptInvitation: "Accept invitation",
+    auditBody: "Accepting an invitation writes an audit event for review.",
+    auditTitle: "Audited join",
+    body:
+      "Use a team invitation to join the right organization and team without bypassing access control.",
+    cardTitle: "Join a DocuMind team",
+    emailMismatchBody:
+      "Sign out and sign in with the email address that received this invitation.",
+    emailMismatchTitle: "This invitation is for another account",
+    eyebrow: "Team invitation",
+    fallbackError: "Unable to accept this team invitation.",
+    invalidBody: "Ask an organization admin to create a new invitation link.",
+    invalidTitle: "This invitation link is invalid or expired.",
+    organization: "Organization",
+    secureBody:
+      "The invitation token is checked on the server and can be used only once.",
+    secureTitle: "Single-use token",
+    signInBody:
+      "Sign in or create an account with the invited email address to accept this team invitation.",
+    team: "Team",
+    title: "Accept secure access to a team workspace",
   },
 };
 
@@ -645,6 +682,11 @@ const ko = {
     "Team name must be between 1 and 80 characters.":
       "팀 이름은 1자 이상 80자 이하여야 합니다.",
     "Team and user are required.": "팀과 사용자가 필요합니다.",
+    "Team invitation belongs to another email address.":
+      "팀 초대가 다른 이메일 주소에 속해 있습니다.",
+    "Team invitation is invalid or expired.":
+      "팀 초대가 잘못되었거나 만료되었습니다.",
+    "Invalid team invitation request.": "팀 초대 요청이 올바르지 않습니다.",
     "Team member not found.": "팀 멤버를 찾을 수 없습니다.",
     "Team not found.": "팀을 찾을 수 없습니다.",
     "This password reset link is invalid or expired.":
@@ -998,6 +1040,12 @@ const ko = {
     existingUsersOnly: "관리자가 팀에 배정하려면 사용자가 먼저 계정을 만들어야 합니다.",
     fallbackError: "팀 RBAC 업데이트에 실패했습니다.",
     confirmRemoveMember: "멤버 제거",
+    invitationLink: "초대 링크",
+    inviteMemberBody:
+      "이 조직과 팀에 참여해야 하는 사람을 위한 1회용 초대 링크를 만듭니다.",
+    inviteMemberSubmit: "초대 생성",
+    inviteMemberTitle: "링크로 초대",
+    invitingMember: "초대 생성 중...",
     memberEmail: "사용자 이메일",
     memberCount: "{count}명",
     noTeams: "아직 팀이 없습니다. 역할 배정을 시작하려면 팀을 만드세요.",
@@ -1007,12 +1055,38 @@ const ko = {
       "이 사용자의 팀 역할과 이 팀을 통해서만 공유된 문서 접근 권한을 제거합니다.",
     removingMember: "제거 중...",
     successMemberAssigned: "팀 멤버를 배정했습니다.",
+    successInvitationCreated: "팀 초대를 생성했습니다.",
     successTeamCreated: "팀을 생성했습니다.",
     team: "팀",
     teamCount: "{count}개 팀",
     teamName: "팀 이름",
     teamRole: "팀 역할",
     title: "팀 RBAC 관리",
+  },
+  teamInvite: {
+    accepted: "팀 초대를 수락했습니다. 이제 워크스페이스를 열 수 있습니다.",
+    accepting: "수락 중...",
+    acceptInvitation: "초대 수락",
+    auditBody: "초대를 수락하면 검토용 감사 이벤트가 기록됩니다.",
+    auditTitle: "감사되는 참여",
+    body:
+      "팀 초대로 접근 제어를 우회하지 않고 올바른 조직과 팀에 참여하세요.",
+    cardTitle: "DocuMind 팀 참여",
+    emailMismatchBody:
+      "로그아웃한 뒤 이 초대를 받은 이메일 주소로 로그인하세요.",
+    emailMismatchTitle: "이 초대는 다른 계정용입니다",
+    eyebrow: "팀 초대",
+    fallbackError: "이 팀 초대를 수락할 수 없습니다.",
+    invalidBody: "조직 관리자에게 새 초대 링크 생성을 요청하세요.",
+    invalidTitle: "이 초대 링크가 잘못되었거나 만료되었습니다.",
+    organization: "조직",
+    secureBody:
+      "초대 토큰은 서버에서 확인되며 한 번만 사용할 수 있습니다.",
+    secureTitle: "1회용 토큰",
+    signInBody:
+      "초대받은 이메일 주소로 로그인하거나 계정을 만들어 팀 초대를 수락하세요.",
+    team: "팀",
+    title: "팀 워크스페이스 접근 수락",
   },
 };
 
@@ -1152,6 +1226,11 @@ const ja = {
     "Team name must be between 1 and 80 characters.":
       "チーム名は1文字以上80文字以下である必要があります。",
     "Team and user are required.": "チームとユーザーは必須です。",
+    "Team invitation belongs to another email address.":
+      "チーム招待は別のメールアドレスに紐づいています。",
+    "Team invitation is invalid or expired.":
+      "チーム招待が無効または期限切れです。",
+    "Invalid team invitation request.": "チーム招待リクエストが正しくありません。",
     "Team member not found.": "チームメンバーが見つかりません。",
     "Team not found.": "チームが見つかりません。",
     "This password reset link is invalid or expired.":
@@ -1505,6 +1584,12 @@ const ja = {
     existingUsersOnly: "管理者がチームに割り当てるには、ユーザーが先にアカウントを作成する必要があります。",
     fallbackError: "チームRBACの更新に失敗しました。",
     confirmRemoveMember: "メンバーを削除",
+    invitationLink: "招待リンク",
+    inviteMemberBody:
+      "この組織とチームに参加する人向けの1回限りの招待リンクを作成します。",
+    inviteMemberSubmit: "招待を作成",
+    inviteMemberTitle: "リンクで招待",
+    invitingMember: "招待を作成中...",
     memberEmail: "ユーザーメール",
     memberCount: "{count}人",
     noTeams: "まだチームはありません。ロール割り当てを始めるにはチームを作成してください。",
@@ -1514,12 +1599,38 @@ const ja = {
       "このユーザーのチームロールと、このチーム経由でのみ共有される文書へのアクセスを削除します。",
     removingMember: "削除中...",
     successMemberAssigned: "チームメンバーを割り当てました。",
+    successInvitationCreated: "チーム招待を作成しました。",
     successTeamCreated: "チームを作成しました。",
     team: "チーム",
     teamCount: "{count}チーム",
     teamName: "チーム名",
     teamRole: "チームロール",
     title: "チームRBACを管理",
+  },
+  teamInvite: {
+    accepted: "チーム招待を承認しました。ワークスペースを開けます。",
+    accepting: "承認中...",
+    acceptInvitation: "招待を承認",
+    auditBody: "招待を承認すると、レビュー用の監査イベントが記録されます。",
+    auditTitle: "監査される参加",
+    body:
+      "アクセス制御を迂回せず、チーム招待で正しい組織とチームに参加します。",
+    cardTitle: "DocuMindチームに参加",
+    emailMismatchBody:
+      "サインアウトして、この招待を受け取ったメールアドレスでサインインしてください。",
+    emailMismatchTitle: "この招待は別のアカウント用です",
+    eyebrow: "チーム招待",
+    fallbackError: "このチーム招待を承認できません。",
+    invalidBody: "組織管理者に新しい招待リンクの作成を依頼してください。",
+    invalidTitle: "この招待リンクは無効または期限切れです。",
+    organization: "組織",
+    secureBody:
+      "招待トークンはサーバーで確認され、1回だけ使用できます。",
+    secureTitle: "1回限りのトークン",
+    signInBody:
+      "招待されたメールアドレスでサインインするかアカウントを作成して、チーム招待を承認してください。",
+    team: "チーム",
+    title: "チームワークスペースへの安全なアクセスを承認",
   },
 };
 

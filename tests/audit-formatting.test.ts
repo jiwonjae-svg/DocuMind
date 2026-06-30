@@ -58,6 +58,18 @@ describe("audit metadata formatting", () => {
     );
   });
 
+  it("localizes team invitation audit actions", () => {
+    expect(formatAuditAction("team_invitation_created", "en")).toBe(
+      "Team invitation created",
+    );
+    expect(formatAuditAction("team_invitation_accepted", "ko")).toBe(
+      "팀 초대 수락",
+    );
+    expect(formatAuditAction("team_invitation_created", "ja")).toBe(
+      "チーム招待作成",
+    );
+  });
+
   it("limits displayed metadata entries", () => {
     const metadata = {
       one: 1,
