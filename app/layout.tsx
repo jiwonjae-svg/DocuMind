@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { getCurrentLocale } from "@/lib/i18n/server";
+import { getCurrentDictionary, getCurrentLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "DocuMind",
-  description:
-    "Agent-ready internal knowledge search for Japanese and Korean teams.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const copy = await getCurrentDictionary();
+
+  return {
+    description: copy.meta.description,
+    title: copy.meta.title,
+  };
+}
 
 export default async function RootLayout({
   children,

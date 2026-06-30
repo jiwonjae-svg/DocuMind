@@ -51,7 +51,7 @@ export default async function AdminAuditLogsPage({
   if (!context) {
     return (
       <main className={ui.page}>
-        <AppHeader userName={displayName}>
+        <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
           <LogoutButton label={copy.common.logout} />
         </AppHeader>
 
@@ -102,7 +102,7 @@ export default async function AdminAuditLogsPage({
 
   return (
     <main className={ui.page}>
-      <AppHeader userName={displayName}>
+      <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 

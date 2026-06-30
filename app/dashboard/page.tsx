@@ -57,7 +57,7 @@ export default async function DashboardPage() {
 
   return (
     <main className={ui.page}>
-      <AppHeader userName={displayName}>
+      <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
         <LanguageSwitcher />
         <LogoutButton label={copy.common.logout} />
       </AppHeader>

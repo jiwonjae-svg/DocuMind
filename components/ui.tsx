@@ -283,9 +283,11 @@ export function LogoMark() {
 
 export function AppHeader({
   children,
+  homeAriaLabel,
   userName,
 }: {
   children?: ReactNode;
+  homeAriaLabel: string;
   userName?: string;
 }) {
   return (
@@ -294,7 +296,7 @@ export function AppHeader({
         <Link
           href="/"
           className="inline-flex min-w-0 items-center gap-2 text-xl font-semibold text-[#0b1535] sm:gap-3 sm:text-2xl"
-          aria-label="DocuMind home"
+          aria-label={homeAriaLabel}
         >
           <LogoMark />
           <span className="truncate">DocuMind</span>

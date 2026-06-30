@@ -46,6 +46,9 @@ describe("i18n locale helpers", () => {
     const english = getDictionary("en");
     const localizedChecks: Array<(copy: typeof english) => string> = [
       (copy) => copy.auth.loginTitle,
+      (copy) => copy.common.homeLink,
+      (copy) => copy.common.primaryNavigation,
+      (copy) => copy.meta.description,
       (copy) => copy.oauth.separator,
       (copy) => copy.home.implementedEyebrow,
       (copy) => copy.dashboard.title,

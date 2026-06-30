@@ -152,7 +152,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams and assigning existing users to organization and team roles
-- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, and organization admin audit UI with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
+- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
 - Cookie-authenticated mutating requests without Origin or Fetch Metadata provenance are blocked

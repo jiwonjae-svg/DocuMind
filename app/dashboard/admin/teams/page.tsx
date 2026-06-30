@@ -49,7 +49,7 @@ export default async function TeamAdminPage({
   if (!context) {
     return (
       <main className={ui.page}>
-        <AppHeader userName={displayName}>
+        <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
           <LogoutButton label={copy.common.logout} />
         </AppHeader>
 
@@ -102,7 +102,7 @@ export default async function TeamAdminPage({
 
   return (
     <main className={ui.page}>
-      <AppHeader userName={displayName}>
+      <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 
@@ -130,7 +130,7 @@ export default async function TeamAdminPage({
 
           <div className={`${ui.card} grid gap-6 p-6 lg:grid-cols-[1fr_360px]`}>
             <div>
-              <p className={ui.eyebrow}>RBAC</p>
+              <p className={ui.eyebrow}>{copy.adminAudit.rbac}</p>
               <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#080f2f] sm:text-4xl">
                 {copy.teamAdmin.title}
               </h1>
@@ -179,7 +179,7 @@ export default async function TeamAdminPage({
         <section className={`${ui.card} overflow-hidden`}>
           <div className="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className={ui.eyebrow}>RBAC</p>
+              <p className={ui.eyebrow}>{copy.adminAudit.rbac}</p>
               <h2 className="mt-2 text-xl font-semibold text-[#080f2f]">
                 {copy.teamAdmin.currentTeams}
               </h2>

@@ -1,6 +1,11 @@
 import { DEFAULT_LOCALE, type SupportedLocale } from "./config";
 
 const en = {
+  meta: {
+    description:
+      "Agent-ready internal knowledge search for Japanese and Korean teams.",
+    title: "DocuMind",
+  },
   common: {
     adminAudit: "Organization audit",
     ask: "Ask questions",
@@ -17,6 +22,8 @@ const en = {
     logout: "Sign out",
     name: "Name",
     password: "Password",
+    homeLink: "DocuMind home",
+    primaryNavigation: "Primary navigation",
     resetPassword: "Reset password",
     search: "Search",
     signup: "Sign up",
@@ -392,6 +399,11 @@ const en = {
 
 const ko = {
   ...en,
+  meta: {
+    description:
+      "일본 및 한국 팀을 위한 에이전트 준비형 내부 지식 검색 시스템입니다.",
+    title: "DocuMind",
+  },
   common: {
     adminAudit: "조직 감사",
     ask: "질문하기",
@@ -408,6 +420,8 @@ const ko = {
     logout: "로그아웃",
     name: "이름",
     password: "비밀번호",
+    homeLink: "DocuMind 홈",
+    primaryNavigation: "주요 탐색",
     resetPassword: "비밀번호 재설정",
     search: "검색",
     signup: "회원가입",
@@ -778,6 +792,11 @@ const ko = {
 
 const ja = {
   ...en,
+  meta: {
+    description:
+      "日本・韓国チーム向けのエージェント対応社内ナレッジ検索システムです。",
+    title: "DocuMind",
+  },
   common: {
     adminAudit: "組織監査",
     ask: "質問する",
@@ -794,6 +813,8 @@ const ja = {
     logout: "ログアウト",
     name: "名前",
     password: "パスワード",
+    homeLink: "DocuMindホーム",
+    primaryNavigation: "主要ナビゲーション",
     resetPassword: "パスワード再設定",
     search: "検索",
     signup: "登録",

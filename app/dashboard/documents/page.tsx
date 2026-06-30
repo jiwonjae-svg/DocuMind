@@ -73,7 +73,7 @@ export default async function DocumentsPage({
 
   return (
     <main className={ui.page}>
-      <AppHeader userName={displayName}>
+      <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 

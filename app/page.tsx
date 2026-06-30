@@ -28,9 +28,9 @@ export default async function Home() {
 
   return (
     <main className={ui.page}>
-      <AppHeader>
+      <AppHeader homeAriaLabel={copy.common.homeLink}>
         <nav
-          aria-label="Primary navigation"
+          aria-label={copy.common.primaryNavigation}
           className="flex flex-wrap items-center justify-end gap-2 sm:gap-3"
         >
           <LanguageSwitcher />

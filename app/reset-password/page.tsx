@@ -28,7 +28,7 @@ export default async function ResetPasswordPage({
 
   return (
     <main className={ui.page}>
-      <AppHeader>
+      <AppHeader homeAriaLabel={copy.common.homeLink}>
         <LanguageSwitcher />
         <Link href="/" className={ui.secondaryButton}>
           <Icon name="home" className="h-4 w-4 text-blue-700" />

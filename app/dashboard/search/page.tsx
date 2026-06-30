@@ -19,7 +19,7 @@ export default async function SearchPage() {
 
   return (
     <main className={ui.page}>
-      <AppHeader userName={displayName}>
+      <AppHeader homeAriaLabel={copy.common.homeLink} userName={displayName}>
         <LogoutButton label={copy.common.logout} />
       </AppHeader>
 
