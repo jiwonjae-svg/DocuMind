@@ -4,6 +4,10 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { normalizeLoginCallbackUrl } from "@/lib/auth/callback-url";
 import { getEnabledOAuthProviders } from "@/lib/auth/oauth-providers";
+import {
+  getAuthPageErrorMessage,
+  normalizeAuthPageErrorCode,
+} from "@/lib/auth/signin-errors";
 import { buildPageMetadata } from "@/lib/i18n/metadata";
 import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
@@ -32,6 +36,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = searchParams ? await searchParams : {};
   const { copy, locale } = await getCurrentI18n();
   const callbackUrl = normalizeLoginCallbackUrl(readParam(params.callbackUrl));
+  const authErrorMessage = getAuthPageErrorMessage(
+    copy.auth,
+    normalizeAuthPageErrorCode(readParam(params.error)),
+  );
   const oauthProviders = getEnabledOAuthProviders();
 
   if (session?.user) {
@@ -95,6 +103,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <p className="mt-3 text-sm leading-6 text-slate-600">
               {copy.auth.emailPasswordDescription}
             </p>
+            {authErrorMessage ? (
+              <div
+                role="alert"
+                className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"
+              >
+                <p className="font-semibold">{copy.auth.signInErrorTitle}</p>
+                <p>{authErrorMessage}</p>
+              </div>
+            ) : null}
             {oauthProviders.length > 0 ? (
               <div className="mt-7">
                 <OAuthButtons

@@ -47,6 +47,8 @@ describe("i18n locale helpers", () => {
     const english = getDictionary("en");
     const localizedChecks: Array<(copy: typeof english) => string> = [
       (copy) => copy.auth.loginTitle,
+      (copy) => copy.auth.signInErrorTitle,
+      (copy) => copy.auth.signInErrorAccountNotLinked,
       (copy) => copy.auth.showPassword,
       (copy) => copy.auth.hidePassword,
       (copy) => copy.apiErrors["Authentication required."],

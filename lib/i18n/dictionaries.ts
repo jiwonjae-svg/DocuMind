@@ -173,6 +173,23 @@ const en = {
     serverSideUpdate: "Server-side update",
     serverSideUpdateBody: "The new password is hashed before it is stored.",
     signInExistingAccount: "If this account exists, sign in with its current password.",
+    signInErrorAccessDenied:
+      "Access was denied, or DocuMind could not verify the provider account email.",
+    signInErrorAccountNotLinked:
+      "This email is already connected to another sign-in method. Sign in with the original method first.",
+    signInErrorCallback:
+      "The provider returned a callback error. Check that the registered callback URL matches this deployment.",
+    signInErrorConfiguration:
+      "This sign-in method is not configured correctly. Contact an administrator.",
+    signInErrorCredentials: "Check your email and password, then try again.",
+    signInErrorDefault:
+      "Try again, or use another sign-in method if one is available.",
+    signInErrorOAuth:
+      "The provider sign-in request could not be completed. Try again from this page.",
+    signInErrorSessionRequired: "Sign in before opening this workspace page.",
+    signInErrorTitle: "Sign-in could not be completed",
+    signInErrorVerification:
+      "This sign-in link could not be verified. Request a new link and try again.",
     signupError: "Unable to create the account.",
     showPassword: "Show password",
   },
@@ -732,6 +749,22 @@ const ko = {
     serverSideUpdate: "서버 측 업데이트",
     serverSideUpdateBody: "새 비밀번호는 저장 전에 해시됩니다.",
     signInExistingAccount: "이 계정이 존재한다면 현재 비밀번호로 로그인하세요.",
+    signInErrorAccessDenied:
+      "접근이 거부되었거나 DocuMind가 제공자 계정 이메일을 확인할 수 없습니다.",
+    signInErrorAccountNotLinked:
+      "이 이메일은 이미 다른 로그인 방식에 연결되어 있습니다. 먼저 기존 방식으로 로그인하세요.",
+    signInErrorCallback:
+      "제공자 콜백 오류가 발생했습니다. 등록된 콜백 URL이 이 배포 주소와 일치하는지 확인하세요.",
+    signInErrorConfiguration:
+      "이 로그인 방식이 올바르게 설정되지 않았습니다. 관리자에게 문의하세요.",
+    signInErrorCredentials: "이메일과 비밀번호를 확인한 뒤 다시 시도하세요.",
+    signInErrorDefault: "다시 시도하거나 사용 가능한 다른 로그인 방식을 사용하세요.",
+    signInErrorOAuth:
+      "제공자 로그인 요청을 완료할 수 없습니다. 이 페이지에서 다시 시도하세요.",
+    signInErrorSessionRequired: "이 워크스페이스 페이지를 열기 전에 로그인하세요.",
+    signInErrorTitle: "로그인을 완료할 수 없습니다",
+    signInErrorVerification:
+      "이 로그인 링크를 확인할 수 없습니다. 새 링크를 요청한 뒤 다시 시도하세요.",
     signupError: "계정을 만들 수 없습니다.",
     showPassword: "비밀번호 표시",
   },
@@ -1368,6 +1401,24 @@ const ja = {
     serverSideUpdate: "サーバー側更新",
     serverSideUpdateBody: "新しいパスワードは保存前にハッシュ化されます。",
     signInExistingAccount: "このアカウントが存在する場合は現在のパスワードでログインしてください。",
+    signInErrorAccessDenied:
+      "アクセスが拒否されたか、DocuMindがプロバイダーアカウントのメールを確認できませんでした。",
+    signInErrorAccountNotLinked:
+      "このメールはすでに別のログイン方法に接続されています。先に元の方法でログインしてください。",
+    signInErrorCallback:
+      "プロバイダーのコールバックエラーが発生しました。登録済みコールバックURLがこのデプロイと一致しているか確認してください。",
+    signInErrorConfiguration:
+      "このログイン方法は正しく設定されていません。管理者に連絡してください。",
+    signInErrorCredentials: "メールとパスワードを確認して再試行してください。",
+    signInErrorDefault:
+      "再試行するか、利用可能な別のログイン方法を使用してください。",
+    signInErrorOAuth:
+      "プロバイダーのログインリクエストを完了できませんでした。このページから再試行してください。",
+    signInErrorSessionRequired:
+      "このワークスペースページを開く前にログインしてください。",
+    signInErrorTitle: "ログインを完了できませんでした",
+    signInErrorVerification:
+      "このログインリンクを確認できませんでした。新しいリンクをリクエストして再試行してください。",
     signupError: "アカウントを作成できません。",
     showPassword: "パスワードを表示",
   },

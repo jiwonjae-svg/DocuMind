@@ -41,7 +41,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Implemented
 
 - Auth.js email/password signup, credentials sign-in, password reset, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
-- Auth forms include localized password visibility controls, live status/error regions, and disabled submit states for a more production-like account flow.
+- Auth forms include localized password visibility controls, bounded Auth.js/OAuth callback error banners, live status/error regions, and disabled submit states for a more production-like account flow.
 - Signed-in password users can change their password from `/dashboard/account`; the route verifies the current password, rate-limits attempts, hashes the new password server-side, and writes a `password_changed` audit event.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
 - OAuth provider account IDs are bounded and reject control/format characters before lookup or linking.
@@ -148,7 +148,7 @@ flowchart LR
 - Auth.js email/password signup and credentials authentication
 - Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, and optional EN/KO/JA Resend email delivery
 - Account security page at `/dashboard/account` for reviewing sign-in methods and changing password-account credentials with server-side current-password verification
-- Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
+- Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks, transaction-time password-account collision checks before local account creation or linking, and localized callback failure messages for users
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization with control/format-character rejection for email credentials, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup email/name/password validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
@@ -159,7 +159,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links with optional email delivery, and removing team memberships
-- EN/KO/JA localized landing, auth, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
+- EN/KO/JA localized landing, auth, OAuth callback errors, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -455,6 +455,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/seed-policy.test.ts`: production seed runs reject the documented default bootstrap password, validates seed email/password bounds, and avoids raw seed email audit/log output.
 - `tests/prisma-client.test.ts`: Prisma client creation is deferred until first use.
 - `tests/auth-callback-url.test.ts`: login redirects stay dashboard-scoped, and Auth.js redirects are allowlisted to expected same-origin paths while rejecting external or malformed callback URLs.
+- `tests/auth-signin-errors.test.ts`: Auth.js page error query values are bounded, unsafe values are rejected, and known OAuth/sign-in failures resolve to localized display copy without reflecting raw error codes.
 - `tests/auth-credentials.test.ts`: login credentials, email control/format-character rejection, auth display names, and profile image URLs are normalized and bounded before use.
 - `tests/auth-rate-limit.test.ts`: credentials sign-in attempts are rate-limited by validated client IP, email, and aggregate attempt volume; malformed or multi-hop forwarded IP values are not trusted, and aggregate denial avoids creating new client/email buckets.
 - `tests/auth-login-audit.test.ts`: successful and failed sign-in audit records include bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata without storing submitted credential values.
@@ -482,8 +483,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  47 passed (47)
-Tests       295 passed (295)
+Test Files  48 passed (48)
+Tests       298 passed (298)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
