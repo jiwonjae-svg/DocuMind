@@ -7,6 +7,7 @@ export type IconName =
   | "check"
   | "compass"
   | "document"
+  | "download"
   | "github"
   | "google"
   | "home"
@@ -141,6 +142,14 @@ export function Icon({
           <path d="M14 3v4h4" />
           <path d="M9.5 11h5" />
           <path d="M9.5 15h5" />
+        </svg>
+      );
+    case "download":
+      return (
+        <svg {...common}>
+          <path d="M12 4v10" />
+          <path d="m7 10 5 5 5-5" />
+          <path d="M5 20h14" />
         </svg>
       );
     case "github":

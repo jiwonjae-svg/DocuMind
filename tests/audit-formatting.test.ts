@@ -83,6 +83,16 @@ describe("audit metadata formatting", () => {
     );
   });
 
+  it("localizes document download audit actions", () => {
+    expect(formatAuditAction("document_download", "en")).toBe(
+      "Document downloaded",
+    );
+    expect(formatAuditAction("document_download", "ko")).toBe("문서 다운로드");
+    expect(formatAuditAction("document_download", "ja")).toBe(
+      "文書ダウンロード",
+    );
+  });
+
   it("limits displayed metadata entries", () => {
     const metadata = {
       one: 1,

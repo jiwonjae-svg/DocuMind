@@ -53,6 +53,7 @@ describe("i18n locale helpers", () => {
       (copy) => copy.apiErrors["Too many search requests. Try again shortly."],
       (copy) => copy.apiErrors["Invalid API bearer token."],
       (copy) => copy.common.apiTokens,
+      (copy) => copy.common.download,
       (copy) => copy.common.homeLink,
       (copy) => copy.common.primaryNavigation,
       (copy) => copy.meta.description,

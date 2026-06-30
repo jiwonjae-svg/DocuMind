@@ -66,6 +66,15 @@ describe("API route security contracts", () => {
 
     return source.includes("export async function DELETE");
   });
+  const protectedGetRoutes = routeFiles.filter((filePath) => {
+    const relativePath = toApiRelativePath(filePath);
+    const source = readRoute(filePath);
+
+    return (
+      source.includes("export async function GET") &&
+      !publicRouteSuffixes.includes(relativePath)
+    );
+  });
 
   it("keeps every protected POST route authenticated and same-origin checked", () => {
     expect(protectedPostRoutes.map(toApiRelativePath).sort()).toEqual([
@@ -107,6 +116,18 @@ describe("API route security contracts", () => {
       expect(source, toApiRelativePath(routeFile)).toContain(
         "isSameOriginRequest(request)",
       );
+    }
+  });
+
+  it("keeps every protected GET route authenticated", () => {
+    expect(protectedGetRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("documents", "[documentId]", "download", "route.ts"),
+    ]);
+
+    for (const routeFile of protectedGetRoutes) {
+      const source = readRoute(routeFile);
+
+      expect(source, toApiRelativePath(routeFile)).toContain("auth()");
     }
   });
 
@@ -269,5 +290,36 @@ describe("API route security contracts", () => {
 
     expect(normalizeIndex).toBeGreaterThanOrEqual(0);
     expect(deleteIndex).toBeGreaterThan(normalizeIndex);
+  });
+
+  it("keeps document downloads readable-scoped before storage reads", () => {
+    const source = readRoute(
+      path.join(
+        apiRoot,
+        "documents",
+        "[documentId]",
+        "download",
+        "route.ts",
+      ),
+    );
+    const normalizeIndex = source.indexOf("const documentId = normalizeDocumentId");
+    const documentLookupIndex = source.indexOf("prisma.document.findFirst");
+    const readableWhereIndex = source.indexOf(
+      "buildReadableDocumentWhere",
+      documentLookupIndex,
+    );
+    const storageReadIndex = source.indexOf(
+      "readStoredDocumentBytes",
+      documentLookupIndex,
+    );
+    const auditIndex = source.indexOf('action: "document_download"');
+
+    expect(source).toContain("isCrossSiteDownloadRequest(request)");
+    expect(source).toContain("Content-Disposition");
+    expect(normalizeIndex).toBeGreaterThanOrEqual(0);
+    expect(documentLookupIndex).toBeGreaterThan(normalizeIndex);
+    expect(readableWhereIndex).toBeGreaterThanOrEqual(0);
+    expect(storageReadIndex).toBeGreaterThan(documentLookupIndex);
+    expect(auditIndex).toBeGreaterThan(storageReadIndex);
   });
 });

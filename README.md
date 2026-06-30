@@ -2,7 +2,7 @@
 
 DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams.
 
-This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, access-scoped semantic search, grounded question answering, and user-managed MCP API tokens.
+This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload, original file download, document processing, OpenAI embeddings, access-scoped semantic search, grounded question answering, and user-managed MCP API tokens.
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
@@ -51,6 +51,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Document storage provider abstraction with local filesystem storage for development and private Vercel Blob storage for durable Vercel deployments.
+- Access-scoped original document downloads with owner/team-readable authorization, private no-store responses, safe attachment filenames, and download audit logs.
 - Upload requests must use multipart form data and malformed multipart bodies are handled as user-facing errors.
 - Upload requests must include a valid `Content-Length`, and declared oversized requests are rejected before multipart parsing.
 - Bounded display filenames that remove path components, control characters, and Unicode format characters while preserving Japanese/Korean names.
@@ -92,12 +93,12 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Shared per-user in-memory rate limiting for AI search and answer generation across app and agent tool endpoints.
 - AI rate limits are applied after request validation and immediately before AI-backed work.
 - Document processing failure messages are normalized before being stored or shown in the dashboard.
-- Audit logs for document upload/delete, semantic search, question ask, and agent tool usage.
+- Audit logs for document upload/download/delete, semantic search, question ask, and agent tool usage.
 - Request metadata stored in audit logs is stripped of control characters and length-bounded.
 - Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
 - Organization-wide admin audit log viewer for organization owners/admins, scoped to audit events created by current organization members.
-- Team-scoped document upload, listing, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read, and only the uploading owner can delete the stored file.
+- Team-scoped document upload, listing, original download, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read/download, and only the uploading owner can delete the stored file.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools.
 - User-managed MCP bearer API tokens at `/dashboard/api-tokens`; raw tokens are shown once, stored only as hashes, revocable by the owning user, and usable by external MCP clients without browser cookies.
@@ -165,6 +166,7 @@ flowchart LR
 - Control/format-character normalization for search and ask inputs before AI-backed work or question persistence
 - Secure local document upload and management for `.txt`, `.md`, and `.pdf`
 - Configurable document storage provider: `local` for development and `vercel-blob` for durable private object storage
+- Access-scoped original document download route at `/api/documents/[documentId]/download` with safe attachment headers and no-store caching
 - Multipart content-type enforcement and parse-error handling for document uploads
 - Valid `Content-Length` enforcement and declared oversized upload rejection before multipart body parsing
 - Per-user upload rate limiting before multipart body parsing and delete rate limiting before delete lookup
@@ -182,7 +184,7 @@ flowchart LR
 - API token management UI at `/dashboard/api-tokens`, with hashed token persistence, one-time raw token display, revocation, last-used tracking, and audit events
 - Shared per-user rate limiting across AI-backed dashboard and tool endpoints
 - Ask UI with source citations at `/dashboard/ask`
-- Document upload/delete audit logs
+- Document upload/download/delete audit logs
 - Semantic search audit logs
 - Question ask audit logs
 - Agent tool usage audit logs
@@ -207,7 +209,7 @@ flowchart LR
 Screenshots should be added when the portfolio is published:
 
 - Landing page with Japanese-facing product copy
-- Documents dashboard showing upload, status, chunks, and delete action
+- Documents dashboard showing upload, status, chunks, download action, and delete action
 - Search page showing access-scoped semantic matches with similarity scores
 - Ask page showing a grounded answer with citations and matched snippets
 - Audit log page showing owner-scoped user activity
@@ -423,6 +425,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-chunking.test.ts`: chunking behavior and overlap handling.
 - `tests/document-validation.test.ts`: file extension, MIME type, file/request size, multipart request type, safe storage/display filename, display-name control/format character stripping, storage path construction, storage provider selection, and upload validation.
 - `tests/document-deletion.test.ts`: owner-scoped document delete mutations and delete race handling.
+- `tests/document-download.test.ts`: safe original-download filename normalization, RFC5987 content-disposition construction, filename length bounds, and stable missing-file errors.
 - `tests/document-notices.test.ts`: document redirect notices avoid reflecting arbitrary query text while allowing known rate-limit notices.
 - `tests/document-ownership.test.ts`: owner-scoped mutation filters, team-readable document filters, and access control helpers for document operations.
 - `tests/answers.test.ts`: grounded answer formatting, JSON Lines prompt boundary construction, unsafe answer character normalization, insufficient-information behavior, citation handling, oversized/malformed answer payload handling, bounded provider response parsing and answer response extraction, and timed-out answer retries.
@@ -474,8 +477,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  45 passed (45)
-Tests       277 passed (277)
+Test Files  46 passed (46)
+Tests       284 passed (284)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -504,12 +507,13 @@ Recommended local verification flow:
 
 1. Create an account with email/password or continue with a configured OAuth provider.
 2. Open Documents and upload a short `.txt`, `.md`, or `.pdf` file.
-3. Run semantic search from the Search page and inspect matching chunks, snippets, and scores.
-4. Ask a grounded question using content from an uploaded document.
-5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
-6. Open API tokens and create a bearer token only if an external MCP client needs access.
-7. Review owner-scoped audit log entries for your activity.
-8. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
+3. Download the original file from the Documents list to confirm durable storage retrieval.
+4. Run semantic search from the Search page and inspect matching chunks, snippets, and scores.
+5. Ask a grounded question using content from an uploaded document.
+6. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
+7. Open API tokens and create a bearer token only if an external MCP client needs access.
+8. Review owner-scoped audit log entries for your activity.
+9. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
 
 The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use. Seed credentials are bounded and normalized; production seeding rejects the documented default password.
 
@@ -524,7 +528,7 @@ The page is intentionally owner-scoped for the MVP:
 - It shows recent action, resource, timestamp, and bounded metadata summaries.
 - Metadata display is normalized and capped to keep control characters, long filenames, provider/model details, or nested values from dominating the audit screen.
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
-- Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control/format characters normalized and IP metadata validated before persistence.
+- Login, failed login, upload, download, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control/format characters normalized and IP metadata validated before persistence.
 - Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
 - API token creation and revocation store token IDs only, not raw bearer token values.
 - It does not expose other users' audit records.
@@ -536,7 +540,7 @@ Organization owners and admins can also review organization member activity at [
 - The admin view verifies the signed-in user has `OWNER` or `ADMIN` organization role.
 - It finds current organization members and filters audit records by those member `actorId` values.
 - It shows member organization roles and team roles next to recent organization-wide audit events.
-- Document reads, search, ask, summarize, and tool execution use owner or team-member authorization checks. Document deletion stays limited to the uploading owner.
+- Document reads, downloads, search, ask, summarize, and tool execution use owner or team-member authorization checks. Document deletion stays limited to the uploading owner.
 
 Organization owners and admins can manage team RBAC at [http://localhost:3000/dashboard/admin/teams](http://localhost:3000/dashboard/admin/teams):
 
@@ -568,7 +572,7 @@ uploads/documents
 
 With `DOCUMENT_STORAGE_PROVIDER=vercel-blob`, uploaded files are stored as private Vercel Blob objects using the same safe relative pathname stored in the database.
 
-The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and stored relative paths are validated before local or Blob reads/deletes; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Local upload file writes use exclusive file creation, Blob uploads disallow overwrite, and stored files are rechecked for size before text/PDF extraction. PDF text extraction rejects documents above the configured page limit before extracting page text. Users can upload to a personal scope or to teams where they hold `MANAGER`/`MEMBER` role; readable team documents are listed for all team members. Delete lookups and delete mutations still include the uploading `ownerId` filter, and stored paths are validated before the database record is deleted.
+The app validates file extension, MIME type, declared request length, declared file size, actual byte size, display filename, and basic file content server-side. Authenticated uploads are rate-limited per user before multipart parsing, and authenticated deletes are rate-limited per user before delete lookup. Stored filenames are sanitized, storage path construction re-sanitizes filename segments, and stored relative paths are validated before local or Blob reads/deletes; display filenames are reduced to a bounded basename and stripped of control/format characters while preserving Japanese/Korean text. Local upload file writes use exclusive file creation, Blob uploads disallow overwrite, and stored files are rechecked for size before text/PDF extraction. PDF text extraction rejects documents above the configured page limit before extracting page text. Users can upload to a personal scope or to teams where they hold `MANAGER`/`MEMBER` role; readable team documents are listed for all team members and can be downloaded through an authenticated no-store response with a safe `Content-Disposition` filename. Delete lookups and delete mutations still include the uploading `ownerId` filter, and stored paths are validated before the database record is deleted.
 
 After upload, documents are processed server-side:
 
