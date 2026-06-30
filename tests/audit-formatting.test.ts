@@ -111,6 +111,18 @@ describe("audit metadata formatting", () => {
     );
   });
 
+  it("localizes OAuth account unlink actions", () => {
+    expect(formatAuditAction("oauth_account_unlinked", "en")).toBe(
+      "OAuth account unlinked",
+    );
+    expect(formatAuditAction("oauth_account_unlinked", "ko")).toBe(
+      "OAuth 계정 연결 해제",
+    );
+    expect(formatAuditAction("oauth_account_unlinked", "ja")).toBe(
+      "OAuthアカウント連携解除",
+    );
+  });
+
   it("localizes password change audit actions", () => {
     expect(formatAuditAction("password_changed", "en")).toBe(
       "Password changed",

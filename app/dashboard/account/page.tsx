@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountPasswordForm } from "./account-password-form";
+import { OAuthAccountManager } from "./oauth-account-manager";
 
 export async function generateMetadata() {
   const copy = await getCurrentDictionary();
@@ -34,6 +35,7 @@ export default async function AccountPage() {
           createdAt: "asc",
         },
         select: {
+          id: true,
           provider: true,
         },
       },
@@ -153,17 +155,30 @@ export default async function AccountPage() {
           </dl>
         </section>
 
-        <AccountPasswordForm
-          copy={{
-            ...copy.account,
-            apiErrors: copy.apiErrors,
-            hidePassword: copy.auth.hidePassword,
-            newPassword: copy.auth.newPassword,
-            passwordHelp: copy.auth.passwordHelp,
-            showPassword: copy.auth.showPassword,
-          }}
-          hasPassword={Boolean(user.passwordHash)}
-        />
+        <div className="space-y-6">
+          <AccountPasswordForm
+            copy={{
+              ...copy.account,
+              apiErrors: copy.apiErrors,
+              hidePassword: copy.auth.hidePassword,
+              newPassword: copy.auth.newPassword,
+              passwordHelp: copy.auth.passwordHelp,
+              showPassword: copy.auth.showPassword,
+            }}
+            hasPassword={Boolean(user.passwordHash)}
+          />
+          <OAuthAccountManager
+            accounts={user.accounts.map((account) => ({
+              id: account.id,
+              providerName: getOAuthProviderName(account.provider),
+            }))}
+            copy={{
+              ...copy.account,
+              apiErrors: copy.apiErrors,
+            }}
+            hasPassword={Boolean(user.passwordHash)}
+          />
+        </div>
       </section>
     </main>
   );

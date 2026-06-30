@@ -70,6 +70,10 @@ const en = {
     "Invalid team membership request.": "Invalid team membership request.",
     "JSON request body must be 16 KB or smaller.":
       "JSON request body must be 16 KB or smaller.",
+    "Add a password before removing your last sign-in method.":
+      "Add a password before removing your last sign-in method.",
+    "Enter a valid OAuth account.": "Enter a valid OAuth account.",
+    "OAuth account not found.": "OAuth account not found.",
     "Password must be at least 12 characters.":
       "Password must be at least 12 characters.",
     "Password change failed.": "Password change failed.",
@@ -348,14 +352,21 @@ const en = {
     fallbackError: "Unable to update account security.",
     noAuthMethods: "No sign-in methods are linked.",
     noName: "No name set",
+    noOAuthAccounts: "No OAuth providers are linked to this account.",
+    oauthConnectionsBody:
+      "Remove a connected OAuth provider only when another sign-in method remains available.",
+    oauthConnectionsTitle: "OAuth connections",
     passwordMethod: "Email and password",
     passwordUnavailable:
       "This account currently uses OAuth sign-in only. Use the connected provider to manage credentials.",
     profileTitle: "Profile",
+    removeOAuth: "Remove",
+    removingOAuth: "Removing...",
     securityBody:
       "Password updates run on the server, are rate-limited, and write a bounded audit event.",
     securityTitle: "Account security",
     successChanged: "Password changed.",
+    successOAuthRemoved: "OAuth connection removed.",
     title: "Manage account security",
     updateBody:
       "Enter your current password before setting a new password with at least 12 characters.",
@@ -814,6 +825,10 @@ const ko = {
     "Invalid team membership request.": "팀 멤버십 요청이 올바르지 않습니다.",
     "JSON request body must be 16 KB or smaller.":
       "JSON 요청 본문은 16 KB 이하여야 합니다.",
+    "Add a password before removing your last sign-in method.":
+      "마지막 로그인 방식을 제거하기 전에 비밀번호를 추가하세요.",
+    "Enter a valid OAuth account.": "유효한 OAuth 계정을 입력하세요.",
+    "OAuth account not found.": "OAuth 계정을 찾을 수 없습니다.",
     "Password must be at least 12 characters.":
       "비밀번호는 12자 이상이어야 합니다.",
     "Password change failed.": "비밀번호 변경에 실패했습니다.",
@@ -1009,14 +1024,21 @@ const ko = {
     fallbackError: "계정 보안을 업데이트할 수 없습니다.",
     noAuthMethods: "연결된 로그인 방식이 없습니다.",
     noName: "설정된 이름 없음",
+    noOAuthAccounts: "이 계정에 연결된 OAuth 제공자가 없습니다.",
+    oauthConnectionsBody:
+      "다른 로그인 방식이 남아 있을 때만 연결된 OAuth 제공자를 제거하세요.",
+    oauthConnectionsTitle: "OAuth 연결",
     passwordMethod: "이메일과 비밀번호",
     passwordUnavailable:
       "이 계정은 현재 OAuth 로그인만 사용합니다. 연결된 제공자에서 자격 증명을 관리하세요.",
     profileTitle: "프로필",
+    removeOAuth: "제거",
+    removingOAuth: "제거 중...",
     securityBody:
       "비밀번호 업데이트는 서버에서 실행되고 rate limit이 적용되며 제한된 감사 이벤트를 기록합니다.",
     securityTitle: "계정 보안",
     successChanged: "비밀번호가 변경되었습니다.",
+    successOAuthRemoved: "OAuth 연결을 제거했습니다.",
     title: "계정 보안 관리",
     updateBody:
       "현재 비밀번호를 입력한 뒤 12자 이상의 새 비밀번호를 설정하세요.",
@@ -1476,6 +1498,10 @@ const ja = {
     "Invalid team membership request.": "チームメンバーシップリクエストが正しくありません。",
     "JSON request body must be 16 KB or smaller.":
       "JSONリクエスト本文は16 KB以下である必要があります。",
+    "Add a password before removing your last sign-in method.":
+      "最後のログイン方法を削除する前にパスワードを追加してください。",
+    "Enter a valid OAuth account.": "有効なOAuthアカウントを入力してください。",
+    "OAuth account not found.": "OAuthアカウントが見つかりません。",
     "Password must be at least 12 characters.":
       "パスワードは12文字以上である必要があります。",
     "Password change failed.": "パスワード変更に失敗しました。",
@@ -1671,14 +1697,21 @@ const ja = {
     fallbackError: "アカウントセキュリティを更新できません。",
     noAuthMethods: "連携済みログイン方法はありません。",
     noName: "名前未設定",
+    noOAuthAccounts: "このアカウントに連携済みOAuthプロバイダーはありません。",
+    oauthConnectionsBody:
+      "別のログイン方法が残っている場合のみ、連携済みOAuthプロバイダーを削除してください。",
+    oauthConnectionsTitle: "OAuth連携",
     passwordMethod: "メールとパスワード",
     passwordUnavailable:
       "このアカウントは現在OAuthログインのみを使用しています。接続済みプロバイダーで認証情報を管理してください。",
     profileTitle: "プロフィール",
+    removeOAuth: "削除",
+    removingOAuth: "削除中...",
     securityBody:
       "パスワード更新はサーバーで実行され、レート制限され、制限付き監査イベントを記録します。",
     securityTitle: "アカウントセキュリティ",
     successChanged: "パスワードを変更しました。",
+    successOAuthRemoved: "OAuth連携を削除しました。",
     title: "アカウントセキュリティ管理",
     updateBody:
       "現在のパスワードを入力してから、12文字以上の新しいパスワードを設定してください。",

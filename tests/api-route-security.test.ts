@@ -27,6 +27,7 @@ const jsonPostRouteSuffixes = [
   path.join("tools", "summarize-document", "route.ts"),
 ];
 const jsonDeleteRouteSuffixes = [
+  path.join("account", "oauth-accounts", "route.ts"),
   path.join("admin", "team-invitations", "route.ts"),
   path.join("admin", "team-memberships", "route.ts"),
   path.join("api-tokens", "route.ts"),
@@ -116,6 +117,7 @@ describe("API route security contracts", () => {
 
   it("keeps every protected DELETE route authenticated and same-origin checked", () => {
     expect(protectedDeleteRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("account", "oauth-accounts", "route.ts"),
       path.join("admin", "team-invitations", "route.ts"),
       path.join("admin", "team-memberships", "route.ts"),
       path.join("api-tokens", "route.ts"),
@@ -306,6 +308,37 @@ describe("API route security contracts", () => {
     expect(tokenHashIndex).toBeGreaterThan(patchIndex);
     expect(tokenHashWriteIndex).toBeGreaterThan(updateIndex);
     expect(auditIndex).toBeGreaterThan(updateIndex);
+  });
+
+  it("keeps OAuth account unlinking owner-scoped and audited", () => {
+    const source = readRoute(
+      path.join(apiRoot, "account", "oauth-accounts", "route.ts"),
+    );
+    const authIndex = source.indexOf("auth()");
+    const jsonBodyIndex = source.indexOf("readJsonBodyResult(request)");
+    const validationIndex = source.indexOf(
+      "validateUnlinkOAuthAccountInput",
+      jsonBodyIndex,
+    );
+    const unlinkIndex = source.indexOf(
+      "unlinkOAuthAccountForUser",
+      validationIndex,
+    );
+
+    expect(source).toContain("isSameOriginRequest(request)");
+    expect(authIndex).toBeGreaterThanOrEqual(0);
+    expect(jsonBodyIndex).toBeGreaterThan(authIndex);
+    expect(validationIndex).toBeGreaterThan(jsonBodyIndex);
+    expect(unlinkIndex).toBeGreaterThan(validationIndex);
+
+    const helperSource = readRoute(
+      path.join(process.cwd(), "lib", "auth", "oauth-account-management.ts"),
+    );
+
+    expect(helperSource).toContain("userAccount.deleteMany");
+    expect(helperSource).toContain("userId");
+    expect(helperSource).toContain("OAUTH_ACCOUNT_LAST_METHOD_ERROR");
+    expect(helperSource).toContain('action: "oauth_account_unlinked"');
   });
 
   it("keeps document uploads rate-limited before multipart parsing", () => {
