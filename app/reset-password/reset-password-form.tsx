@@ -1,11 +1,13 @@
 "use client";
 
 import { Icon, ui } from "@/components/ui";
+import { lookupApiError } from "@/lib/i18n/dictionaries";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type ResetPasswordFormProps = {
   copy: {
+    apiErrors: Record<string, string>;
     error: string;
     newPassword: string;
     passwordHelp: string;
@@ -52,14 +54,12 @@ export function ResetPasswordForm({ copy, token }: ResetPasswordFormProps) {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setError(payload.error ?? copy.error);
+      setError(lookupApiError(copy.apiErrors, payload.error, copy.error));
       return;
     }
 
     form.reset();
-    setMessage(
-      payload.message ?? copy.success,
-    );
+    setMessage(copy.success);
   }
 
   return (

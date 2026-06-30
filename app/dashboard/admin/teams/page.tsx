@@ -161,7 +161,7 @@ export default async function TeamAdminPage({
 
       <section className={`${ui.container} grid gap-6 py-4 sm:py-8`}>
         <TeamRbacForms
-          copy={copy.teamAdmin}
+          copy={{ ...copy.teamAdmin, apiErrors: copy.apiErrors }}
           organizationId={context.organization.id}
           roleCopy={{
             organizationRoles: {

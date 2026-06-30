@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon, ui } from "@/components/ui";
+import { lookupApiError } from "@/lib/i18n/dictionaries";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +15,7 @@ type TeamRbacFormCopy = {
   addMemberSubmit: string;
   addMemberTitle: string;
   addingMember: string;
+  apiErrors: Record<string, string>;
   createTeamBody: string;
   createTeamSubmit: string;
   createTeamTitle: string;
@@ -45,10 +47,14 @@ type ApiResponse = {
   error?: string;
 };
 
-async function readApiError(response: Response, fallback: string) {
+async function readApiError(
+  response: Response,
+  apiErrors: Record<string, string>,
+  fallback: string,
+) {
   const payload = (await response.json().catch(() => null)) as ApiResponse | null;
 
-  return payload?.error ?? fallback;
+  return lookupApiError(apiErrors, payload?.error, fallback);
 }
 
 export function TeamRbacForms({
@@ -84,7 +90,9 @@ export function TeamRbacForms({
       });
 
       if (!response.ok) {
-        throw new Error(await readApiError(response, copy.fallbackError));
+        throw new Error(
+          await readApiError(response, copy.apiErrors, copy.fallbackError),
+        );
       }
 
       event.currentTarget.reset();
@@ -121,7 +129,9 @@ export function TeamRbacForms({
       });
 
       if (!response.ok) {
-        throw new Error(await readApiError(response, copy.fallbackError));
+        throw new Error(
+          await readApiError(response, copy.apiErrors, copy.fallbackError),
+        );
       }
 
       setMemberSuccess(copy.successMemberAssigned);

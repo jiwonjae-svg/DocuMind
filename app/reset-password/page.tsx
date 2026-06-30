@@ -83,6 +83,7 @@ export default async function ResetPasswordPage({
             {token ? (
               <ResetPasswordForm
                 copy={{
+                  apiErrors: copy.apiErrors,
                   error: copy.auth.resetError,
                   newPassword: copy.auth.newPassword,
                   passwordHelp: copy.auth.passwordHelp,

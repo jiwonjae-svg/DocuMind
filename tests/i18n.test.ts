@@ -9,6 +9,7 @@ import {
 import {
   formatCopy,
   getDictionary,
+  lookupApiError,
   lookupCopy,
   translate,
 } from "../lib/i18n/dictionaries";
@@ -46,6 +47,8 @@ describe("i18n locale helpers", () => {
     const english = getDictionary("en");
     const localizedChecks: Array<(copy: typeof english) => string> = [
       (copy) => copy.auth.loginTitle,
+      (copy) => copy.apiErrors["Authentication required."],
+      (copy) => copy.apiErrors["Too many search requests. Try again shortly."],
       (copy) => copy.common.homeLink,
       (copy) => copy.common.primaryNavigation,
       (copy) => copy.meta.description,
@@ -91,5 +94,15 @@ describe("i18n locale helpers", () => {
     expect(
       lookupCopy(ja.documents.processingErrors, "Document processing failed."),
     ).toBe("文書処理に失敗しました。");
+    expect(
+      lookupApiError(
+        ko.apiErrors,
+        "Team name must be between 1 and 80 characters.",
+        "fallback",
+      ),
+    ).toBe("팀 이름은 1자 이상 80자 이하여야 합니다.");
+    expect(lookupApiError(ja.apiErrors, "Unknown API error.", "fallback")).toBe(
+      "fallback",
+    );
   });
 });

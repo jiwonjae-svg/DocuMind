@@ -74,7 +74,7 @@ export default async function AskPage() {
       </section>
 
       <section className={`${ui.container} py-4 sm:py-8`}>
-        <AskForm copy={copy.askForm} />
+        <AskForm copy={{ ...copy.askForm, apiErrors: copy.apiErrors }} />
       </section>
     </main>
   );

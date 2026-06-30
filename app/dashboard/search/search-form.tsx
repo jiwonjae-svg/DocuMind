@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon, IconTile, ui } from "@/components/ui";
-import { formatCopy } from "@/lib/i18n/dictionaries";
+import { formatCopy, lookupApiError } from "@/lib/i18n/dictionaries";
 import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
 import { FormEvent, useState } from "react";
 
@@ -20,6 +20,7 @@ type SearchFormCopy = {
   auditBody: string;
   auditEyebrow: string;
   auditTitle: string;
+  apiErrors: Record<string, string>;
   chunk: string;
   empty: string;
   fallbackError: string;
@@ -90,7 +91,9 @@ export function SearchForm({ copy }: { copy: SearchFormCopy }) {
         | null;
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? copy.fallbackError);
+        throw new Error(
+          lookupApiError(copy.apiErrors, payload?.error, copy.fallbackError),
+        );
       }
 
       if (!Array.isArray(payload?.results)) {

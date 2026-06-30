@@ -70,6 +70,7 @@ export default async function ForgotPasswordPage() {
             </p>
             <ForgotPasswordForm
               copy={{
+                apiErrors: copy.apiErrors,
                 email: copy.common.email,
                 error: copy.auth.forgotError,
                 localResetLink: copy.auth.localResetLink,

@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon, IconTile, ui } from "@/components/ui";
+import { lookupApiError } from "@/lib/i18n/dictionaries";
 import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/search/validation";
 import { FormEvent, useState } from "react";
 
@@ -23,6 +24,7 @@ type AskResponse = {
 
 type AskFormCopy = {
   answer: string;
+  apiErrors: Record<string, string>;
   ask: string;
   asking: string;
   chunk: string;
@@ -100,7 +102,9 @@ export function AskForm({ copy }: { copy: AskFormCopy }) {
         | null;
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? copy.fallbackError);
+        throw new Error(
+          lookupApiError(copy.apiErrors, payload?.error, copy.fallbackError),
+        );
       }
 
       if (

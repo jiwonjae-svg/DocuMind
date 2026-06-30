@@ -29,6 +29,53 @@ const en = {
     signup: "Sign up",
     userFallback: "User",
   },
+  apiErrors: {
+    "Admin access required.": "Admin access required.",
+    "AI provider is rate limiting requests. Try again shortly.":
+      "AI provider is rate limiting requests. Try again shortly.",
+    "AI provider is temporarily unavailable. Try again shortly.":
+      "AI provider is temporarily unavailable. Try again shortly.",
+    "AI provider request failed.": "AI provider request failed.",
+    "AI service is not configured. Contact an administrator.":
+      "AI service is not configured. Contact an administrator.",
+    "Ask request failed.": "Ask request failed.",
+    "Authentication required.": "Authentication required.",
+    "Content-Type must be application/json.": "Content-Type must be application/json.",
+    "Cross-origin request blocked.": "Cross-origin request blocked.",
+    "Email, team, organization role, and team role are required.":
+      "Email, team, organization role, and team role are required.",
+    "Enter a valid email address.": "Enter a valid email address.",
+    "Enter a valid email, name, and password.":
+      "Enter a valid email, name, and password.",
+    "Enter a valid reset token and password.":
+      "Enter a valid reset token and password.",
+    "Invalid JSON body.": "Invalid JSON body.",
+    "Invalid team membership request.": "Invalid team membership request.",
+    "JSON request body must be 16 KB or smaller.":
+      "JSON request body must be 16 KB or smaller.",
+    "Password must be at least 12 characters.":
+      "Password must be at least 12 characters.",
+    "Question must be between 1 and 1000 characters.":
+      "Question must be between 1 and 1000 characters.",
+    "Search failed.": "Search failed.",
+    "Search query must be between 1 and 1000 characters.":
+      "Search query must be between 1 and 1000 characters.",
+    "Team name must be between 1 and 80 characters.":
+      "Team name must be between 1 and 80 characters.",
+    "Team not found.": "Team not found.",
+    "This password reset link is invalid or expired.":
+      "This password reset link is invalid or expired.",
+    "Too many account creation attempts. Try again shortly.":
+      "Too many account creation attempts. Try again shortly.",
+    "Too many answer requests. Try again shortly.":
+      "Too many answer requests. Try again shortly.",
+    "Too many password reset attempts. Try again shortly.":
+      "Too many password reset attempts. Try again shortly.",
+    "Too many search requests. Try again shortly.":
+      "Too many search requests. Try again shortly.",
+    "User must sign up before being added to a team.":
+      "User must sign up before being added to a team.",
+  },
   auth: {
     accountRecovery: "Account recovery",
     accountSetup: "Account setup",
@@ -488,6 +535,54 @@ const ko = {
     signInExistingAccount: "이 계정이 존재한다면 현재 비밀번호로 로그인하세요.",
     signupError: "계정을 만들 수 없습니다.",
   },
+  apiErrors: {
+    ...en.apiErrors,
+    "Admin access required.": "관리자 접근이 필요합니다.",
+    "AI provider is rate limiting requests. Try again shortly.":
+      "AI 제공자가 요청을 제한하고 있습니다. 잠시 후 다시 시도하세요.",
+    "AI provider is temporarily unavailable. Try again shortly.":
+      "AI 제공자를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도하세요.",
+    "AI provider request failed.": "AI 제공자 요청에 실패했습니다.",
+    "AI service is not configured. Contact an administrator.":
+      "AI 서비스가 설정되어 있지 않습니다. 관리자에게 문의하세요.",
+    "Ask request failed.": "질문 요청에 실패했습니다.",
+    "Authentication required.": "로그인이 필요합니다.",
+    "Content-Type must be application/json.": "Content-Type은 application/json이어야 합니다.",
+    "Cross-origin request blocked.": "교차 출처 요청이 차단되었습니다.",
+    "Email, team, organization role, and team role are required.":
+      "이메일, 팀, 조직 역할, 팀 역할을 모두 입력해야 합니다.",
+    "Enter a valid email address.": "유효한 이메일 주소를 입력하세요.",
+    "Enter a valid email, name, and password.":
+      "유효한 이메일, 이름, 비밀번호를 입력하세요.",
+    "Enter a valid reset token and password.":
+      "유효한 재설정 토큰과 비밀번호를 입력하세요.",
+    "Invalid JSON body.": "JSON 본문이 올바르지 않습니다.",
+    "Invalid team membership request.": "팀 멤버십 요청이 올바르지 않습니다.",
+    "JSON request body must be 16 KB or smaller.":
+      "JSON 요청 본문은 16 KB 이하여야 합니다.",
+    "Password must be at least 12 characters.":
+      "비밀번호는 12자 이상이어야 합니다.",
+    "Question must be between 1 and 1000 characters.":
+      "질문은 1자 이상 1000자 이하여야 합니다.",
+    "Search failed.": "검색에 실패했습니다.",
+    "Search query must be between 1 and 1000 characters.":
+      "검색어는 1자 이상 1000자 이하여야 합니다.",
+    "Team name must be between 1 and 80 characters.":
+      "팀 이름은 1자 이상 80자 이하여야 합니다.",
+    "Team not found.": "팀을 찾을 수 없습니다.",
+    "This password reset link is invalid or expired.":
+      "비밀번호 재설정 링크가 잘못되었거나 만료되었습니다.",
+    "Too many account creation attempts. Try again shortly.":
+      "계정 생성 시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "Too many answer requests. Try again shortly.":
+      "답변 요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "Too many password reset attempts. Try again shortly.":
+      "비밀번호 재설정 시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "Too many search requests. Try again shortly.":
+      "검색 요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "User must sign up before being added to a team.":
+      "팀에 추가하려면 사용자가 먼저 회원가입해야 합니다.",
+  },
   oauth: {
     continueWith: "{provider}로 계속",
     opening: "{provider} 열기...",
@@ -881,6 +976,54 @@ const ja = {
     signInExistingAccount: "このアカウントが存在する場合は現在のパスワードでログインしてください。",
     signupError: "アカウントを作成できません。",
   },
+  apiErrors: {
+    ...en.apiErrors,
+    "Admin access required.": "管理者アクセスが必要です。",
+    "AI provider is rate limiting requests. Try again shortly.":
+      "AIプロバイダーがリクエストを制限しています。しばらくしてから再試行してください。",
+    "AI provider is temporarily unavailable. Try again shortly.":
+      "AIプロバイダーを一時的に利用できません。しばらくしてから再試行してください。",
+    "AI provider request failed.": "AIプロバイダーへのリクエストに失敗しました。",
+    "AI service is not configured. Contact an administrator.":
+      "AIサービスが設定されていません。管理者に連絡してください。",
+    "Ask request failed.": "質問リクエストに失敗しました。",
+    "Authentication required.": "ログインが必要です。",
+    "Content-Type must be application/json.": "Content-Typeはapplication/jsonである必要があります。",
+    "Cross-origin request blocked.": "クロスオリジンリクエストがブロックされました。",
+    "Email, team, organization role, and team role are required.":
+      "メール、チーム、組織ロール、チームロールはすべて必須です。",
+    "Enter a valid email address.": "有効なメールアドレスを入力してください。",
+    "Enter a valid email, name, and password.":
+      "有効なメール、名前、パスワードを入力してください。",
+    "Enter a valid reset token and password.":
+      "有効な再設定トークンとパスワードを入力してください。",
+    "Invalid JSON body.": "JSON本文が正しくありません。",
+    "Invalid team membership request.": "チームメンバーシップリクエストが正しくありません。",
+    "JSON request body must be 16 KB or smaller.":
+      "JSONリクエスト本文は16 KB以下である必要があります。",
+    "Password must be at least 12 characters.":
+      "パスワードは12文字以上である必要があります。",
+    "Question must be between 1 and 1000 characters.":
+      "質問は1文字以上1000文字以下である必要があります。",
+    "Search failed.": "検索に失敗しました。",
+    "Search query must be between 1 and 1000 characters.":
+      "検索クエリは1文字以上1000文字以下である必要があります。",
+    "Team name must be between 1 and 80 characters.":
+      "チーム名は1文字以上80文字以下である必要があります。",
+    "Team not found.": "チームが見つかりません。",
+    "This password reset link is invalid or expired.":
+      "このパスワード再設定リンクは無効または期限切れです。",
+    "Too many account creation attempts. Try again shortly.":
+      "アカウント作成の試行が多すぎます。しばらくしてから再試行してください。",
+    "Too many answer requests. Try again shortly.":
+      "回答リクエストが多すぎます。しばらくしてから再試行してください。",
+    "Too many password reset attempts. Try again shortly.":
+      "パスワード再設定の試行が多すぎます。しばらくしてから再試行してください。",
+    "Too many search requests. Try again shortly.":
+      "検索リクエストが多すぎます。しばらくしてから再試行してください。",
+    "User must sign up before being added to a team.":
+      "チームに追加する前に、ユーザーが登録している必要があります。",
+  },
   oauth: {
     continueWith: "{provider}で続行",
     opening: "{provider}を開いています...",
@@ -1209,4 +1352,12 @@ export function formatCopy(template: string, values: Record<string, string | num
 
 export function lookupCopy(copy: Record<string, string>, key: string) {
   return copy[key] ?? key;
+}
+
+export function lookupApiError(
+  copy: Record<string, string>,
+  key: string | null | undefined,
+  fallback: string,
+) {
+  return key ? (copy[key] ?? fallback) : fallback;
 }

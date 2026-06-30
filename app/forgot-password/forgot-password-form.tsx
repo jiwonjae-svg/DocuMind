@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon, ui } from "@/components/ui";
+import { lookupApiError } from "@/lib/i18n/dictionaries";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
@@ -14,6 +15,7 @@ export function ForgotPasswordForm({
   copy,
 }: {
   copy: {
+    apiErrors: Record<string, string>;
     email: string;
     error: string;
     localResetLink: string;
@@ -51,14 +53,11 @@ export function ForgotPasswordForm({
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setError(payload.error ?? copy.error);
+      setError(lookupApiError(copy.apiErrors, payload.error, copy.error));
       return;
     }
 
-    setMessage(
-      payload.message ??
-        copy.success,
-    );
+    setMessage(copy.success);
     setResetUrl(payload.resetUrl ?? null);
   }
 

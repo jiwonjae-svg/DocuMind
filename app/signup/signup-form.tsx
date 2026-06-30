@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon, ui } from "@/components/ui";
+import { lookupApiError } from "@/lib/i18n/dictionaries";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -10,6 +11,7 @@ type SignupFormProps = {
   copy: {
     createAccount: string;
     createAccountPending: string;
+    apiErrors: Record<string, string>;
     email: string;
     name: string;
     password: string;
@@ -52,7 +54,7 @@ export function SignupForm({ callbackUrl, copy }: SignupFormProps) {
 
     if (!response.ok) {
       setIsSubmitting(false);
-      setError(payload.error ?? copy.signupError);
+      setError(lookupApiError(copy.apiErrors, payload.error, copy.signupError));
       return;
     }
 

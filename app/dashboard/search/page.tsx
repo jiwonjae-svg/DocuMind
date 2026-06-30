@@ -74,7 +74,7 @@ export default async function SearchPage() {
       </section>
 
       <section className={`${ui.container} py-4 sm:py-8`}>
-        <SearchForm copy={copy.searchForm} />
+        <SearchForm copy={{ ...copy.searchForm, apiErrors: copy.apiErrors }} />
       </section>
     </main>
   );

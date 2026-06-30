@@ -99,6 +99,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               copy={{
                 createAccount: copy.auth.createAccount,
                 createAccountPending: copy.auth.createAccountPending,
+                apiErrors: copy.apiErrors,
                 email: copy.common.email,
                 name: copy.common.name,
                 password: copy.common.password,
