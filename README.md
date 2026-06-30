@@ -243,6 +243,14 @@ To enter OAuth and email secrets locally without pasting them into Codex chat, r
 
 The script opens a PowerShell prompt, reads secret values with `Read-Host -AsSecureString`, updates `.env.local`, and prints only the Google callback URL to register.
 
+To enter Google OAuth and optional Resend secrets directly into Vercel production without pasting them into Codex chat, run:
+
+```powershell
+.\scripts\configure-vercel-auth-secrets.ps1 -LaunchNewWindow -ProductionUrl https://documind-chi.vercel.app
+```
+
+The script opens a PowerShell prompt, reads secret values locally, writes them to Vercel environment variables through `vercel env add/update`, and prints only the Google callback URL. Redeploy production after changing Vercel environment variables.
+
 Optional OAuth variables:
 
 ```text
