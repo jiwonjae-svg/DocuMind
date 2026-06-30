@@ -43,6 +43,11 @@ const en = {
     "Authentication required.": "Authentication required.",
     "Content-Type must be application/json.": "Content-Type must be application/json.",
     "Cross-origin request blocked.": "Cross-origin request blocked.",
+    "documentId is required.": "documentId is required.",
+    "Document must be READY before summarization.":
+      "Document must be READY before summarization.",
+    "Document not found.": "Document not found.",
+    "Document summarization failed.": "Document summarization failed.",
     "Email, team, organization role, and team role are required.":
       "Email, team, organization role, and team role are required.",
     "Enter a valid email address.": "Enter a valid email address.",
@@ -74,6 +79,7 @@ const en = {
       "Too many password reset attempts. Try again shortly.",
     "Too many search requests. Try again shortly.":
       "Too many search requests. Try again shortly.",
+    "Unsupported locale.": "Unsupported locale.",
     "User must sign up before being added to a team.":
       "User must sign up before being added to a team.",
   },
@@ -606,6 +612,11 @@ const ko = {
     "Authentication required.": "로그인이 필요합니다.",
     "Content-Type must be application/json.": "Content-Type은 application/json이어야 합니다.",
     "Cross-origin request blocked.": "교차 출처 요청이 차단되었습니다.",
+    "documentId is required.": "documentId가 필요합니다.",
+    "Document must be READY before summarization.":
+      "요약하기 전에 문서가 READY 상태여야 합니다.",
+    "Document not found.": "문서를 찾을 수 없습니다.",
+    "Document summarization failed.": "문서 요약에 실패했습니다.",
     "Email, team, organization role, and team role are required.":
       "이메일, 팀, 조직 역할, 팀 역할을 모두 입력해야 합니다.",
     "Enter a valid email address.": "유효한 이메일 주소를 입력하세요.",
@@ -637,6 +648,7 @@ const ko = {
       "비밀번호 재설정 시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
     "Too many search requests. Try again shortly.":
       "검색 요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "Unsupported locale.": "지원하지 않는 언어입니다.",
     "User must sign up before being added to a team.":
       "팀에 추가하려면 사용자가 먼저 회원가입해야 합니다.",
   },
@@ -1100,6 +1112,11 @@ const ja = {
     "Authentication required.": "ログインが必要です。",
     "Content-Type must be application/json.": "Content-Typeはapplication/jsonである必要があります。",
     "Cross-origin request blocked.": "クロスオリジンリクエストがブロックされました。",
+    "documentId is required.": "documentIdは必須です。",
+    "Document must be READY before summarization.":
+      "要約する前に文書がREADY状態である必要があります。",
+    "Document not found.": "文書が見つかりません。",
+    "Document summarization failed.": "文書要約に失敗しました。",
     "Email, team, organization role, and team role are required.":
       "メール、チーム、組織ロール、チームロールはすべて必須です。",
     "Enter a valid email address.": "有効なメールアドレスを入力してください。",
@@ -1131,6 +1148,7 @@ const ja = {
       "パスワード再設定の試行が多すぎます。しばらくしてから再試行してください。",
     "Too many search requests. Try again shortly.":
       "検索リクエストが多すぎます。しばらくしてから再試行してください。",
+    "Unsupported locale.": "サポートされていないロケールです。",
     "User must sign up before being added to a team.":
       "チームに追加する前に、ユーザーが登録している必要があります。",
   },

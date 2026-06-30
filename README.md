@@ -466,7 +466,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  41 passed (41)
-Tests       252 passed (252)
+Tests       253 passed (253)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 

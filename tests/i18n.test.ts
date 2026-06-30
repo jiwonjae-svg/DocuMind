@@ -107,4 +107,19 @@ describe("i18n locale helpers", () => {
       "fallback",
     );
   });
+
+  it("keeps supported API error keys localized", () => {
+    const english = getDictionary("en").apiErrors;
+
+    for (const locale of ["ko", "ja"] as const) {
+      const localized = getDictionary(locale).apiErrors;
+
+      for (const [key, englishValue] of Object.entries(english)) {
+        expect(localized[key], `${locale} missing API error: ${key}`).toBeTruthy();
+        expect(localized[key], `${locale} untranslated API error: ${key}`).not.toBe(
+          englishValue,
+        );
+      }
+    }
+  });
 });
