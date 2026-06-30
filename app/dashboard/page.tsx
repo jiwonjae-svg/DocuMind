@@ -44,6 +44,12 @@ const workspaceCardMeta = [
     accent: "violet",
     scope: "admin",
   },
+  {
+    href: "/dashboard/api-tokens",
+    icon: "network",
+    accent: "emerald",
+    scope: "available",
+  },
 ] as const;
 
 const roadmapMeta = [
@@ -110,6 +116,10 @@ export default async function DashboardPage() {
               <Link href="/dashboard/admin/audit-logs" className={ui.secondaryButton}>
                 <Icon name="team" className="h-4 w-4 text-blue-700" />
                 {copy.common.adminAudit}
+              </Link>
+              <Link href="/dashboard/api-tokens" className={ui.secondaryButton}>
+                <Icon name="network" className="h-4 w-4 text-blue-700" />
+                {copy.common.apiTokens}
               </Link>
             </div>
           </div>

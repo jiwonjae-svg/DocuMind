@@ -8,6 +8,7 @@ const en = {
   },
   common: {
     adminAudit: "Organization audit",
+    apiTokens: "API tokens",
     ask: "Ask questions",
     auditLogs: "Audit logs",
     backToDashboard: "Back to dashboard",
@@ -41,6 +42,10 @@ const en = {
       "AI service is not configured. Contact an administrator.",
     "Ask request failed.": "Ask request failed.",
     "Authentication required.": "Authentication required.",
+    "API token is required.": "API token is required.",
+    "API token name must be between 1 and 80 characters.":
+      "API token name must be between 1 and 80 characters.",
+    "API token not found.": "API token not found.",
     "Content-Type must be application/json.": "Content-Type must be application/json.",
     "Cross-origin request blocked.": "Cross-origin request blocked.",
     "documentId is required.": "documentId is required.",
@@ -56,6 +61,7 @@ const en = {
     "Enter a valid reset token and password.":
       "Enter a valid reset token and password.",
     "Invalid JSON body.": "Invalid JSON body.",
+    "Invalid API bearer token.": "Invalid API bearer token.",
     "Invalid team membership request.": "Invalid team membership request.",
     "JSON request body must be 16 KB or smaller.":
       "JSON request body must be 16 KB or smaller.",
@@ -260,11 +266,44 @@ const en = {
       ["Audit log review", "Review your records for uploads, processing, questions, and agent tool usage.", "Review audit logs"],
       ["Organization audit", "Owners and admins can review recent activity across organization members.", "Review organization"],
       ["Team RBAC", "Owners and admins can create teams, assign existing users, and send single-use team invitations.", "Manage teams"],
+      ["MCP API tokens", "Create user-scoped bearer tokens for external MCP clients without sharing browser cookies.", "Manage API tokens"],
     ],
     roadmap: [
       ["Invitation lifecycle controls", "Add revoke, resend, and expiry-management screens for team invitations."],
       ["Background processing", "Move long document processing and embeddings into a durable queue for larger deployments."],
     ],
+  },
+  apiTokens: {
+    activeBody: "Active bearer tokens",
+    activeTitle: "Active tokens",
+    bearerUsage:
+      "Use a generated token as an Authorization bearer credential from MCP clients that cannot use the browser session.",
+    body:
+      "Create and revoke user-scoped bearer tokens for the JSON-RPC MCP wrapper. Tokens are hashed before storage and can access only the same documents your account can access.",
+    createBody:
+      "Name the client or environment that will use this token. The raw token is shown once and cannot be recovered later.",
+    createSubmit: "Create token",
+    createTitle: "Create MCP bearer token",
+    createdAt: "Created",
+    createdBody:
+      "Store this value in the client that will call DocuMind. It will not be shown again after you leave this page.",
+    createdTitle: "Token created",
+    creating: "Creating token...",
+    emptyBody: "Create a token when an external MCP client needs to call DocuMind.",
+    emptyTitle: "No active API tokens",
+    fallbackError: "Unable to update API tokens.",
+    lastUsedAt: "Last used",
+    mcpEndpoint: "MCP endpoint",
+    nameLabel: "Token name",
+    namePlaceholder: "Desktop MCP client",
+    neverUsed: "Never used",
+    revoke: "Revoke",
+    revoking: "Revoking...",
+    successCreated: "API token created.",
+    successRevoked: "API token revoked.",
+    title: "Manage MCP API tokens",
+    tokenHelp: "The token is stored only as a server-side hash.",
+    tokenLabel: "Bearer token",
   },
   documents: {
     acceptedFormats: "Accepted formats: .txt, .md, .pdf. Maximum size: 10 MB.",
@@ -557,6 +596,7 @@ const ko = {
   },
   common: {
     adminAudit: "조직 감사",
+    apiTokens: "API 토큰",
     ask: "질문하기",
     auditLogs: "감사 로그",
     backToDashboard: "대시보드로 돌아가기",
@@ -655,6 +695,10 @@ const ko = {
       "AI 서비스가 설정되어 있지 않습니다. 관리자에게 문의하세요.",
     "Ask request failed.": "질문 요청에 실패했습니다.",
     "Authentication required.": "로그인이 필요합니다.",
+    "API token is required.": "API 토큰이 필요합니다.",
+    "API token name must be between 1 and 80 characters.":
+      "API 토큰 이름은 1자 이상 80자 이하여야 합니다.",
+    "API token not found.": "API 토큰을 찾을 수 없습니다.",
     "Content-Type must be application/json.": "Content-Type은 application/json이어야 합니다.",
     "Cross-origin request blocked.": "교차 출처 요청이 차단되었습니다.",
     "documentId is required.": "documentId가 필요합니다.",
@@ -670,6 +714,7 @@ const ko = {
     "Enter a valid reset token and password.":
       "유효한 재설정 토큰과 비밀번호를 입력하세요.",
     "Invalid JSON body.": "JSON 본문이 올바르지 않습니다.",
+    "Invalid API bearer token.": "API bearer 토큰이 올바르지 않습니다.",
     "Invalid team membership request.": "팀 멤버십 요청이 올바르지 않습니다.",
     "JSON request body must be 16 KB or smaller.":
       "JSON 요청 본문은 16 KB 이하여야 합니다.",
@@ -806,11 +851,45 @@ const ko = {
       ["감사 로그 검토", "업로드, 처리, 질문, 에이전트 도구 사용 기록을 내 활동 범위에서 확인합니다.", "감사 로그 보기"],
       ["조직 감사", "소유자와 관리자는 조직 구성원의 최근 활동을 검토할 수 있습니다.", "조직 검토"],
       ["팀 RBAC", "소유자와 관리자는 팀을 만들고 기존 사용자를 배정하며 1회용 팀 초대를 보낼 수 있습니다.", "팀 관리"],
+      ["MCP API 토큰", "브라우저 쿠키를 공유하지 않고 외부 MCP 클라이언트용 사용자 범위 bearer 토큰을 만듭니다.", "API 토큰 관리"],
     ],
     roadmap: [
       ["초대 수명주기 제어", "팀 초대를 취소, 재전송하고 만료를 관리하는 화면을 추가합니다."],
       ["백그라운드 처리", "더 큰 배포를 위해 긴 문서 처리와 임베딩을 내구성 있는 큐로 옮깁니다."],
     ],
+  },
+  apiTokens: {
+    ...en.apiTokens,
+    activeBody: "활성 bearer 토큰",
+    activeTitle: "활성 토큰",
+    bearerUsage:
+      "브라우저 세션을 사용할 수 없는 MCP 클라이언트에서 생성된 토큰을 Authorization bearer 자격 증명으로 사용합니다.",
+    body:
+      "JSON-RPC MCP wrapper용 사용자 범위 bearer 토큰을 생성하고 폐기합니다. 토큰은 저장 전에 해시되며, 계정이 접근할 수 있는 동일한 문서에만 접근합니다.",
+    createBody:
+      "이 토큰을 사용할 클라이언트나 환경 이름을 지정하세요. 원문 토큰은 한 번만 표시되며 나중에 복구할 수 없습니다.",
+    createSubmit: "토큰 만들기",
+    createTitle: "MCP bearer 토큰 만들기",
+    createdAt: "생성일",
+    createdBody:
+      "DocuMind를 호출할 클라이언트에 이 값을 저장하세요. 이 페이지를 떠나면 다시 표시되지 않습니다.",
+    createdTitle: "토큰 생성됨",
+    creating: "토큰 생성 중...",
+    emptyBody: "외부 MCP 클라이언트가 DocuMind를 호출해야 할 때 토큰을 만드세요.",
+    emptyTitle: "활성 API 토큰 없음",
+    fallbackError: "API 토큰을 업데이트할 수 없습니다.",
+    lastUsedAt: "마지막 사용",
+    mcpEndpoint: "MCP 엔드포인트",
+    nameLabel: "토큰 이름",
+    namePlaceholder: "데스크톱 MCP 클라이언트",
+    neverUsed: "사용 기록 없음",
+    revoke: "폐기",
+    revoking: "폐기 중...",
+    successCreated: "API 토큰을 생성했습니다.",
+    successRevoked: "API 토큰을 폐기했습니다.",
+    title: "MCP API 토큰 관리",
+    tokenHelp: "토큰은 서버 측 해시로만 저장됩니다.",
+    tokenLabel: "Bearer 토큰",
   },
   documents: {
     ...en.documents,
@@ -1101,6 +1180,7 @@ const ja = {
   },
   common: {
     adminAudit: "組織監査",
+    apiTokens: "APIトークン",
     ask: "質問する",
     auditLogs: "監査ログ",
     backToDashboard: "ダッシュボードへ戻る",
@@ -1200,6 +1280,10 @@ const ja = {
       "AIサービスが設定されていません。管理者に連絡してください。",
     "Ask request failed.": "質問リクエストに失敗しました。",
     "Authentication required.": "ログインが必要です。",
+    "API token is required.": "APIトークンは必須です。",
+    "API token name must be between 1 and 80 characters.":
+      "APIトークン名は1文字以上80文字以下である必要があります。",
+    "API token not found.": "APIトークンが見つかりません。",
     "Content-Type must be application/json.": "Content-Typeはapplication/jsonである必要があります。",
     "Cross-origin request blocked.": "クロスオリジンリクエストがブロックされました。",
     "documentId is required.": "documentIdは必須です。",
@@ -1215,6 +1299,7 @@ const ja = {
     "Enter a valid reset token and password.":
       "有効な再設定トークンとパスワードを入力してください。",
     "Invalid JSON body.": "JSON本文が正しくありません。",
+    "Invalid API bearer token.": "API bearerトークンが正しくありません。",
     "Invalid team membership request.": "チームメンバーシップリクエストが正しくありません。",
     "JSON request body must be 16 KB or smaller.":
       "JSONリクエスト本文は16 KB以下である必要があります。",
@@ -1351,11 +1436,45 @@ const ja = {
       ["監査ログ確認", "アップロード、処理、質問、エージェントツール利用の記録を自分の活動範囲で確認します。", "監査ログを見る"],
       ["組織監査", "オーナーと管理者は組織メンバーの最近の活動を確認できます。", "組織を確認"],
       ["チームRBAC", "オーナーと管理者はチームを作成し、既存ユーザーを割り当て、1回限りのチーム招待を送信できます。", "チームを管理"],
+      ["MCP APIトークン", "ブラウザーCookieを共有せず、外部MCPクライアント向けのユーザースコープbearerトークンを作成します。", "APIトークンを管理"],
     ],
     roadmap: [
       ["招待ライフサイクル制御", "チーム招待の取り消し、再送、期限管理画面を追加します。"],
       ["バックグラウンド処理", "大規模デプロイ向けに長い文書処理と埋め込みを耐久性のあるキューへ移します。"],
     ],
+  },
+  apiTokens: {
+    ...en.apiTokens,
+    activeBody: "有効なbearerトークン",
+    activeTitle: "有効なトークン",
+    bearerUsage:
+      "ブラウザーセッションを使えないMCPクライアントから、生成したトークンをAuthorization bearer資格情報として使用します。",
+    body:
+      "JSON-RPC MCP wrapper向けのユーザースコープbearerトークンを作成・取り消します。トークンは保存前にハッシュ化され、アカウントがアクセスできる文書だけにアクセスできます。",
+    createBody:
+      "このトークンを使うクライアントまたは環境名を指定してください。生のトークンは一度だけ表示され、後から復元できません。",
+    createSubmit: "トークンを作成",
+    createTitle: "MCP bearerトークンを作成",
+    createdAt: "作成日",
+    createdBody:
+      "DocuMindを呼び出すクライアントにこの値を保存してください。このページを離れると再表示されません。",
+    createdTitle: "トークンを作成しました",
+    creating: "作成中...",
+    emptyBody: "外部MCPクライアントがDocuMindを呼び出す必要がある場合にトークンを作成します。",
+    emptyTitle: "有効なAPIトークンはありません",
+    fallbackError: "APIトークンを更新できません。",
+    lastUsedAt: "最終使用",
+    mcpEndpoint: "MCPエンドポイント",
+    nameLabel: "トークン名",
+    namePlaceholder: "デスクトップMCPクライアント",
+    neverUsed: "未使用",
+    revoke: "取り消し",
+    revoking: "取り消し中...",
+    successCreated: "APIトークンを作成しました。",
+    successRevoked: "APIトークンを取り消しました。",
+    title: "MCP APIトークン管理",
+    tokenHelp: "トークンはサーバー側ハッシュとしてのみ保存されます。",
+    tokenLabel: "Bearerトークン",
   },
   documents: {
     ...en.documents,

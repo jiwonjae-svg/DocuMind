@@ -14,6 +14,7 @@ const localizedMetadataPages = [
   "app/dashboard/search/page.tsx",
   "app/dashboard/ask/page.tsx",
   "app/dashboard/audit-logs/page.tsx",
+  "app/dashboard/api-tokens/page.tsx",
   "app/dashboard/admin/audit-logs/page.tsx",
   "app/dashboard/admin/teams/page.tsx",
 ];
@@ -24,6 +25,7 @@ const dashboardLanguageSwitcherPages = [
   "app/dashboard/search/page.tsx",
   "app/dashboard/ask/page.tsx",
   "app/dashboard/audit-logs/page.tsx",
+  "app/dashboard/api-tokens/page.tsx",
   "app/dashboard/admin/audit-logs/page.tsx",
   "app/dashboard/admin/teams/page.tsx",
 ];

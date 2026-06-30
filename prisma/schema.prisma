@@ -45,8 +45,28 @@ model User {
   acceptedTeamInvitations TeamInvitation[]         @relation("TeamInvitationAccepter")
   memberships             OrganizationMembership[]
   teamMemberships         TeamMembership[]
+  apiTokens               UserApiToken[]          @relation("UserApiTokenOwner")
 
   @@map("users")
+}
+
+model UserApiToken {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  tokenHash  String    @unique
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation("UserApiTokenOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([revokedAt])
+  @@index([expiresAt])
+  @@map("user_api_tokens")
 }
 
 model Organization {

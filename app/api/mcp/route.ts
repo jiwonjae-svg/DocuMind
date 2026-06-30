@@ -14,6 +14,10 @@ import {
   isSameOriginRequest,
 } from "@/lib/api/request-origin";
 import { buildSearchAuditMetadata, buildSummaryAuditMetadata } from "@/lib/audit/metadata";
+import {
+  API_TOKEN_INVALID_BEARER_ERROR,
+  authenticateApiBearerToken,
+} from "@/lib/auth/api-tokens";
 import { buildReadableDocumentWhere } from "@/lib/documents/access";
 import {
   JsonRpcRequest,
@@ -52,6 +56,51 @@ type ToolCallContext = {
   ownerId: string;
   request: NextRequest;
 };
+
+async function authenticateMcpRequest(request: NextRequest) {
+  const bearerAuth = await authenticateApiBearerToken({
+    db: prisma,
+    headers: request.headers,
+  });
+
+  if (bearerAuth.ok) {
+    return {
+      ok: true as const,
+      userId: bearerAuth.userId,
+    };
+  }
+
+  if (bearerAuth.reason === "invalid") {
+    return {
+      error: API_TOKEN_INVALID_BEARER_ERROR,
+      ok: false as const,
+      status: 401,
+    };
+  }
+
+  if (!isSameOriginRequest(request)) {
+    return {
+      error: CROSS_ORIGIN_REQUEST_ERROR,
+      ok: false as const,
+      status: 403,
+    };
+  }
+
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return {
+      error: "Authentication required.",
+      ok: false as const,
+      status: 401,
+    };
+  }
+
+  return {
+    ok: true as const,
+    userId: session.user.id,
+  };
+}
 
 function readObjectParams(params: unknown) {
   return params && typeof params === "object" && !Array.isArray(params)
@@ -319,17 +368,13 @@ async function handleMcpRequest(
 }
 
 export async function POST(request: NextRequest) {
-  if (!isSameOriginRequest(request)) {
+  const authentication = await authenticateMcpRequest(request);
+
+  if (!authentication.ok) {
     return NextResponse.json(
-      { error: CROSS_ORIGIN_REQUEST_ERROR },
-      { status: 403 },
+      { error: authentication.error },
+      { status: authentication.status },
     );
-  }
-
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
   const jsonBody = await readJsonBodyResult(request);
@@ -359,7 +404,7 @@ export async function POST(request: NextRequest) {
     const result = await handleMcpRequest(
       request,
       parsed.request,
-      session.user.id,
+      authentication.userId,
     );
 
     return result instanceof NextResponse

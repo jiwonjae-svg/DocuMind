@@ -15,6 +15,7 @@ const jsonPostRouteSuffixes = [
   path.join("admin", "team-invitations", "route.ts"),
   path.join("admin", "team-memberships", "route.ts"),
   path.join("admin", "teams", "route.ts"),
+  path.join("api-tokens", "route.ts"),
   path.join("ask", "route.ts"),
   path.join("locale", "route.ts"),
   path.join("mcp", "route.ts"),
@@ -26,6 +27,7 @@ const jsonPostRouteSuffixes = [
 ];
 const jsonDeleteRouteSuffixes = [
   path.join("admin", "team-memberships", "route.ts"),
+  path.join("api-tokens", "route.ts"),
 ];
 
 function findRouteFiles(directory: string): string[] {
@@ -70,6 +72,7 @@ describe("API route security contracts", () => {
       path.join("admin", "team-invitations", "route.ts"),
       path.join("admin", "team-memberships", "route.ts"),
       path.join("admin", "teams", "route.ts"),
+      path.join("api-tokens", "route.ts"),
       path.join("ask", "route.ts"),
       path.join("documents", "[documentId]", "delete", "route.ts"),
       path.join("documents", "route.ts"),
@@ -94,6 +97,7 @@ describe("API route security contracts", () => {
   it("keeps every protected DELETE route authenticated and same-origin checked", () => {
     expect(protectedDeleteRoutes.map(toApiRelativePath).sort()).toEqual([
       path.join("admin", "team-memberships", "route.ts"),
+      path.join("api-tokens", "route.ts"),
     ]);
 
     for (const routeFile of protectedDeleteRoutes) {

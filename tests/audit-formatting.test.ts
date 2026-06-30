@@ -73,6 +73,16 @@ describe("audit metadata formatting", () => {
     );
   });
 
+  it("localizes API token audit actions", () => {
+    expect(formatAuditAction("api_token_created", "en")).toBe(
+      "API token created",
+    );
+    expect(formatAuditAction("api_token_revoked", "ko")).toBe("API 토큰 폐기");
+    expect(formatAuditAction("api_token_created", "ja")).toBe(
+      "APIトークン作成",
+    );
+  });
+
   it("limits displayed metadata entries", () => {
     const metadata = {
       one: 1,

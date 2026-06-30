@@ -2,7 +2,7 @@
 
 DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams.
 
-This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, access-scoped semantic search, and grounded question answering.
+This repository contains a usable MVP with email/password signup, password reset, optional Google/GitHub OAuth, document upload and processing, OpenAI embeddings, access-scoped semantic search, grounded question answering, and user-managed MCP API tokens.
 
 Public Vercel deployment: [https://documind-chi.vercel.app](https://documind-chi.vercel.app)
 
@@ -18,7 +18,7 @@ DocuMind は、日本・韓国チーム向けの社内ナレッジ検索 MVP で
 
 ## Portfolio Project Description
 
-DocuMind is a portfolio-ready backend/full-stack project for demonstrating how to build a secure retrieval-augmented knowledge product. It covers authenticated document ingestion, file validation, local or Vercel Blob document storage, Prisma data modeling, vector search, OpenAI integration, grounded answer generation, audit logging, scoped HTTP tool endpoints, and an authenticated MCP wrapper.
+DocuMind is a portfolio-ready backend/full-stack project for demonstrating how to build a secure retrieval-augmented knowledge product. It covers authenticated document ingestion, file validation, local or Vercel Blob document storage, Prisma data modeling, vector search, OpenAI integration, grounded answer generation, audit logging, scoped HTTP tool endpoints, user-managed API tokens, and an authenticated MCP wrapper.
 
 ## Final Portfolio Copy
 
@@ -100,6 +100,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Team-scoped document upload, listing, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read, and only the uploading owner can delete the stored file.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools.
+- User-managed MCP bearer API tokens at `/dashboard/api-tokens`; raw tokens are shown once, stored only as hashes, revocable by the owning user, and usable by external MCP clients without browser cookies.
 - Docker and Docker Compose setup for local app + PostgreSQL infrastructure.
 - Docker and Git ignore hygiene for secrets, local uploads, and generated outputs.
 - Docker runtime uses a non-root application user.
@@ -154,7 +155,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links with optional email delivery, and removing team memberships
-- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
+- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -177,7 +178,8 @@ flowchart LR
 - Dashboard semantic search UI at `/dashboard/search`
 - Grounded question answering endpoint at `POST /api/ask`
 - Agent-ready tool endpoints under `/api/tools/*`
-- MCP JSON-RPC wrapper at `/api/mcp` for authenticated tool discovery and calls
+- MCP JSON-RPC wrapper at `/api/mcp` for authenticated tool discovery and calls with either an Auth.js browser session or a user-managed bearer token
+- API token management UI at `/dashboard/api-tokens`, with hashed token persistence, one-time raw token display, revocation, last-used tracking, and audit events
 - Shared per-user rate limiting across AI-backed dashboard and tool endpoints
 - Ask UI with source citations at `/dashboard/ask`
 - Document upload/delete audit logs
@@ -187,6 +189,7 @@ flowchart LR
 - Failed credentials sign-in audit logs without raw credential values
 - Signup and OAuth account audit logs
 - Password reset request, completion, and delivery-failure audit logs
+- API token creation and revocation audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
 - Admin team-management API routes for creating teams, assigning existing users, creating team invitation links with optional email delivery, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
@@ -435,6 +438,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/search-validation.test.ts`: semantic search query normalization, control/format-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata captured for audit logs.
+- `tests/api-tokens.test.ts`: MCP bearer token name normalization, token creation format, server-side hashing, Authorization bearer parsing, active-token authentication, last-used updates, and revoked/expired token rejection.
 - `tests/api-errors.test.ts`: stable API error mapping for AI configuration and provider failures without exposing internal environment variable names.
 - `tests/json-body.test.ts`: bounded JSON request parsing, content-type enforcement, oversized body rejection, and stable route-handler error mapping.
 - `tests/api-route-security.test.ts`: protected API POST routes keep authentication, same-origin checks, bounded JSON parsing contracts, upload rate limiting before multipart parsing, exclusive upload file writes, delete rate limiting before delete lookup, summarize rate limiting before chunk lookup, and document ID normalization before delete mutations.
@@ -470,8 +474,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  42 passed (42)
-Tests       263 passed (263)
+Test Files  45 passed (45)
+Tests       277 passed (277)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -503,8 +507,9 @@ Recommended local verification flow:
 3. Run semantic search from the Search page and inspect matching chunks, snippets, and scores.
 4. Ask a grounded question using content from an uploaded document.
 5. Confirm the answer, citations, matched snippets, and insufficient-information behavior.
-6. Review owner-scoped audit log entries for your activity.
-7. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
+6. Open API tokens and create a bearer token only if an external MCP client needs access.
+7. Review owner-scoped audit log entries for your activity.
+8. Open Organization audit logs to confirm owner/admin visibility over organization member activity.
 
 The seed script remains available for local bootstrap accounts, but the product no longer depends on seeded credentials for normal use. Seed credentials are bounded and normalized; production seeding rejects the documented default password.
 
@@ -521,6 +526,7 @@ The page is intentionally owner-scoped for the MVP:
 - Search and ask audit metadata records input lengths, not the raw search query or question text.
 - Login, failed login, upload, delete, search, ask, and agent tool logs store bounded request metadata such as IP address and User-Agent when available, with control/format characters normalized and IP metadata validated before persistence.
 - Failed login audit metadata records a generic invalid-credentials reason, not submitted email or password values.
+- API token creation and revocation store token IDs only, not raw bearer token values.
 - It does not expose other users' audit records.
 
 Organization owners and admins can also review organization member activity at [http://localhost:3000/dashboard/admin/audit-logs](http://localhost:3000/dashboard/admin/audit-logs):
@@ -674,9 +680,9 @@ The ask UI and API never call OpenAI from client components. The shared answer-g
 
 ## Agent Tool API
 
-DocuMind exposes both scoped HTTP tool endpoints and an authenticated JSON-RPC MCP wrapper. All tool surfaces require the same Auth.js session as the dashboard and keep owner/team-scoped retrieval rules.
+DocuMind exposes both scoped HTTP tool endpoints and an authenticated JSON-RPC MCP wrapper. All tool surfaces keep owner/team-scoped retrieval rules.
 
-All tool endpoints require the same Auth.js session as the dashboard. Unauthenticated requests return `401`. Each endpoint filters by document owner or team membership and writes an agent tool audit log. Search and answer-generating tool endpoints share the same per-user in-memory rate limits as the dashboard APIs.
+All `/api/tools/*` endpoints require the same Auth.js session as the dashboard. Unauthenticated requests return `401`. Each endpoint filters by document owner or team membership and writes an agent tool audit log. Search and answer-generating tool endpoints share the same per-user in-memory rate limits as the dashboard APIs.
 
 ### Search Documents
 
@@ -755,6 +761,14 @@ Authenticated MCP-style clients can call:
 POST /api/mcp
 ```
 
+Browser clients can use the normal Auth.js session with same-origin protections. External MCP clients that cannot use browser cookies should create a token at `/dashboard/api-tokens` and send it as:
+
+```http
+Authorization: Bearer dm_pat_...
+```
+
+Raw token values are shown once, stored only as SHA-256 hashes, scoped to the owning user, and can be revoked from the dashboard. The MCP route updates `lastUsedAt` for accepted bearer tokens and rejects missing, malformed, revoked, or expired tokens.
+
 The route accepts bounded JSON-RPC 2.0 requests and supports:
 
 - `initialize`
@@ -788,7 +802,7 @@ Example tool call:
 }
 ```
 
-The MCP wrapper uses same-origin checks, Auth.js session authentication, bounded JSON parsing, owner/team-scoped retrieval, shared AI rate limits, and MCP-specific audit actions.
+The MCP wrapper uses same-origin checks for cookie-backed browser calls, Auth.js session authentication or user bearer token authentication, bounded JSON parsing, owner/team-scoped retrieval, shared AI rate limits, and MCP-specific audit actions.
 
 ## Database
 
@@ -811,9 +825,11 @@ prisma/migrations/20260629083000_signup_oauth_accounts/migration.sql
 prisma/migrations/20260630093000_password_reset_tokens/migration.sql
 prisma/migrations/20260630101500_organization_team_rbac/migration.sql
 prisma/migrations/20260630151500_document_team_scope/migration.sql
+prisma/migrations/20260630164500_team_invitations/migration.sql
+prisma/migrations/20260630173000_user_api_tokens/migration.sql
 ```
 
-The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer`, plus optional `Document.teamId` for team-scoped read access. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, `TeamInvitation` stores hashed single-use join tokens, and `AuditLog` records actor and resource fields for security-relevant events.
+The schema includes ownership fields such as `ownerId` on `Document`, `DocumentChunk`, `Question`, and `Answer`, plus optional `Document.teamId` for team-scoped read access. `UserAccount` stores OAuth provider links for stable local user IDs, `PasswordResetToken` stores hashed single-use recovery tokens, organization/team membership tables store RBAC roles, `TeamInvitation` stores hashed single-use join tokens, `UserApiToken` stores hashed user-managed bearer tokens for MCP clients, and `AuditLog` records actor and resource fields for security-relevant events.
 
 ## Known Limitations
 
