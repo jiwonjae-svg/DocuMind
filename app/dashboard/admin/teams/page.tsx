@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { RemoveTeamMemberForm } from "./remove-team-member-form";
+import { RenewTeamInvitationForm } from "./renew-team-invitation-form";
 import { RevokeTeamInvitationForm } from "./revoke-team-invitation-form";
 import { TeamRbacForms } from "./team-rbac-form";
 
@@ -140,9 +141,6 @@ export default async function TeamAdminPage({
       },
       where: {
         acceptedAt: null,
-        expiresAt: {
-          gt: currentTime,
-        },
         organizationId: context.organization.id,
         revokedAt: null,
       },
@@ -255,9 +253,22 @@ export default async function TeamAdminPage({
                   key={invitation.id}
                   className="rounded-lg border border-slate-200 bg-white p-4"
                 >
-                  <p className="truncate text-sm font-semibold text-[#0b1535]">
-                    {invitation.email}
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 truncate text-sm font-semibold text-[#0b1535]">
+                      {invitation.email}
+                    </p>
+                    <span
+                      className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold ${
+                        invitation.expiresAt <= currentTime
+                          ? "bg-red-50 text-red-700"
+                          : "bg-emerald-50 text-emerald-700"
+                      }`}
+                    >
+                      {invitation.expiresAt <= currentTime
+                        ? copy.teamAdmin.expiredInvitation
+                        : copy.teamAdmin.activeInvitation}
+                    </span>
+                  </div>
                   <p className="mt-1 truncate text-xs text-slate-500">
                     {invitation.team.name}
                   </p>
@@ -285,6 +296,21 @@ export default async function TeamAdminPage({
                       <dd>{formatDateTime(invitation.expiresAt, locale)}</dd>
                     </div>
                   </dl>
+                  <RenewTeamInvitationForm
+                    copy={{
+                      apiErrors: copy.apiErrors,
+                      fallbackError: copy.teamAdmin.fallbackError,
+                      invitationLink: copy.teamAdmin.invitationLink,
+                      renewInvitation: copy.teamAdmin.renewInvitation,
+                      renewingInvitation: copy.teamAdmin.renewingInvitation,
+                      successInvitationRenewed:
+                        copy.teamAdmin.successInvitationRenewed,
+                      successInvitationRenewedWithEmail:
+                        copy.teamAdmin.successInvitationRenewedWithEmail,
+                    }}
+                    invitationId={invitation.id}
+                    organizationId={context.organization.id}
+                  />
                   <RevokeTeamInvitationForm
                     copy={{
                       apiErrors: copy.apiErrors,

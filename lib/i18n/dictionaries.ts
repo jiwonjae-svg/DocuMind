@@ -262,7 +262,6 @@ const en = {
     ],
     planned: [
       "Enterprise SSO and user-managed account-linking settings",
-      "Invitation resend controls",
       "Background processing for large document pipelines",
       "Richer MCP streaming/session transport",
       "Production-grade distributed rate limiting",
@@ -302,8 +301,8 @@ const en = {
       ["Account security", "Review your sign-in methods and change your password from a protected account page.", "Manage account"],
     ],
     roadmap: [
-      ["Invitation lifecycle controls", "Add resend and expiry-management screens for team invitations."],
       ["Background processing", "Move long document processing and embeddings into a durable queue for larger deployments."],
+      ["MCP transport hardening", "Add richer streaming or session transport once external client requirements are fixed."],
     ],
   },
   apiTokens: {
@@ -591,7 +590,9 @@ const en = {
     creatingTeam: "Creating...",
     currentTeams: "Current teams",
     existingUsersOnly: "Users must create an account before an admin can assign them to a team.",
+    activeInvitation: "Active",
     expiresAt: "Expires",
+    expiredInvitation: "Expired",
     fallbackError: "Team RBAC update failed.",
     confirmRemoveMember: "Remove member",
     confirmRevokeInvitation: "Revoke invitation",
@@ -613,6 +614,8 @@ const en = {
     removeMemberWarning:
       "This removes the user's team role and access to documents shared only through this team.",
     removingMember: "Removing...",
+    renewInvitation: "Renew link",
+    renewingInvitation: "Renewing...",
     revokeInvitation: "Revoke",
     revokeInvitationWarning:
       "This disables the invitation link. The invited person will need a new invitation to join.",
@@ -620,6 +623,8 @@ const en = {
     successMemberAssigned: "Team member assigned.",
     successInvitationCreated: "Team invitation created.",
     successInvitationCreatedWithEmail: "Team invitation email sent.",
+    successInvitationRenewed: "Team invitation link renewed.",
+    successInvitationRenewedWithEmail: "Team invitation link renewed and email sent.",
     successTeamCreated: "Team created.",
     team: "Team",
     teamCount: "{count} teams",
@@ -913,7 +918,6 @@ const ko = {
     ],
     planned: [
       "엔터프라이즈 SSO와 사용자 관리 계정 연결 설정",
-      "초대 재전송 제어",
       "대용량 문서 파이프라인을 위한 백그라운드 처리",
       "더 풍부한 MCP 스트리밍/세션 전송",
       "운영 등급 분산 rate limiting",
@@ -953,8 +957,8 @@ const ko = {
       ["계정 보안", "로그인 방식을 확인하고 보호된 계정 페이지에서 비밀번호를 변경합니다.", "계정 관리"],
     ],
     roadmap: [
-      ["초대 수명주기 제어", "팀 초대 재전송과 만료 관리 화면을 추가합니다."],
       ["백그라운드 처리", "더 큰 배포를 위해 긴 문서 처리와 임베딩을 내구성 있는 큐로 옮깁니다."],
+      ["MCP 전송 강화", "외부 클라이언트 요구사항이 확정되면 스트리밍 또는 세션 전송을 강화합니다."],
     ],
   },
   apiTokens: {
@@ -1242,7 +1246,9 @@ const ko = {
     creatingTeam: "생성 중...",
     currentTeams: "현재 팀",
     existingUsersOnly: "관리자가 팀에 배정하려면 사용자가 먼저 계정을 만들어야 합니다.",
+    activeInvitation: "활성",
     expiresAt: "만료",
+    expiredInvitation: "만료됨",
     fallbackError: "팀 RBAC 업데이트에 실패했습니다.",
     confirmRemoveMember: "멤버 제거",
     confirmRevokeInvitation: "초대 폐기",
@@ -1264,6 +1270,8 @@ const ko = {
     removeMemberWarning:
       "이 사용자의 팀 역할과 이 팀을 통해서만 공유된 문서 접근 권한을 제거합니다.",
     removingMember: "제거 중...",
+    renewInvitation: "링크 갱신",
+    renewingInvitation: "갱신 중...",
     revokeInvitation: "폐기",
     revokeInvitationWarning:
       "이 초대 링크를 비활성화합니다. 초대받은 사용자가 참여하려면 새 초대가 필요합니다.",
@@ -1271,6 +1279,8 @@ const ko = {
     successMemberAssigned: "팀 멤버를 배정했습니다.",
     successInvitationCreated: "팀 초대를 생성했습니다.",
     successInvitationCreatedWithEmail: "팀 초대 이메일을 보냈습니다.",
+    successInvitationRenewed: "팀 초대 링크를 갱신했습니다.",
+    successInvitationRenewedWithEmail: "팀 초대 링크를 갱신하고 이메일을 보냈습니다.",
     successTeamCreated: "팀을 생성했습니다.",
     team: "팀",
     teamCount: "{count}개 팀",
@@ -1567,7 +1577,6 @@ const ja = {
     ],
     planned: [
       "エンタープライズSSOとユーザー管理のアカウント連携設定",
-      "招待の再送制御",
       "大規模文書パイプライン向けバックグラウンド処理",
       "より豊富なMCPストリーミング/セッション転送",
       "本番レベルの分散レート制限",
@@ -1607,8 +1616,8 @@ const ja = {
       ["アカウントセキュリティ", "ログイン方法を確認し、保護されたアカウントページでパスワードを変更します。", "アカウント管理"],
     ],
     roadmap: [
-      ["招待ライフサイクル制御", "チーム招待の再送と期限管理画面を追加します。"],
       ["バックグラウンド処理", "大規模デプロイ向けに長い文書処理と埋め込みを耐久性のあるキューへ移します。"],
+      ["MCP転送強化", "外部クライアント要件が固まったらストリーミングまたはセッション転送を強化します。"],
     ],
   },
   apiTokens: {
@@ -1896,7 +1905,9 @@ const ja = {
     creatingTeam: "作成中...",
     currentTeams: "現在のチーム",
     existingUsersOnly: "管理者がチームに割り当てるには、ユーザーが先にアカウントを作成する必要があります。",
+    activeInvitation: "有効",
     expiresAt: "期限",
+    expiredInvitation: "期限切れ",
     fallbackError: "チームRBACの更新に失敗しました。",
     confirmRemoveMember: "メンバーを削除",
     confirmRevokeInvitation: "招待を取り消し",
@@ -1918,6 +1929,8 @@ const ja = {
     removeMemberWarning:
       "このユーザーのチームロールと、このチーム経由でのみ共有される文書へのアクセスを削除します。",
     removingMember: "削除中...",
+    renewInvitation: "リンクを更新",
+    renewingInvitation: "更新中...",
     revokeInvitation: "取り消し",
     revokeInvitationWarning:
       "この招待リンクを無効化します。招待されたユーザーが参加するには新しい招待が必要です。",
@@ -1925,6 +1938,9 @@ const ja = {
     successMemberAssigned: "チームメンバーを割り当てました。",
     successInvitationCreated: "チーム招待を作成しました。",
     successInvitationCreatedWithEmail: "チーム招待メールを送信しました。",
+    successInvitationRenewed: "チーム招待リンクを更新しました。",
+    successInvitationRenewedWithEmail:
+      "チーム招待リンクを更新し、メールを送信しました。",
     successTeamCreated: "チームを作成しました。",
     team: "チーム",
     teamCount: "{count}チーム",

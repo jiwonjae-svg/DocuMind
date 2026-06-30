@@ -31,6 +31,9 @@ const jsonDeleteRouteSuffixes = [
   path.join("admin", "team-memberships", "route.ts"),
   path.join("api-tokens", "route.ts"),
 ];
+const jsonPatchRouteSuffixes = [
+  path.join("admin", "team-invitations", "route.ts"),
+];
 
 function findRouteFiles(directory: string): string[] {
   return readdirSync(directory).flatMap((entry) => {
@@ -67,6 +70,11 @@ describe("API route security contracts", () => {
     const source = readRoute(filePath);
 
     return source.includes("export async function DELETE");
+  });
+  const protectedPatchRoutes = routeFiles.filter((filePath) => {
+    const source = readRoute(filePath);
+
+    return source.includes("export async function PATCH");
   });
   const protectedGetRoutes = routeFiles.filter((filePath) => {
     const relativePath = toApiRelativePath(filePath);
@@ -123,6 +131,21 @@ describe("API route security contracts", () => {
     }
   });
 
+  it("keeps every protected PATCH route authenticated and same-origin checked", () => {
+    expect(protectedPatchRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("admin", "team-invitations", "route.ts"),
+    ]);
+
+    for (const routeFile of protectedPatchRoutes) {
+      const source = readRoute(routeFile);
+
+      expect(source, toApiRelativePath(routeFile)).toContain("auth()");
+      expect(source, toApiRelativePath(routeFile)).toContain(
+        "isSameOriginRequest(request)",
+      );
+    }
+  });
+
   it("keeps every protected GET route authenticated", () => {
     expect(protectedGetRoutes.map(toApiRelativePath).sort()).toEqual([
       path.join("documents", "[documentId]", "download", "route.ts"),
@@ -153,6 +176,19 @@ describe("API route security contracts", () => {
       );
 
       expect(jsonBodyIndex, relativePath).toBeGreaterThan(deleteIndex);
+    }
+  });
+
+  it("keeps JSON PATCH routes on bounded JSON body parsing", () => {
+    for (const relativePath of jsonPatchRouteSuffixes) {
+      const source = readRoute(path.join(apiRoot, relativePath));
+      const patchIndex = source.indexOf("export async function PATCH");
+      const jsonBodyIndex = source.indexOf(
+        "readJsonBodyResult(request)",
+        patchIndex,
+      );
+
+      expect(jsonBodyIndex, relativePath).toBeGreaterThan(patchIndex);
     }
   });
 
@@ -248,6 +284,27 @@ describe("API route security contracts", () => {
     expect(revokedSelectIndex).toBeGreaterThan(lookupIndex);
     expect(invalidCheckIndex).toBeGreaterThan(revokedSelectIndex);
     expect(revokedWhereIndex).toBeGreaterThan(consumeIndex);
+  });
+
+  it("keeps team invitation renewal replacing the stored token hash", () => {
+    const source = readRoute(
+      path.join(apiRoot, "admin", "team-invitations", "route.ts"),
+    );
+    const patchIndex = source.indexOf("export async function PATCH");
+    const tokenHashIndex = source.indexOf("const tokenHash", patchIndex);
+    const updateIndex = source.indexOf(
+      "transaction.teamInvitation.updateMany",
+      patchIndex,
+    );
+    const tokenHashWriteIndex = source.indexOf("tokenHash", updateIndex);
+    const auditIndex = source.indexOf(
+      'action: "team_invitation_renewed"',
+      updateIndex,
+    );
+
+    expect(tokenHashIndex).toBeGreaterThan(patchIndex);
+    expect(tokenHashWriteIndex).toBeGreaterThan(updateIndex);
+    expect(auditIndex).toBeGreaterThan(updateIndex);
   });
 
   it("keeps document uploads rate-limited before multipart parsing", () => {

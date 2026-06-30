@@ -68,6 +68,9 @@ describe("audit metadata formatting", () => {
     expect(formatAuditAction("team_invitation_email_failed", "ko")).toBe(
       "팀 초대 이메일 실패",
     );
+    expect(formatAuditAction("team_invitation_renewed", "ko")).toBe(
+      "팀 초대 갱신",
+    );
     expect(formatAuditAction("team_invitation_revoked", "ko")).toBe(
       "팀 초대 폐기",
     );

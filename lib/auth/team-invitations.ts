@@ -18,6 +18,8 @@ export const TEAM_INVITATION_ACCEPTED_MESSAGE =
   "Team invitation accepted.";
 export const TEAM_INVITATION_REVOKED_MESSAGE =
   "Team invitation revoked.";
+export const TEAM_INVITATION_RENEWED_MESSAGE =
+  "Team invitation renewed.";
 export const TEAM_INVITATION_NOT_FOUND_ERROR =
   "Team invitation not found.";
 
@@ -41,6 +43,18 @@ type TeamInvitationValidationResult =
     };
 
 type TeamInvitationRevocationValidationResult =
+  | {
+      data: {
+        invitationId: string;
+      };
+      ok: true;
+    }
+  | {
+      error: string;
+      ok: false;
+    };
+
+type TeamInvitationRenewalValidationResult =
   | {
       data: {
         invitationId: string;
@@ -152,6 +166,35 @@ export function validateCreateTeamInvitationInput(
 export function validateRevokeTeamInvitationInput(
   body: unknown,
 ): TeamInvitationRevocationValidationResult {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return {
+      error: TEAM_INVITATION_INVALID_REQUEST_ERROR,
+      ok: false,
+    };
+  }
+
+  const invitationId = normalizeRbacResourceId(
+    (body as Record<string, unknown>).invitationId,
+  );
+
+  if (!invitationId) {
+    return {
+      error: TEAM_INVITATION_INVALID_REQUEST_ERROR,
+      ok: false,
+    };
+  }
+
+  return {
+    data: {
+      invitationId,
+    },
+    ok: true,
+  };
+}
+
+export function validateRenewTeamInvitationInput(
+  body: unknown,
+): TeamInvitationRenewalValidationResult {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return {
       error: TEAM_INVITATION_INVALID_REQUEST_ERROR,

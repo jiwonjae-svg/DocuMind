@@ -100,6 +100,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Owner-scoped audit log viewer in the dashboard.
 - Organization-wide admin audit log viewer for organization owners/admins, scoped to audit events created by current organization members.
 - Team-scoped document upload, listing, original download, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read/download, and only the uploading owner can delete the stored file.
+- Pending and expired team invitations can be renewed from the team admin screen, issuing a new seven-day single-use link and optionally resending email without storing the raw token.
 - Pending team invitation revocation from the team admin screen; revoked invitations are rejected by the join flow and recorded in audit logs.
 - Agent-ready HTTP tool endpoints for search, ask with citations, and document summarization.
 - Authenticated JSON-RPC MCP wrapper at `POST /api/mcp` exposing the same scoped search, ask-with-citations, and summarize-document tools.
@@ -112,7 +113,6 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Future / Production Hardening
 
 - MCP streaming/session transport hardening beyond the current authenticated JSON-RPC wrapper.
-- Invitation resend and expiry-management screens beyond current single-use invitation creation and revocation.
 - Optional S3/GCS storage adapters if deploying outside the current Vercel Blob path.
 - Background queue for document processing and embedding generation.
 - Production-grade distributed rate limiting.
@@ -158,7 +158,7 @@ flowchart LR
 - pgvector support for semantic search
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
-- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating single-use team invitation links with optional email delivery, and removing team memberships
+- Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams, assigning existing users to organization/team roles, creating, renewing, revoking, and optionally emailing single-use team invitation links, and removing team memberships
 - EN/KO/JA localized landing, auth, OAuth callback errors, dashboard, account security, documents, search, ask, MCP API token, personal audit, organization admin audit UI, password reset and team invitation emails, page-specific metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher across the main workspace surfaces
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
@@ -198,7 +198,7 @@ flowchart LR
 - API token creation and revocation audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
-- Admin team-management API routes for creating teams, assigning existing users, creating team invitation links with optional email delivery, revoking pending invitations, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, and audit logs
+- Admin team-management API routes for creating teams, assigning existing users, creating/renewing team invitation links with optional email delivery, revoking pending invitations, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, token-hash replacement on renewal, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
 - `.gitignore` excludes non-example environment files while keeping `.env.example` tracked for reproducible setup
@@ -466,7 +466,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-team-invitation-email.test.ts`: optional Resend team invitation email delivery, sender fallback, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
-- `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, create/revoke validation, invite URL construction, and expiry calculation.
+- `tests/team-invitations.test.ts`: single-use team invitation token generation, hashing, create/revoke/renew validation, invite URL construction, and expiry calculation.
 - `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
 - `tests/i18n-metadata.test.ts`: localized page metadata coverage for the main product pages and language-switcher coverage for dashboard workspace surfaces.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
@@ -484,7 +484,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  48 passed (48)
-Tests       298 passed (298)
+Tests       302 passed (302)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -557,11 +557,11 @@ Organization owners and admins can manage team RBAC at [http://localhost:3000/da
 - Assign existing DocuMind users by email to organization `ADMIN`/`MEMBER` roles.
 - Assign existing users to team `MANAGER`/`MEMBER`/`VIEWER` roles.
 - Create a single-use invitation link for a not-yet-assigned email address, then let the invited user sign in or sign up and accept it at `/join-team`.
-- Review pending invitations and revoke an unused invitation link before it is accepted.
+- Review pending or expired invitations, renew an unused link with a fresh seven-day token, and revoke an unused invitation before it is accepted.
 - Remove a user's team membership to revoke team-scoped document access.
 - `MANAGER` and `MEMBER` team roles can upload documents to that team; `VIEWER` can read team documents through document lists, search, ask, and summarize flows.
-- Team creation, invitation creation, invitation acceptance, invitation revocation, member assignment, and member removal write bounded audit log records.
-- Invitation emails are sent through Resend when configured; the generated link remains visible so admins can share it manually when email delivery is not configured or fails.
+- Team creation, invitation creation, invitation renewal, invitation acceptance, invitation revocation, member assignment, and member removal write bounded audit log records.
+- Invitation emails are sent through Resend when configured; generated and renewed links remain visible so admins can share them manually when email delivery is not configured or fails.
 
 ## Documents
 
@@ -853,14 +853,14 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
 - User-managed OAuth account-linking settings and enterprise SSO are not implemented yet.
-- Production email delivery requires `RESEND_API_KEY` plus `PASSWORD_RESET_EMAIL_FROM` and/or `TEAM_INVITATION_EMAIL_FROM`; without them, password reset requests still return safely and team invitation creation still returns a manual share link, but no email is delivered.
+- Production email delivery requires `RESEND_API_KEY` plus `PASSWORD_RESET_EMAIL_FROM` and/or `TEAM_INVITATION_EMAIL_FROM`; without them, password reset requests still return safely and team invitation creation or renewal still returns a manual share link, but no email is delivered.
 - The MCP wrapper currently uses a bounded JSON-RPC POST endpoint; richer streaming/session transport can be added later.
 
 ## Future Improvements
 
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add account-linking settings and richer invitation resend/expiry controls.
+- Add account-linking settings.
 - Add organization-wide audit export controls.
 - Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.

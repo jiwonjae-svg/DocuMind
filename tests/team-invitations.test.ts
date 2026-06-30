@@ -7,6 +7,7 @@ import {
   hashTeamInvitationToken,
   normalizeTeamInvitationToken,
   validateCreateTeamInvitationInput,
+  validateRenewTeamInvitationInput,
   validateRevokeTeamInvitationInput,
 } from "../lib/auth/team-invitations";
 
@@ -97,6 +98,28 @@ describe("team invitations", () => {
 
     expect(
       validateRevokeTeamInvitationInput({
+        invitationId: "bad/invitation",
+      }),
+    ).toEqual({
+      error: TEAM_INVITATION_INVALID_REQUEST_ERROR,
+      ok: false,
+    });
+  });
+
+  it("validates renew invitation inputs", () => {
+    expect(
+      validateRenewTeamInvitationInput({
+        invitationId: "invitation_123",
+      }),
+    ).toEqual({
+      data: {
+        invitationId: "invitation_123",
+      },
+      ok: true,
+    });
+
+    expect(
+      validateRenewTeamInvitationInput({
         invitationId: "bad/invitation",
       }),
     ).toEqual({
