@@ -9,7 +9,17 @@ $ErrorActionPreference = "Stop"
 
 if ($LaunchNewWindow) {
   $scriptPath = $PSCommandPath
-  Start-Process powershell -ArgumentList "-NoExit -ExecutionPolicy Bypass -File `"$scriptPath`" -Environment `"$Environment`" -ProductionUrl `"$ProductionUrl`"" -WindowStyle Normal
+  Start-Process powershell -ArgumentList @(
+    "-NoExit",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $scriptPath,
+    "-Environment",
+    $Environment,
+    "-ProductionUrl",
+    $ProductionUrl
+  ) -WindowStyle Normal
   return
 }
 

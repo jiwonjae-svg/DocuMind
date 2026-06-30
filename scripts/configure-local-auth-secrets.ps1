@@ -7,8 +7,19 @@ $ErrorActionPreference = "Stop"
 
 if ($LaunchNewWindow) {
   $scriptPath = $PSCommandPath
-  $envArg = if ([string]::IsNullOrWhiteSpace($EnvFile)) { "" } else { " -EnvFile `"$EnvFile`"" }
-  Start-Process powershell -ArgumentList "-NoExit -ExecutionPolicy Bypass -File `"$scriptPath`"$envArg" -WindowStyle Normal
+  $arguments = @(
+    "-NoExit",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $scriptPath
+  )
+
+  if (-not [string]::IsNullOrWhiteSpace($EnvFile)) {
+    $arguments += @("-EnvFile", $EnvFile)
+  }
+
+  Start-Process powershell -ArgumentList $arguments -WindowStyle Normal
   return
 }
 
