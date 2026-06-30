@@ -148,6 +148,7 @@ describe("API route security contracts", () => {
 
   it("keeps every protected GET route authenticated", () => {
     expect(protectedGetRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("admin", "audit-logs", "export", "route.ts"),
       path.join("documents", "[documentId]", "download", "route.ts"),
     ]);
 
@@ -397,5 +398,37 @@ describe("API route security contracts", () => {
     expect(readableWhereIndex).toBeGreaterThanOrEqual(0);
     expect(storageReadIndex).toBeGreaterThan(documentLookupIndex);
     expect(auditIndex).toBeGreaterThan(storageReadIndex);
+  });
+
+  it("keeps organization audit exports admin-scoped before CSV response", () => {
+    const source = readRoute(
+      path.join(apiRoot, "admin", "audit-logs", "export", "route.ts"),
+    );
+    const contextIndex = source.indexOf("getOrganizationAdminContext");
+    const memberIdsIndex = source.indexOf("const memberUserIds");
+    const auditLookupIndex = source.indexOf("prisma.auditLog.findMany");
+    const scopedWhereIndex = source.indexOf(
+      "buildOrganizationAuditLogWhere(memberUserIds)",
+      auditLookupIndex,
+    );
+    const csvIndex = source.indexOf("buildAuditLogCsv", auditLookupIndex);
+    const auditIndex = source.indexOf(
+      'action: "organization_audit_exported"',
+      csvIndex,
+    );
+    const responseIndex = source.indexOf("return new NextResponse", auditIndex);
+
+    expect(source).toContain("isCrossSiteAuditExportRequest(request)");
+    expect(source).toContain("Content-Disposition");
+    expect(source).toContain("text/csv; charset=utf-8");
+    expect(source).toContain("Cache-Control");
+    expect(source).toContain("X-Content-Type-Options");
+    expect(contextIndex).toBeGreaterThanOrEqual(0);
+    expect(memberIdsIndex).toBeGreaterThan(contextIndex);
+    expect(auditLookupIndex).toBeGreaterThan(memberIdsIndex);
+    expect(scopedWhereIndex).toBeGreaterThan(auditLookupIndex);
+    expect(csvIndex).toBeGreaterThan(auditLookupIndex);
+    expect(auditIndex).toBeGreaterThan(csvIndex);
+    expect(responseIndex).toBeGreaterThan(auditIndex);
   });
 });

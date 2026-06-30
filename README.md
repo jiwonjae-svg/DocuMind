@@ -99,6 +99,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Audit metadata records search/question lengths instead of raw search or question text.
 - Owner-scoped audit log viewer in the dashboard.
 - Organization-wide admin audit log viewer for organization owners/admins, scoped to audit events created by current organization members.
+- Organization audit CSV export for owners/admins, with admin-scoped filtering, no-store attachment headers, spreadsheet formula neutralization, and an export audit event.
 - Team-scoped document upload, listing, original download, search, ask, and summarization for team members; `MANAGER` and `MEMBER` roles can upload to a team, `VIEWER` can read/download, and only the uploading owner can delete the stored file.
 - Pending and expired team invitations can be renewed from the team admin screen, issuing a new seven-day single-use link and optionally resending email without storing the raw token.
 - Pending team invitation revocation from the team admin screen; revoked invitations are rejected by the join flow and recorded in audit logs.
@@ -198,6 +199,7 @@ flowchart LR
 - API token creation and revocation audit logs
 - Owner-scoped audit log viewer at `/dashboard/audit-logs`
 - Organization-wide admin audit log viewer at `/dashboard/admin/audit-logs` for organization owners/admins
+- Organization audit CSV export at `/api/admin/audit-logs/export` with organization-admin authorization and an `organization_audit_exported` audit event
 - Admin team-management API routes for creating teams, assigning existing users, creating/renewing team invitation links with optional email delivery, revoking pending invitations, and removing team memberships, with same-origin checks, bounded JSON parsing, role validation, token-hash replacement on renewal, and audit logs
 - Dockerfile and Docker Compose setup for app + PostgreSQL
 - `.dockerignore` excludes secrets, local Vercel state, uploads, dependencies, and build artifacts from image build context
@@ -441,7 +443,8 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/document-extraction-limits.test.ts`: PDF page counts are checked before text extraction and parser resources are released on rejection.
 - `tests/document-processing.test.ts`: document processing status writes stay owner-scoped, extracted text and PDF page count limits are enforced before chunking/embedding, and failure messages avoid leaking provider, configuration, or filesystem details.
 - `tests/audit-logs.test.ts`: owner-scoped audit log visibility.
-- `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting plus raw query/question text and AI model avoidance for audit metadata.
+- `tests/audit-formatting.test.ts`: bounded and control-character-normalized audit metadata formatting, localized audit action labels, plus raw query/question text and AI model avoidance for audit metadata.
+- `tests/audit-export.test.ts`: organization audit CSV export formatting, localized action labels, stable attachment filenames, spreadsheet formula neutralization, and unsafe character cleanup.
 - `tests/search-validation.test.ts`: semantic search query normalization, control/format-character stripping, and limit validation.
 - `tests/search-availability.test.ts`: searchable chunk availability checks before query embedding.
 - `tests/tools-response.test.ts`: bounded, control/format-character-normalized, single-hop valid-IP-filtered request metadata captured for audit logs.
@@ -483,8 +486,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  48 passed (48)
-Tests       302 passed (302)
+Test Files  49 passed (49)
+Tests       307 passed (307)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -549,6 +552,7 @@ Organization owners and admins can also review organization member activity at [
 - The admin view verifies the signed-in user has `OWNER` or `ADMIN` organization role.
 - It finds current organization members and filters audit records by those member `actorId` values.
 - It shows member organization roles and team roles next to recent organization-wide audit events.
+- It can export the latest organization-member audit events as CSV; the export route repeats the admin check, uses no-store attachment headers, neutralizes spreadsheet formula prefixes, and writes an export audit record.
 - Document reads, downloads, search, ask, summarize, and tool execution use owner or team-member authorization checks. Document deletion stays limited to the uploading owner.
 
 Organization owners and admins can manage team RBAC at [http://localhost:3000/dashboard/admin/teams](http://localhost:3000/dashboard/admin/teams):
@@ -861,7 +865,6 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
 - Add account-linking settings.
-- Add organization-wide audit export controls.
 - Add locale-prefixed URLs and a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.
 - Add production-grade rate limiting with Redis.

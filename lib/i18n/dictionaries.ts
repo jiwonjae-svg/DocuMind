@@ -557,6 +557,9 @@ const en = {
     emptyBody:
       "Member activity such as sign-in, document upload, search, ask, and tool usage will appear here.",
     emptyTitle: "No organization audit events yet",
+    exportBody:
+      "CSV export includes the latest organization-member audit events and records the export itself in the audit trail.",
+    exportCsv: "Export CSV",
     latestEvents: "Organization-wide audit events",
     memberRolePrefix: "Org",
     membersAndTeams: "Members and teams",
@@ -1213,6 +1216,9 @@ const ko = {
     emptyBody:
       "로그인, 문서 업로드, 검색, 질문, 도구 사용 같은 구성원 활동이 여기에 표시됩니다.",
     emptyTitle: "아직 조직 감사 이벤트가 없습니다",
+    exportBody:
+      "CSV 내보내기는 최신 조직 구성원 감사 이벤트를 포함하며 내보내기 자체도 감사 추적에 기록합니다.",
+    exportCsv: "CSV 내보내기",
     latestEvents: "조직 전체 감사 이벤트",
     memberRolePrefix: "조직",
     membersAndTeams: "구성원 및 팀",
@@ -1872,6 +1878,9 @@ const ja = {
     emptyBody:
       "サインイン、文書アップロード、検索、質問、ツール利用などのメンバー活動がここに表示されます。",
     emptyTitle: "まだ組織監査イベントはありません",
+    exportBody:
+      "CSVエクスポートには最新の組織メンバー監査イベントが含まれ、エクスポート自体も監査証跡に記録されます。",
+    exportCsv: "CSVエクスポート",
     latestEvents: "組織全体の監査イベント",
     memberRolePrefix: "組織",
     membersAndTeams: "メンバーとチーム",

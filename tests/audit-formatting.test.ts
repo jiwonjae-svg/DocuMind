@@ -99,6 +99,18 @@ describe("audit metadata formatting", () => {
     );
   });
 
+  it("localizes organization audit export actions", () => {
+    expect(formatAuditAction("organization_audit_exported", "en")).toBe(
+      "Organization audit exported",
+    );
+    expect(formatAuditAction("organization_audit_exported", "ko")).toBe(
+      "조직 감사 내보내기",
+    );
+    expect(formatAuditAction("organization_audit_exported", "ja")).toBe(
+      "組織監査エクスポート",
+    );
+  });
+
   it("localizes password change audit actions", () => {
     expect(formatAuditAction("password_changed", "en")).toBe(
       "Password changed",

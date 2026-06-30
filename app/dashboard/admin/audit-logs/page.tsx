@@ -111,6 +111,9 @@ export default async function AdminAuditLogsPage({
     take: 100,
     where: buildOrganizationAuditLogWhere(memberUserIds),
   });
+  const auditExportHref = `/api/admin/audit-logs/export?organizationId=${encodeURIComponent(
+    context.organization.id,
+  )}`;
 
   return (
     <main className={ui.page}>
@@ -134,6 +137,10 @@ export default async function AdminAuditLogsPage({
                 <Icon name="shield" className="h-4 w-4 text-blue-700" />
                 {copy.adminAudit.myAuditLogs}
               </Link>
+              <a href={auditExportHref} className={ui.secondaryButton}>
+                <Icon name="download" className="h-4 w-4 text-blue-700" />
+                {copy.adminAudit.exportCsv}
+              </a>
               <Link href="/dashboard/documents" className={ui.secondaryButton}>
                 <Icon name="document" className="h-4 w-4 text-blue-700" />
                 {copy.common.documents}
@@ -171,6 +178,9 @@ export default async function AdminAuditLogsPage({
                   events: auditLogs.length,
                   members: members.length,
                 })}
+              </p>
+              <p className="mt-3 text-xs leading-5 text-slate-500">
+                {copy.adminAudit.exportBody}
               </p>
             </div>
           </div>
