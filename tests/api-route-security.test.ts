@@ -12,6 +12,7 @@ const publicRouteSuffixes = [
   path.join("locale", "route.ts"),
 ];
 const jsonPostRouteSuffixes = [
+  path.join("account", "oauth-link-intents", "route.ts"),
   path.join("account", "password", "route.ts"),
   path.join("admin", "team-invitations", "route.ts"),
   path.join("admin", "team-memberships", "route.ts"),
@@ -89,6 +90,7 @@ describe("API route security contracts", () => {
 
   it("keeps every protected POST route authenticated and same-origin checked", () => {
     expect(protectedPostRoutes.map(toApiRelativePath).sort()).toEqual([
+      path.join("account", "oauth-link-intents", "route.ts"),
       path.join("account", "password", "route.ts"),
       path.join("admin", "team-invitations", "route.ts"),
       path.join("admin", "team-memberships", "route.ts"),

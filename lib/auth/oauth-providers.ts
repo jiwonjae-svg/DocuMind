@@ -47,6 +47,10 @@ export function isOAuthProviderEnabled(
   return getEnabledOAuthProviders(env).some((provider) => provider.id === id);
 }
 
+export function normalizeOAuthProviderId(value: unknown): OAuthProviderId | null {
+  return value === "github" || value === "google" ? value : null;
+}
+
 export function getOAuthProviderName(provider: string) {
   return providerConfig[provider as OAuthProviderId]?.name ?? provider;
 }

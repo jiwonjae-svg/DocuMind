@@ -25,6 +25,10 @@ type OAuthUserInput = {
   user: User;
 };
 
+type OAuthLinkInput = OAuthUserInput & {
+  userId: string;
+};
+
 function readProfileString(profile: Profile | undefined, key: string) {
   const value = profile?.[key as keyof Profile];
 
@@ -279,6 +283,143 @@ export async function ensureOAuthUser({
   } catch (error) {
     if (isUniqueConstraintError(error)) {
       return updateLinkedOAuthUser({ account, image, name });
+    }
+
+    throw error;
+  }
+}
+
+export async function linkOAuthAccountForUser({
+  account,
+  profile,
+  user,
+  userId,
+}: OAuthLinkInput) {
+  const providerAccountId = readProviderAccountId(account);
+
+  if (!account?.provider || !providerAccountId) {
+    return null;
+  }
+
+  if (!hasVerifiedProviderEmail(account, profile)) {
+    return null;
+  }
+
+  const email = readOAuthEmail(user);
+
+  if (!email) {
+    return null;
+  }
+
+  const linkedUserId = await findUserIdForOAuthAccount(account);
+  const name = readOAuthDisplayName(user, profile);
+  const image = readOAuthImage(user, profile);
+
+  if (linkedUserId) {
+    return linkedUserId === userId
+      ? updateLinkedOAuthUser({ account, image, name })
+      : null;
+  }
+
+  const providerName = getOAuthProviderName(account.provider);
+
+  try {
+    return await prisma.$transaction(async (transaction) => {
+      const localUser = await transaction.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          email: true,
+          id: true,
+          image: true,
+          name: true,
+        },
+      });
+
+      if (!localUser || localUser.email !== email) {
+        return null;
+      }
+
+      const existingAccount = await transaction.userAccount.findUnique({
+        where: {
+          provider_providerAccountId: {
+            provider: account.provider,
+            providerAccountId,
+          },
+        },
+        select: {
+          userId: true,
+        },
+      });
+
+      if (existingAccount) {
+        return existingAccount.userId === userId
+          ? transaction.user.update({
+              where: {
+                id: userId,
+              },
+              data: {
+                ...(name ? { name } : {}),
+                ...(image ? { image } : {}),
+              },
+              select: {
+                email: true,
+                id: true,
+                image: true,
+                name: true,
+              },
+            })
+          : null;
+      }
+
+      const updatedUser = await transaction.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          ...(name ? { name } : {}),
+          ...(image ? { image } : {}),
+        },
+        select: {
+          email: true,
+          id: true,
+          image: true,
+          name: true,
+        },
+      });
+
+      await transaction.userAccount.create({
+        data: {
+          provider: account.provider,
+          providerAccountId,
+          type: account.type ?? "oauth",
+          userId,
+        },
+      });
+
+      await transaction.auditLog.create({
+        data: {
+          actorId: userId,
+          action: "oauth_account_linked",
+          resourceType: "User",
+          resourceId: userId,
+          metadata: {
+            method: "self_service",
+            provider: providerName,
+          },
+        },
+      });
+
+      return updatedUser;
+    });
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      const concurrentLinkedUserId = await findUserIdForOAuthAccount(account);
+
+      return concurrentLinkedUserId === userId
+        ? updateLinkedOAuthUser({ account, image, name })
+        : null;
     }
 
     throw error;

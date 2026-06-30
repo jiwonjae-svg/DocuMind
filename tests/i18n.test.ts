@@ -71,6 +71,7 @@ describe("i18n locale helpers", () => {
       (copy) => copy.askForm.answer,
       (copy) => copy.audit.title,
       (copy) => copy.account.title,
+      (copy) => copy.account.addOAuth,
       (copy) => copy.account.changePassword,
       (copy) => copy.account.requestPasswordSetup,
       (copy) => copy.account.oauthConnectionsTitle,

@@ -66,6 +66,9 @@ const en = {
       "Enter your current password and a valid new password.",
     "Enter a valid reset token and password.":
       "Enter a valid reset token and password.",
+    "OAuth link setup is not available.":
+      "OAuth link setup is not available.",
+    "OAuth provider is not enabled.": "OAuth provider is not enabled.",
     "Invalid JSON body.": "Invalid JSON body.",
     "Invalid API bearer token.": "Invalid API bearer token.",
     "Invalid team membership request.": "Invalid team membership request.",
@@ -345,6 +348,8 @@ const en = {
     tokenLabel: "Bearer token",
   },
   account: {
+    addOAuth: "Connect {provider}",
+    addingOAuth: "Opening {provider}...",
     authMethods: "Sign-in methods",
     body:
       "Review your DocuMind account details and change your password without exposing credentials to the client.",
@@ -353,11 +358,13 @@ const en = {
     confirmNewPassword: "Confirm new password",
     currentPassword: "Current password",
     fallbackError: "Unable to update account security.",
+    noAvailableOAuthProviders:
+      "No additional OAuth providers are configured for this deployment.",
     noAuthMethods: "No sign-in methods are linked.",
     noName: "No name set",
     noOAuthAccounts: "No OAuth providers are linked to this account.",
     oauthConnectionsBody:
-      "Remove a connected OAuth provider only when another sign-in method remains available.",
+      "Connect configured OAuth providers that use the same verified email, or remove a provider only when another sign-in method remains available.",
     oauthConnectionsTitle: "OAuth connections",
     passwordMethod: "Email and password",
     passwordUnavailable:
@@ -892,6 +899,9 @@ const ko = {
     "Enter a valid email address.": "유효한 이메일 주소를 입력하세요.",
     "Enter a valid email, name, and password.":
       "유효한 이메일, 이름, 비밀번호를 입력하세요.",
+    "OAuth link setup is not available.":
+      "OAuth 연결 설정을 사용할 수 없습니다.",
+    "OAuth provider is not enabled.": "OAuth 제공자가 활성화되어 있지 않습니다.",
     "Enter your current password and a valid new password.":
       "현재 비밀번호와 유효한 새 비밀번호를 입력하세요.",
     "Enter a valid reset token and password.":
@@ -1091,6 +1101,8 @@ const ko = {
   },
   account: {
     ...en.account,
+    addOAuth: "{provider} 연결",
+    addingOAuth: "{provider} 여는 중...",
     authMethods: "로그인 방식",
     body:
       "클라이언트에 자격 증명을 노출하지 않고 DocuMind 계정 정보와 비밀번호를 관리합니다.",
@@ -1099,11 +1111,13 @@ const ko = {
     confirmNewPassword: "새 비밀번호 확인",
     currentPassword: "현재 비밀번호",
     fallbackError: "계정 보안을 업데이트할 수 없습니다.",
+    noAvailableOAuthProviders:
+      "이 배포에 추가로 연결할 OAuth 제공자가 설정되어 있지 않습니다.",
     noAuthMethods: "연결된 로그인 방식이 없습니다.",
     noName: "설정된 이름 없음",
     noOAuthAccounts: "이 계정에 연결된 OAuth 제공자가 없습니다.",
     oauthConnectionsBody:
-      "다른 로그인 방식이 남아 있을 때만 연결된 OAuth 제공자를 제거하세요.",
+      "같은 검증 이메일을 사용하는 설정된 OAuth 제공자를 연결하거나, 다른 로그인 방식이 남아 있을 때만 제공자를 제거하세요.",
     oauthConnectionsTitle: "OAuth 연결",
     passwordMethod: "이메일과 비밀번호",
     passwordUnavailable:
@@ -1640,6 +1654,9 @@ const ja = {
     "Enter a valid email address.": "有効なメールアドレスを入力してください。",
     "Enter a valid email, name, and password.":
       "有効なメール、名前、パスワードを入力してください。",
+    "OAuth link setup is not available.":
+      "OAuth連携設定を利用できません。",
+    "OAuth provider is not enabled.": "OAuthプロバイダーが有効ではありません。",
     "Enter your current password and a valid new password.":
       "現在のパスワードと有効な新しいパスワードを入力してください。",
     "Enter a valid reset token and password.":
@@ -1839,6 +1856,8 @@ const ja = {
   },
   account: {
     ...en.account,
+    addOAuth: "{provider}を接続",
+    addingOAuth: "{provider}を開いています...",
     authMethods: "ログイン方法",
     body:
       "認証情報をクライアントに公開せずに、DocuMindアカウント情報とパスワードを管理します。",
@@ -1847,11 +1866,13 @@ const ja = {
     confirmNewPassword: "新しいパスワードを確認",
     currentPassword: "現在のパスワード",
     fallbackError: "アカウントセキュリティを更新できません。",
+    noAvailableOAuthProviders:
+      "このデプロイで追加接続できるOAuthプロバイダーは設定されていません。",
     noAuthMethods: "連携済みログイン方法はありません。",
     noName: "名前未設定",
     noOAuthAccounts: "このアカウントに連携済みOAuthプロバイダーはありません。",
     oauthConnectionsBody:
-      "別のログイン方法が残っている場合のみ、連携済みOAuthプロバイダーを削除してください。",
+      "同じ確認済みメールを使用する設定済みOAuthプロバイダーを接続できます。削除は別のログイン方法が残っている場合のみ行えます。",
     oauthConnectionsTitle: "OAuth連携",
     passwordMethod: "メールとパスワード",
     passwordUnavailable:

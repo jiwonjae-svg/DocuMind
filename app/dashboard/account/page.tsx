@@ -2,7 +2,10 @@ import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
-import { getOAuthProviderName } from "@/lib/auth/oauth-providers";
+import {
+  getEnabledOAuthProviders,
+  getOAuthProviderName,
+} from "@/lib/auth/oauth-providers";
 import { buildPageMetadata } from "@/lib/i18n/metadata";
 import { getCurrentDictionary, getCurrentI18n } from "@/lib/i18n/server";
 import { prisma } from "@/lib/prisma";
@@ -57,6 +60,12 @@ export default async function AccountPage() {
     ...(user.passwordHash ? [copy.account.passwordMethod] : []),
     ...user.accounts.map((account) => getOAuthProviderName(account.provider)),
   ];
+  const linkedOAuthProviders = new Set(
+    user.accounts.map((account) => account.provider),
+  );
+  const availableOAuthProviders = getEnabledOAuthProviders().filter(
+    (provider) => !linkedOAuthProviders.has(provider.id),
+  );
   const passwordSetupHref = `/forgot-password?email=${encodeURIComponent(
     user.email,
   )}`;
@@ -176,6 +185,7 @@ export default async function AccountPage() {
               id: account.id,
               providerName: getOAuthProviderName(account.provider),
             }))}
+            availableProviders={availableOAuthProviders}
             copy={{
               ...copy.account,
               apiErrors: copy.apiErrors,

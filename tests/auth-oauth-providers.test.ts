@@ -3,6 +3,7 @@ import {
   getEnabledOAuthProviders,
   getOAuthProviderName,
   isOAuthProviderEnabled,
+  normalizeOAuthProviderId,
 } from "../lib/auth/oauth-providers";
 
 describe("OAuth provider configuration", () => {
@@ -27,5 +28,12 @@ describe("OAuth provider configuration", () => {
     expect(getOAuthProviderName("google")).toBe("Google");
     expect(getOAuthProviderName("github")).toBe("GitHub");
     expect(getOAuthProviderName("custom")).toBe("custom");
+  });
+
+  it("normalizes supported OAuth provider IDs", () => {
+    expect(normalizeOAuthProviderId("google")).toBe("google");
+    expect(normalizeOAuthProviderId("github")).toBe("github");
+    expect(normalizeOAuthProviderId("custom")).toBeNull();
+    expect(normalizeOAuthProviderId(null)).toBeNull();
   });
 });

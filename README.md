@@ -43,7 +43,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Auth.js email/password signup, credentials sign-in, password reset, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
 - Auth forms include localized password visibility controls, bounded Auth.js/OAuth callback error banners, live status/error regions, and disabled submit states for a more production-like account flow.
 - Signed-in password users can change their password from `/dashboard/account`; the route verifies the current password, rate-limits attempts, hashes the new password server-side, and writes a `password_changed` audit event.
-- Signed-in users can review linked OAuth providers from `/dashboard/account` and remove a provider only when another sign-in method remains; removals are owner-scoped, same-origin checked, and audited.
+- Signed-in users can connect configured OAuth providers from `/dashboard/account` when the provider returns the same verified email, and remove a provider only when another sign-in method remains; link intents use a short-lived signed HttpOnly cookie, and changes are owner-scoped, same-origin checked, and audited.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
 - OAuth provider account IDs are bounded and reject control/format characters before lookup or linking.
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
@@ -150,8 +150,8 @@ flowchart LR
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
 - Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, OAuth-to-password setup support, and optional EN/KO/JA Resend email delivery
-- Account security page at `/dashboard/account` for reviewing sign-in methods, changing password-account credentials with server-side current-password verification, and removing linked OAuth providers without deleting the last sign-in method
-- Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks, transaction-time password-account collision checks before local account creation or linking, and localized callback failure messages for users
+- Account security page at `/dashboard/account` for reviewing sign-in methods, changing password-account credentials with server-side current-password verification, connecting configured OAuth providers with verified same-email checks, and removing linked OAuth providers without deleting the last sign-in method
+- Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks, self-service provider linking for signed-in users, transaction-time password-account collision checks before local account creation or linking, and localized callback failure messages for users
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization with control/format-character rejection for email credentials, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
 - Bounded signup email/name/password validation, server-side scrypt password hashing, per-client/per-email/aggregate signup rate limiting, and duplicate-email response normalization
@@ -491,8 +491,8 @@ npm run test
 Local verification on 2026-06-30:
 
 ```text
-Test Files  53 passed (53)
-Tests       328 passed (328)
+Test Files  54 passed (54)
+Tests       335 passed (335)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -515,7 +515,7 @@ After running migrations, create an account at [http://localhost:3000/signup](ht
 
 Password users can start account recovery at [http://localhost:3000/forgot-password](http://localhost:3000/forgot-password). OAuth-only users can use the same email-verified flow to add email/password sign-in from `/dashboard/account` without exposing provider credentials to DocuMind. The app stores only a hashed reset token, sends a localized one-time reset link when Resend email delivery is configured, and accepts the new password at `/reset-password?token=...`. For local testing without email, set `PASSWORD_RESET_DEBUG_LINKS=true` outside production to show the reset link after requesting it.
 
-Signed-in users can open [http://localhost:3000/dashboard/account](http://localhost:3000/dashboard/account) to review their profile and linked sign-in methods. Password users can change credentials there with current-password verification, the same 12-character minimum as signup/reset, rate limiting, server-side hashing, and a `password_changed` audit log. OAuth-only users can request a password setup link from the same page. Users with OAuth providers can remove a linked provider only when another password or OAuth sign-in method remains; the unlink route writes an `oauth_account_unlinked` audit log.
+Signed-in users can open [http://localhost:3000/dashboard/account](http://localhost:3000/dashboard/account) to review their profile and linked sign-in methods. Password users can change credentials there with current-password verification, the same 12-character minimum as signup/reset, rate limiting, server-side hashing, and a `password_changed` audit log. OAuth-only users can request a password setup link from the same page. Users can connect configured Google/GitHub providers when the provider returns the same verified email; the link flow uses a short-lived signed HttpOnly cookie and writes an `oauth_account_linked` audit log. Users with OAuth providers can remove a linked provider only when another password or OAuth sign-in method remains; the unlink route writes an `oauth_account_unlinked` audit log.
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 
@@ -899,7 +899,7 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 - AI-backed search, answer, signup, and credentials sign-in endpoints use bounded in-memory rate limiters, which are not shared across multiple app instances.
 - Document processing runs inline after upload; a production system should use a background queue.
 - Summarization uses bounded chunk context for MVP predictability and may truncate very large documents.
-- OAuth account connections can be reviewed and removed, but self-service provider add/link flows and enterprise SSO are not implemented yet.
+- Enterprise SSO is not implemented yet.
 - Production email delivery requires `RESEND_API_KEY` plus `PASSWORD_RESET_EMAIL_FROM` and/or `TEAM_INVITATION_EMAIL_FROM`; without them, password reset requests still return safely and team invitation creation or renewal still returns a manual share link, but no email is delivered.
 - The MCP wrapper currently uses a bounded JSON-RPC POST endpoint with lifecycle notifications and batch handling; richer streaming or stateful session transport can be added later.
 
@@ -907,7 +907,6 @@ The schema includes ownership fields such as `ownerId` on `Document`, `DocumentC
 
 - Add S3/GCS storage adapters and signed upload/download URLs for non-Vercel deployments.
 - Move document processing and embedding generation to a job queue.
-- Add self-service OAuth provider add/link flow from account settings.
 - Add a managed translation review workflow.
 - Add Playwright end-to-end coverage for upload, ask, and tool endpoints.
 - Add production-grade rate limiting with Redis.

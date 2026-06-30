@@ -38,6 +38,7 @@ vi.mock("../lib/prisma", () => ({
 
 import {
   ensureOAuthUser,
+  linkOAuthAccountForUser,
   MAX_OAUTH_PROVIDER_ACCOUNT_ID_LENGTH,
 } from "../lib/auth/oauth";
 
@@ -339,5 +340,94 @@ describe("OAuth user provisioning", () => {
       }),
     );
     expect(prismaMock.auditLog.create).not.toHaveBeenCalled();
+  });
+
+  it("links a provider to a signed-in user when the verified email matches", async () => {
+    prismaMock.userAccount.findUnique.mockResolvedValue(null);
+    prismaMock.user.findUnique.mockResolvedValue({
+      email: "owner@example.com",
+      id: "password-user-1",
+      image: null,
+      name: "Owner",
+    });
+    prismaMock.user.update.mockResolvedValue({
+      email: "owner@example.com",
+      id: "password-user-1",
+      image: "https://cdn.example.com/avatar.png",
+      name: "Owner",
+    });
+
+    await expect(
+      linkOAuthAccountForUser({
+        account: oauthAccount("google"),
+        profile: profile({
+          email_verified: true,
+          picture: "https://cdn.example.com/avatar.png",
+        }),
+        user: oauthUser("owner@example.com"),
+        userId: "password-user-1",
+      }),
+    ).resolves.toMatchObject({ id: "password-user-1" });
+
+    expect(prismaMock.userAccount.create).toHaveBeenCalledWith({
+      data: {
+        provider: "google",
+        providerAccountId: "google-account-1",
+        type: "oauth",
+        userId: "password-user-1",
+      },
+    });
+    expect(prismaMock.auditLog.create).toHaveBeenCalledWith({
+      data: {
+        actorId: "password-user-1",
+        action: "oauth_account_linked",
+        resourceId: "password-user-1",
+        resourceType: "User",
+        metadata: {
+          method: "self_service",
+          provider: "Google",
+        },
+      },
+    });
+  });
+
+  it("rejects self-service OAuth linking when the provider email differs", async () => {
+    prismaMock.userAccount.findUnique.mockResolvedValue(null);
+    prismaMock.user.findUnique.mockResolvedValue({
+      email: "owner@example.com",
+      id: "password-user-1",
+      image: null,
+      name: "Owner",
+    });
+
+    await expect(
+      linkOAuthAccountForUser({
+        account: oauthAccount("google"),
+        profile: profile({ email_verified: true }),
+        user: oauthUser("attacker@example.com"),
+        userId: "password-user-1",
+      }),
+    ).resolves.toBeNull();
+
+    expect(prismaMock.userAccount.create).not.toHaveBeenCalled();
+    expect(prismaMock.auditLog.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects self-service OAuth linking when the provider account belongs to another user", async () => {
+    prismaMock.userAccount.findUnique.mockResolvedValue({
+      userId: "other-user-1",
+    });
+
+    await expect(
+      linkOAuthAccountForUser({
+        account: oauthAccount("google"),
+        profile: profile({ email_verified: true }),
+        user: oauthUser("owner@example.com"),
+        userId: "password-user-1",
+      }),
+    ).resolves.toBeNull();
+
+    expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.userAccount.create).not.toHaveBeenCalled();
   });
 });

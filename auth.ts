@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import type { Provider } from "next-auth/providers";
+import { cookies } from "next/headers";
 import { normalizeAuthRedirectUrl } from "@/lib/auth/callback-url";
 import {
   normalizeAuthDisplayName,
@@ -15,10 +16,15 @@ import {
   buildUserLoginFailureAuditData,
 } from "@/lib/auth/login-audit";
 import { checkLoginAttemptRateLimit } from "@/lib/auth/login-rate-limit";
+import {
+  OAUTH_LINK_INTENT_COOKIE_NAME,
+  readOAuthLinkIntentCookieValue,
+} from "@/lib/auth/oauth-link-intent";
 import { isOAuthProviderEnabled } from "@/lib/auth/oauth-providers";
 import {
   ensureOAuthUser,
   findUserIdForOAuthAccount,
+  linkOAuthAccountForUser,
 } from "@/lib/auth/oauth";
 import { ensureUserDefaultOrganization } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/prisma";
@@ -36,6 +42,23 @@ async function auditFailedLogin(request: Request, userId?: string | null) {
       }),
     })
     .catch(() => {});
+}
+
+async function consumeOAuthLinkIntent() {
+  try {
+    const cookieStore = await cookies();
+    const intent = readOAuthLinkIntentCookieValue({
+      value: cookieStore.get(OAUTH_LINK_INTENT_COOKIE_NAME)?.value,
+    });
+
+    if (intent) {
+      cookieStore.delete(OAUTH_LINK_INTENT_COOKIE_NAME);
+    }
+
+    return intent;
+  } catch {
+    return null;
+  }
 }
 
 const authProviders: Provider[] = [
@@ -121,6 +144,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ account, profile, user }) {
       if (!account || account.provider === "credentials") {
         return true;
+      }
+
+      const linkIntent = await consumeOAuthLinkIntent();
+
+      if (linkIntent) {
+        if (linkIntent.provider !== account.provider) {
+          return false;
+        }
+
+        const linkedUser = await linkOAuthAccountForUser({
+          account,
+          profile,
+          user,
+          userId: linkIntent.userId,
+        });
+
+        return Boolean(linkedUser);
       }
 
       const localUser = await ensureOAuthUser({ account, profile, user });
