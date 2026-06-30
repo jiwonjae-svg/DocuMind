@@ -82,6 +82,33 @@ describe("password reset email delivery", () => {
     expect(body.html).toContain("Reset password");
   });
 
+  it("localizes password reset email copy by request locale", async () => {
+    const fetcher = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        status: 200,
+      }),
+    );
+
+    await sendPasswordResetEmail({
+      env: {
+        PASSWORD_RESET_EMAIL_FROM: "DocuMind <security@documind.example>",
+        RESEND_API_KEY: "re_test",
+      },
+      fetcher,
+      locale: "ko",
+      resetUrl: "https://documind.example/reset-password?token=token",
+      to: "owner@example.com",
+      userName: "지원",
+    });
+
+    const body = JSON.parse(fetcher.mock.calls[0][1].body);
+
+    expect(body.subject).toBe("DocuMind 비밀번호 재설정");
+    expect(body.text).toContain("아래 링크로 새 비밀번호를 설정하세요.");
+    expect(body.html).toContain("지원님, 안녕하세요.");
+    expect(body.html).toContain("비밀번호 재설정");
+  });
+
   it("fails closed when the email provider rejects delivery", async () => {
     const fetcher = vi.fn().mockResolvedValue(
       new Response("Bad request", {

@@ -1,6 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import { hashPassword } from "../password";
 import { prisma } from "../prisma";
+import type { SupportedLocale } from "../i18n/config";
+import { DEFAULT_LOCALE } from "../i18n/config";
 import { readIpAddress, readUserAgent } from "../tools/response";
 import {
   normalizeEmailCredential,
@@ -62,6 +64,7 @@ type RequestPasswordResetOptions = {
   email: string;
   env?: NodeJS.ProcessEnv;
   fetcher?: typeof fetch;
+  locale?: SupportedLocale;
   now?: () => Date;
   request: PasswordResetRequest;
 };
@@ -208,6 +211,7 @@ export async function requestPasswordReset({
   email,
   env = process.env,
   fetcher = fetch,
+  locale = DEFAULT_LOCALE,
   now = () => new Date(),
   request,
 }: RequestPasswordResetOptions) {
@@ -267,6 +271,7 @@ export async function requestPasswordReset({
     await sendPasswordResetEmail({
       env,
       fetcher,
+      locale,
       resetUrl,
       to: user.email,
       userName: user.name,

@@ -13,9 +13,24 @@ import {
   requestPasswordReset,
   validateForgotPasswordInput,
 } from "@/lib/auth/password-reset";
+import {
+  I18N_COOKIE_NAME,
+  normalizeLocale,
+  readPreferredLocaleFromAcceptLanguage,
+} from "@/lib/i18n/config";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
+
+function readRequestLocale(request: NextRequest) {
+  const cookieLocale = request.cookies.get(I18N_COOKIE_NAME)?.value;
+
+  return cookieLocale
+    ? normalizeLocale(cookieLocale)
+    : readPreferredLocaleFromAcceptLanguage(
+        request.headers.get("accept-language"),
+      );
+}
 
 export async function POST(request: NextRequest) {
   if (!isSameOriginRequest(request)) {
@@ -75,6 +90,7 @@ export async function POST(request: NextRequest) {
 
   const result = await requestPasswordReset({
     email: validation.data.email,
+    locale: readRequestLocale(request),
     request,
   });
 

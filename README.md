@@ -47,7 +47,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
 - Public signup is protected with same-origin checks, bounded JSON parsing, bounded password input validation, password hashing, and in-memory client/email/aggregate rate limiting.
 - Public password reset uses non-enumerating responses, same-origin checks, bounded JSON parsing, in-memory client/email/aggregate request rate limiting, hashed single-use reset tokens, expiry checks, server-side password hashing, and audit logs for reset requests and completed resets.
-- Password reset email delivery uses the Resend HTTP API when `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM` are configured, without adding a client-side secret or extra runtime dependency.
+- Password reset email delivery uses the Resend HTTP API when `RESEND_API_KEY` and `PASSWORD_RESET_EMAIL_FROM` are configured, localizes the email subject/body from the current locale cookie or `Accept-Language`, and avoids client-side secrets or extra runtime dependencies.
 - Document ingestion for `.txt`, `.md`, and `.pdf` files.
 - Server-side file validation for extension, MIME type, size, and storage path safety.
 - Document storage provider abstraction with local filesystem storage for development and private Vercel Blob storage for durable Vercel deployments.
@@ -142,7 +142,7 @@ flowchart LR
 - Tailwind CSS
 - Responsive landing page
 - Auth.js email/password signup and credentials authentication
-- Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, and optional Resend email delivery
+- Password reset pages and API routes with hashed single-use tokens, expiry, audit logging, and optional EN/KO/JA Resend email delivery
 - Optional Google and GitHub OAuth authentication through Auth.js, with verified-email checks and transaction-time password-account collision checks before local account creation or linking
 - App-relative login callback URL normalization plus Auth.js redirect callback allowlisting
 - Bounded server-side credential normalization with control/format-character rejection for email credentials, validated-IP per-client/per-email/aggregate sign-in attempt rate limiting, aggregate login rate-limit bucket short-circuiting, and dummy password verification for unknown or OAuth-only users
@@ -154,7 +154,7 @@ flowchart LR
 - Ownership-ready models for users, documents, chunks, questions, answers, and audit logs
 - Organization, organization membership, team, and team membership models with owner/admin/member and team manager/member/viewer roles
 - Organization owner/admin team RBAC management at `/dashboard/admin/teams` for creating teams and assigning existing users to organization and team roles
-- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
+- EN/KO/JA localized landing, auth, dashboard, documents, search, ask, personal audit, organization admin audit UI, password reset emails, page metadata, and accessibility labels with a shared dictionary, locale cookie API, Accept-Language fallback, and language switcher
 - Known server validation and API errors shown in auth, search, ask, and team admin forms are mapped through the EN/KO/JA dictionary instead of leaking raw English API strings.
 - Protected dashboard navigation at `/dashboard`
 - Browser Origin and Fetch Metadata checks on mutating POST routes for uploads, deletes, search, ask, and agent tool APIs
@@ -448,7 +448,7 @@ The test suite is designed to cover the reliability and safety concerns that mat
 - `tests/auth-signup.test.ts`: signup input validation, display-name/password bounds, client/email/aggregate account-creation rate limits, and aggregate bucket short-circuiting.
 - `tests/auth-signup-persistence.test.ts`: password user creation and signup audit logs are written in one transaction, and unique email collisions return a non-enumerating accepted result.
 - `tests/auth-password-reset.test.ts`: forgot-password/reset-password validation, non-enumerating token issuance behavior, hashed single-use token persistence, transactional password updates, audit logging, and reset rate limits.
-- `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, and provider failure handling.
+- `tests/auth-password-reset-email.test.ts`: optional Resend password reset email delivery, skipped delivery when unconfigured, EN/KO/JA email copy selection, and provider failure handling.
 - `tests/auth-rbac.test.ts`: organization/team role checks, organization audit filters, default organization/team provisioning, and migrated-user default workspace creation.
 - `tests/i18n.test.ts`: EN/KO/JA locale normalization, Accept-Language preference parsing, shared navigation labels, core product-surface dictionary coverage, localized document notices, and formatted copy helpers.
 - `tests/auth-oauth-providers.test.ts`: OAuth provider buttons/configuration are enabled only when the required server environment variables are set.
@@ -466,7 +466,7 @@ Local verification on 2026-06-30:
 
 ```text
 Test Files  41 passed (41)
-Tests       251 passed (251)
+Tests       252 passed (252)
 npm audit --omit=dev --audit-level=moderate: found 0 vulnerabilities
 ```
 
@@ -487,7 +487,7 @@ npm run prisma:seed
 
 After running migrations, create an account at [http://localhost:3000/signup](http://localhost:3000/signup). Email/password signup hashes the password on the server and then signs the new user in. If Google or GitHub OAuth variables are configured, the signup and login pages also show OAuth buttons. OAuth only provisions or links local users when the provider supplies a verified email; password accounts are not automatically linked by OAuth sign-in.
 
-Password users can start account recovery at [http://localhost:3000/forgot-password](http://localhost:3000/forgot-password). The app stores only a hashed reset token, sends a one-time reset link when Resend email delivery is configured, and accepts the new password at `/reset-password?token=...`. For local testing without email, set `PASSWORD_RESET_DEBUG_LINKS=true` outside production to show the reset link after requesting it.
+Password users can start account recovery at [http://localhost:3000/forgot-password](http://localhost:3000/forgot-password). The app stores only a hashed reset token, sends a localized one-time reset link when Resend email delivery is configured, and accepts the new password at `/reset-password?token=...`. For local testing without email, set `PASSWORD_RESET_DEBUG_LINKS=true` outside production to show the reset link after requesting it.
 
 The dashboard at `/dashboard` is protected. Unauthenticated users are redirected to `/login?callbackUrl=/dashboard`.
 

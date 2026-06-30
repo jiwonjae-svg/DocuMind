@@ -157,6 +157,7 @@ describe("password reset persistence", () => {
         PASSWORD_RESET_EMAIL_FROM: "DocuMind <security@documind.example>",
         RESEND_API_KEY: "re_test",
       },
+      locale: "ja",
       now: () => now,
       request: request(),
     });
@@ -191,6 +192,7 @@ describe("password reset persistence", () => {
     });
     expect(sendPasswordResetEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        locale: "ja",
         resetUrl: result.resetUrl,
         to: "owner@example.com",
         userName: "Owner",

@@ -87,9 +87,9 @@ const en = {
     createAccountPending: "Creating account...",
     createAccountTitle: "Create a private knowledge workspace",
     createAccountBody:
-      "Start with a password account or an enabled OAuth provider. New users get their own owner-scoped document library, search index, answers, and audit log records.",
+      "Start with a password account or an enabled OAuth provider. New users get a private workspace and can later access team-scoped documents assigned by an organization admin.",
     createAccountFormBody:
-      "Create an account for your own document workspace. OAuth options appear when configured in the deployment environment.",
+      "Create an account for a private document workspace. OAuth options appear when configured in the deployment environment.",
     emailPasswordDescription:
       "Enter your email and password. If OAuth is configured for this deployment, you can continue with a connected provider.",
     forgotFormBody:
@@ -106,20 +106,22 @@ const en = {
     localResetLink: "Open local reset link",
     loginTitle: "Sign in to a secure knowledge workspace",
     loginBody:
-      "Use your workspace account or an enabled OAuth provider to access private document management, semantic search, grounded answers, and owner-scoped audit records.",
+      "Use your workspace account or an enabled OAuth provider to access private and team document management, semantic search, grounded answers, and audit records.",
     loginError: "Check your email and password, then try again.",
     loginPending: "Signing in...",
     needAccount: "Need an account?",
     newPassword: "New password",
     oneTimeToken: "One-time token",
     oneTimeTokenBody: "Reset links expire and only hashed tokens are stored.",
-    ownerScopedData: "Owner-scoped data",
-    ownerScopedDataBody: "Documents, chunks, and answers stay scoped to one user.",
+    ownerScopedData: "Access-scoped data",
+    ownerScopedDataBody:
+      "Documents, chunks, and answers stay filtered by ownership or team membership.",
     passwordAccount: "Password account",
     passwordAccountBody: "This flow updates only accounts that use password sign-in.",
     passwordHelp: "Use at least 12 characters.",
     privateByDefault: "Private by default",
-    privateByDefaultBody: "Documents and answers are filtered by your user ID.",
+    privateByDefaultBody:
+      "Documents and answers are filtered by your account and assigned teams.",
     rememberPassword: "Remember your password?",
     resetBody:
       "Reset links are single-use and expire quickly. After a successful reset, sign in again with the new password.",
@@ -157,7 +159,7 @@ const en = {
     currentOnly:
       "Every step below is implemented now. Planned-only items are intentionally separated in the MVP scope section above.",
     heroBody:
-      "DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams. It combines secure document ingestion, owner-scoped semantic search, grounded answers, and clean API endpoints that can be used by agents.",
+      "DocuMind is an agent-ready internal knowledge search system for Japanese/Korean teams. It combines secure document ingestion, access-scoped semantic search, grounded answers, and clean API endpoints that can be used by agents.",
     heroEyebrow: "Agent-ready knowledge search",
     heroLocalized:
       "A backend-focused MVP for internal knowledge search across Japanese and Korean teams, with authentication, document processing, semantic search, and cited answers.",
@@ -173,7 +175,7 @@ const en = {
     previewHeading: "Internal document index",
     previewLabel: "Search preview",
     previewPlaceholder: "Search policies, guides, and project notes...",
-    previewSubtext: "Owner-scoped retrieval with source-aware AI responses.",
+    previewSubtext: "Access-scoped retrieval with source-aware AI responses.",
     productStepsLabel: "DocuMind workflow steps",
     startNow: "Start now",
     useProductEyebrow: "Use the product",
@@ -181,19 +183,19 @@ const en = {
     viewImplementation: "View implementation",
     viewImplementationAria: "View the DocuMind implementation README in the GitHub repository",
     whyAgentBody:
-      "DocuMind is not just a chat UI. It is a controlled knowledge layer for human users and future AI agents. Agents should reach internal knowledge through authenticated, owner-scoped, auditable API boundaries instead of bypassing application logic or reading the database directly.",
+      "DocuMind is not just a chat UI. It is a controlled knowledge layer for human users and future AI agents. Agents should reach internal knowledge through authenticated, access-scoped, auditable API boundaries instead of bypassing application logic or reading the database directly.",
     whyAgentEyebrow: "Why agent-ready?",
     whyAgentLocalized:
-      "DocuMind is a controlled layer for humans and future AI agents to access internal knowledge through authenticated, owner-scoped, auditable API boundaries.",
+      "DocuMind is a controlled layer for humans and future AI agents to access internal knowledge through authenticated, access-scoped, auditable API boundaries.",
     whyAgentTitle: "A controlled knowledge layer for humans and agents",
     features: [
       ["Protected dashboard routes", "Server-side session checks redirect unauthenticated visitors before protected dashboard content is rendered."],
       ["Signup, OAuth, and recovery", "Auth.js supports password accounts, configured Google or GitHub OAuth providers, and one-time password reset links."],
       ["Document management", "Authenticated users can upload, process, list, and delete validated .txt, .md, and .pdf documents."],
-      ["Owner-scoped data access", "Document reads, deletes, chunks, retrieval, and tool calls filter against the authenticated user's owner ID."],
+      ["Access-scoped data access", "Document reads, chunks, retrieval, and tool calls filter by ownership or team membership; deletes remain owner-only."],
       ["Semantic search", "OpenAI embeddings and PostgreSQL pgvector rank relevant chunks through authenticated server routes and a dashboard search UI."],
       ["Grounded answers with citations", "Retrieved chunks constrain the answer prompt, and the UI returns source titles, chunk indexes, snippets, and scores."],
-      ["Audit logging and review", "Login, upload, processing, delete, ask, and tool actions create owner-scoped and admin-visible audit records."],
+      ["Audit logging and review", "Login, upload, processing, delete, ask, and tool actions create user-visible and admin-visible audit records."],
       ["MCP and tool endpoints", "Authenticated HTTP tool routes and a JSON-RPC MCP wrapper expose search, cited answers, and document summaries."],
     ],
     flow: [
@@ -202,7 +204,7 @@ const en = {
       ["Chunk", "Split normalized text into bounded, indexed retrieval units."],
       ["Embed", "Generate missing chunk vectors through the server-side OpenAI client."],
       ["Store", "Persist documents, chunks, status, and vectors in PostgreSQL."],
-      ["Search", "Rank ready chunks with pgvector under the current owner ID."],
+      ["Search", "Rank accessible ready chunks with pgvector after owner/team filtering."],
       ["Answer", "Build a prompt constrained to the retrieved document context."],
       ["Cite", "Return supporting titles, chunk indexes, and matched snippets."],
       ["Audit", "Record security-relevant user and agent-tool actions."],
@@ -239,15 +241,15 @@ const en = {
     plannedOnly: "Planned only",
     roadmapEyebrow: "MVP roadmap",
     cards: [
-      ["Document management", "Upload, process, list, and delete only your own documents.", "Manage documents"],
+      ["Document management", "Upload, process, list, and delete personal documents, or upload to writable teams.", "Manage documents"],
       ["Semantic search", "Search ready chunks directly and inspect similarity-scored snippets.", "Search documents"],
       ["Grounded question answering", "Ask questions over retrieved chunks and review source citations.", "Ask questions"],
-      ["Audit log review", "Review owner-scoped records for uploads, processing, questions, and agent tool usage.", "Review audit logs"],
+      ["Audit log review", "Review your records for uploads, processing, questions, and agent tool usage.", "Review audit logs"],
       ["Organization audit", "Owners and admins can review recent activity across organization members.", "Review organization"],
       ["Team RBAC", "Owners and admins can create teams and assign existing users to organization and team roles.", "Manage teams"],
     ],
     roadmap: [
-      ["Team sharing workflows", "Add invitations and team-scoped document sharing beyond the current admin/audit foundation."],
+      ["Team invitation workflows", "Add email invitations and self-service join flows beyond current admin assignment."],
       ["Background processing", "Move long document processing and embeddings into a durable queue for larger deployments."],
     ],
   },
@@ -427,13 +429,13 @@ const en = {
       "This view shows only audit records created by the signed-in user. It helps you verify document, search, ask, and tool activity without exposing logs from other users.",
     countShown: "{count} shown",
     emptyBody:
-      "Upload a document, run a search, ask a question, or use a tool endpoint to create owner-scoped audit records.",
+      "Upload a document, run a search, ask a question, or use a tool endpoint to create your own audit records.",
     emptyTitle: "No audit events yet",
     latest: "Latest activity",
     recentEvents: "Most recent audit events",
     scopeBody:
       "The query is filtered by the current session user before any audit records are rendered.",
-    scopeTitle: "Owner-scoped visibility",
+    scopeTitle: "User-scoped visibility",
     title: "Review your account activity",
   },
   adminAudit: {
@@ -472,7 +474,7 @@ const en = {
     addMemberTitle: "Assign an existing user",
     addingMember: "Assigning...",
     body:
-      "Create teams and manage role assignments for existing users. Document access remains owner-scoped while team RBAC controls workspace administration.",
+      "Create teams and manage role assignments for existing users. Team RBAC controls workspace administration and team-scoped document access.",
     createTeamBody:
       "Create a team inside this organization. The current admin is added as that team's manager.",
     createTeamSubmit: "Create team",
@@ -537,9 +539,9 @@ const ko = {
     createAccountPending: "계정 생성 중...",
     createAccountTitle: "비공개 지식 워크스페이스 만들기",
     createAccountBody:
-      "비밀번호 계정이나 활성화된 OAuth 제공자로 시작하세요. 새 사용자는 본인 범위의 문서 라이브러리, 검색 인덱스, 답변, 감사 기록을 갖습니다.",
+      "비밀번호 계정이나 활성화된 OAuth 제공자로 시작하세요. 새 사용자는 비공개 워크스페이스를 받고, 이후 조직 관리자가 배정한 팀 문서에도 접근할 수 있습니다.",
     createAccountFormBody:
-      "자신의 문서 워크스페이스 계정을 만드세요. 배포 환경에 OAuth가 설정되면 옵션이 표시됩니다.",
+      "비공개 문서 워크스페이스 계정을 만드세요. 배포 환경에 OAuth가 설정되면 옵션이 표시됩니다.",
     emailPasswordDescription:
       "이메일과 비밀번호를 입력하세요. 이 배포에 OAuth가 설정되어 있으면 연결된 제공자로 계속할 수 있습니다.",
     forgotFormBody:
@@ -562,13 +564,14 @@ const ko = {
     newPassword: "새 비밀번호",
     oneTimeToken: "1회용 토큰",
     oneTimeTokenBody: "재설정 링크는 만료되며 해시된 토큰만 저장됩니다.",
-    ownerScopedData: "소유자 범위 데이터",
-    ownerScopedDataBody: "문서, 청크, 답변은 한 사용자 범위에 유지됩니다.",
+    ownerScopedData: "접근 범위 데이터",
+    ownerScopedDataBody:
+      "문서, 청크, 답변은 소유권 또는 팀 멤버십으로 필터링됩니다.",
     passwordAccount: "비밀번호 계정",
     passwordAccountBody: "이 흐름은 비밀번호 로그인 계정만 업데이트합니다.",
     passwordHelp: "12자 이상을 사용하세요.",
     privateByDefault: "기본 비공개",
-    privateByDefaultBody: "문서와 답변은 사용자 ID로 필터링됩니다.",
+    privateByDefaultBody: "문서와 답변은 계정 및 배정된 팀으로 필터링됩니다.",
     rememberPassword: "비밀번호가 기억나시나요?",
     resetBody:
       "재설정 링크는 한 번만 사용할 수 있고 빠르게 만료됩니다. 성공 후 새 비밀번호로 다시 로그인하세요.",
@@ -653,7 +656,7 @@ const ko = {
     currentOnly:
       "아래 단계는 현재 구현되어 있습니다. 계획 단계 항목은 위 MVP 범위에서 분리했습니다.",
     heroBody:
-      "DocuMind는 일본/한국 팀을 위한 agent-ready 내부 지식 검색 시스템입니다. 안전한 문서 수집, 소유자 범위 의미 검색, 근거 기반 답변, 에이전트가 사용할 수 있는 API endpoint를 결합합니다.",
+      "DocuMind는 일본/한국 팀을 위한 agent-ready 내부 지식 검색 시스템입니다. 안전한 문서 수집, 접근 범위 의미 검색, 근거 기반 답변, 에이전트가 사용할 수 있는 API endpoint를 결합합니다.",
     heroEyebrow: "에이전트 준비 지식 검색",
     heroLocalized:
       "일본 및 한국 팀의 내부 지식 검색을 위한 백엔드 중심 MVP입니다. 인증, 문서 처리, 의미 검색, 출처 있는 답변을 제공합니다.",
@@ -668,23 +671,23 @@ const ko = {
     previewHeading: "내부 문서 인덱스",
     previewLabel: "검색 미리보기",
     previewPlaceholder: "정책, 가이드, 프로젝트 노트 검색...",
-    previewSubtext: "소유자 범위 검색과 출처 인식 AI 응답.",
+    previewSubtext: "접근 범위 검색과 출처 인식 AI 응답.",
     startNow: "지금 시작",
     useProductEyebrow: "제품 사용",
     useProductTitle: "워크스페이스 사용자가 할 수 있는 일",
     viewImplementation: "구현 보기",
     viewImplementationAria: "GitHub 저장소의 DocuMind 구현 README 보기",
     whyAgentBody:
-      "DocuMind는 단순한 채팅 UI가 아닙니다. 사람과 향후 AI 에이전트가 인증되고 소유자 범위가 적용되며 감사 가능한 API 경계로 내부 지식에 접근하는 제어 계층입니다.",
+      "DocuMind는 단순한 채팅 UI가 아닙니다. 사람과 향후 AI 에이전트가 인증되고 접근 범위가 적용되며 감사 가능한 API 경계로 내부 지식에 접근하는 제어 계층입니다.",
     whyAgentEyebrow: "왜 agent-ready인가?",
     whyAgentLocalized:
-      "DocuMind는 사람과 향후 AI 에이전트가 인증, 소유자 범위, 감사 가능한 API 경계로 내부 지식에 접근하게 하는 제어 계층입니다.",
+      "DocuMind는 사람과 향후 AI 에이전트가 인증, 접근 범위, 감사 가능한 API 경계로 내부 지식에 접근하게 하는 제어 계층입니다.",
     whyAgentTitle: "사람과 에이전트를 위한 제어된 지식 계층",
     features: [
       ["보호된 대시보드 라우트", "서버 측 세션 검사가 보호된 대시보드 콘텐츠 렌더링 전에 미인증 방문자를 리디렉션합니다."],
       ["회원가입, OAuth, 복구", "Auth.js가 비밀번호 계정, 설정된 Google/GitHub OAuth, 1회용 비밀번호 재설정 링크를 지원합니다."],
       ["문서 관리", "인증된 사용자는 검증된 .txt, .md, .pdf 문서를 업로드, 처리, 조회, 삭제할 수 있습니다."],
-      ["소유자 범위 데이터 접근", "문서 읽기, 삭제, 청크, 검색, 도구 호출은 인증된 사용자의 owner ID로 필터링됩니다."],
+      ["접근 범위 데이터 접근", "문서 읽기, 청크, 검색, 도구 호출은 소유권 또는 팀 멤버십으로 필터링되며, 삭제는 소유자만 가능합니다."],
       ["의미 검색", "OpenAI 임베딩과 PostgreSQL pgvector가 인증된 서버 라우트와 대시보드 UI에서 관련 청크를 순위화합니다."],
       ["출처 있는 근거 기반 답변", "검색된 청크가 답변 프롬프트를 제한하고 UI는 출처 제목, 청크 인덱스, 스니펫, 점수를 반환합니다."],
       ["감사 로그와 검토", "로그인, 업로드, 처리, 삭제, 질문, 도구 action이 사용자 및 관리자 감사 기록을 만듭니다."],
@@ -696,7 +699,7 @@ const ko = {
       ["청킹", "정규화된 텍스트를 제한된 인덱스 검색 단위로 나눕니다."],
       ["임베딩", "서버 측 OpenAI client로 누락된 청크 벡터를 생성합니다."],
       ["저장", "문서, 청크, 상태, 벡터를 PostgreSQL에 저장합니다."],
-      ["검색", "현재 owner ID 범위에서 pgvector로 READY 청크를 순위화합니다."],
+      ["검색", "소유자/팀 필터를 거친 접근 가능한 READY 청크를 pgvector로 순위화합니다."],
       ["답변", "검색된 문서 맥락으로 제한된 프롬프트를 구성합니다."],
       ["인용", "근거 제목, 청크 인덱스, 일치 스니펫을 반환합니다."],
       ["감사", "보안 관련 사용자 및 도구 action을 기록합니다."],
@@ -733,15 +736,15 @@ const ko = {
     plannedOnly: "계획됨",
     roadmapEyebrow: "MVP 로드맵",
     cards: [
-      ["문서 관리", "본인 문서만 업로드, 처리, 조회, 삭제합니다.", "문서 관리"],
+      ["문서 관리", "개인 문서를 업로드, 처리, 조회, 삭제하거나 쓰기 가능한 팀에 업로드합니다.", "문서 관리"],
       ["의미 검색", "준비된 청크를 직접 검색하고 유사도 점수와 스니펫을 확인합니다.", "문서 검색"],
       ["근거 기반 질문 답변", "검색된 청크를 기반으로 질문하고 출처 인용을 검토합니다.", "질문하기"],
-      ["감사 로그 검토", "업로드, 처리, 질문, 에이전트 도구 사용 기록을 본인 범위에서 확인합니다.", "감사 로그 보기"],
+      ["감사 로그 검토", "업로드, 처리, 질문, 에이전트 도구 사용 기록을 내 활동 범위에서 확인합니다.", "감사 로그 보기"],
       ["조직 감사", "소유자와 관리자는 조직 구성원의 최근 활동을 검토할 수 있습니다.", "조직 검토"],
       ["팀 RBAC", "소유자와 관리자는 팀을 만들고 기존 사용자를 조직 및 팀 역할에 배정할 수 있습니다.", "팀 관리"],
     ],
     roadmap: [
-      ["팀 공유 워크플로", "현재 관리자/감사 기반 위에 초대와 팀 범위 문서 공유를 추가합니다."],
+      ["팀 초대 워크플로", "현재 관리자 배정 방식 위에 이메일 초대와 셀프서비스 참여 흐름을 추가합니다."],
       ["백그라운드 처리", "더 큰 배포를 위해 긴 문서 처리와 임베딩을 내구성 있는 큐로 옮깁니다."],
     ],
   },
@@ -920,13 +923,13 @@ const ko = {
       "이 화면은 로그인 사용자가 만든 감사 기록만 보여줍니다. 다른 사용자의 로그를 노출하지 않고 문서, 검색, 질문, 도구 활동을 확인할 수 있습니다.",
     countShown: "{count}개 표시",
     emptyBody:
-      "문서를 업로드하거나, 검색을 실행하거나, 질문하거나, 도구 endpoint를 사용하면 소유자 범위 감사 기록이 생성됩니다.",
+      "문서를 업로드하거나, 검색을 실행하거나, 질문하거나, 도구 endpoint를 사용하면 내 감사 기록이 생성됩니다.",
     emptyTitle: "아직 감사 이벤트가 없습니다",
     latest: "최근 활동",
     recentEvents: "가장 최근 감사 이벤트",
     scopeBody:
       "감사 기록을 렌더링하기 전에 쿼리는 현재 세션 사용자로 필터링됩니다.",
-    scopeTitle: "소유자 범위 가시성",
+    scopeTitle: "사용자 범위 가시성",
     title: "계정 활동 검토",
   },
   adminAudit: {
@@ -964,7 +967,7 @@ const ko = {
     addMemberTitle: "기존 사용자 배정",
     addingMember: "배정 중...",
     body:
-      "팀을 만들고 기존 사용자의 역할 배정을 관리합니다. 문서 접근은 소유자 범위를 유지하고, 팀 RBAC는 워크스페이스 관리를 제어합니다.",
+      "팀을 만들고 기존 사용자의 역할 배정을 관리합니다. 팀 RBAC는 워크스페이스 관리와 팀 범위 문서 접근을 함께 제어합니다.",
     createTeamBody:
       "이 조직 안에 팀을 만듭니다. 현재 관리자는 해당 팀의 매니저로 추가됩니다.",
     createTeamSubmit: "팀 생성",
@@ -1029,9 +1032,9 @@ const ja = {
     createAccountPending: "作成中...",
     createAccountTitle: "非公開ナレッジワークスペースを作成",
     createAccountBody:
-      "パスワードアカウントまたは有効なOAuthプロバイダーで開始します。新規ユーザーには所有者スコープの文書ライブラリ、検索インデックス、回答、監査ログが用意されます。",
+      "パスワードアカウントまたは有効なOAuthプロバイダーで開始します。新規ユーザーには非公開ワークスペースが用意され、後で組織管理者が割り当てたチーム文書にもアクセスできます。",
     createAccountFormBody:
-      "自分用の文書ワークスペースを作成します。OAuthはデプロイ環境で設定されると表示されます。",
+      "非公開の文書ワークスペースを作成します。OAuthはデプロイ環境で設定されると表示されます。",
     emailPasswordDescription:
       "メールとパスワードを入力してください。このデプロイでOAuthが設定されている場合は接続済みプロバイダーでも続行できます。",
     forgotFormBody:
@@ -1054,13 +1057,15 @@ const ja = {
     newPassword: "新しいパスワード",
     oneTimeToken: "1回限りのトークン",
     oneTimeTokenBody: "再設定リンクは期限切れになり、ハッシュ化されたトークンだけが保存されます。",
-    ownerScopedData: "所有者スコープのデータ",
-    ownerScopedDataBody: "文書、チャンク、回答は1ユーザーの範囲に保たれます。",
+    ownerScopedData: "アクセススコープのデータ",
+    ownerScopedDataBody:
+      "文書、チャンク、回答は所有権またはチームメンバーシップでフィルタリングされます。",
     passwordAccount: "パスワードアカウント",
     passwordAccountBody: "このフローはパスワードログインのアカウントだけを更新します。",
     passwordHelp: "12文字以上を使用してください。",
     privateByDefault: "初期状態で非公開",
-    privateByDefaultBody: "文書と回答はユーザーIDでフィルタリングされます。",
+    privateByDefaultBody:
+      "文書と回答はアカウントと割り当てられたチームでフィルタリングされます。",
     rememberPassword: "パスワードを覚えていますか？",
     resetBody:
       "再設定リンクは1回だけ使用でき、短時間で期限切れになります。成功後は新しいパスワードで再度ログインしてください。",
@@ -1145,7 +1150,7 @@ const ja = {
     currentOnly:
       "以下の手順は現在実装済みです。計画段階の項目は上のMVP範囲で分けています。",
     heroBody:
-      "DocuMindは日本・韓国チーム向けのagent-readyな社内ナレッジ検索システムです。安全な文書取り込み、所有者スコープのセマンティック検索、根拠付き回答、エージェントが利用できるAPI endpointを組み合わせています。",
+      "DocuMindは日本・韓国チーム向けのagent-readyな社内ナレッジ検索システムです。安全な文書取り込み、アクセススコープのセマンティック検索、根拠付き回答、エージェントが利用できるAPI endpointを組み合わせています。",
     heroEyebrow: "エージェント対応ナレッジ検索",
     heroLocalized:
       "日本・韓国チームの社内ナレッジ検索に向けたバックエンド重視のMVPです。認証、文書処理、セマンティック検索、出典付き回答を提供します。",
@@ -1160,23 +1165,23 @@ const ja = {
     previewHeading: "社内文書インデックス",
     previewLabel: "検索プレビュー",
     previewPlaceholder: "ポリシー、ガイド、プロジェクトノートを検索...",
-    previewSubtext: "所有者スコープ検索と出典を意識したAI回答。",
+    previewSubtext: "アクセススコープ検索と出典を意識したAI回答。",
     startNow: "今すぐ開始",
     useProductEyebrow: "製品を使う",
     useProductTitle: "ワークスペースユーザーができること",
     viewImplementation: "実装を見る",
     viewImplementationAria: "GitHubリポジトリのDocuMind実装READMEを見る",
     whyAgentBody:
-      "DocuMindは単なるチャットUIではありません。人と将来のAIエージェントが、認証済み・所有者スコープ・監査可能なAPI境界を通じて社内ナレッジにアクセスするための制御レイヤーです。",
+      "DocuMindは単なるチャットUIではありません。人と将来のAIエージェントが、認証済み・アクセススコープ・監査可能なAPI境界を通じて社内ナレッジにアクセスするための制御レイヤーです。",
     whyAgentEyebrow: "なぜagent-readyか",
     whyAgentLocalized:
-      "DocuMindは、人と将来のAIエージェントが認証済み・所有者スコープ・監査可能なAPI境界で社内ナレッジにアクセスする制御レイヤーです。",
+      "DocuMindは、人と将来のAIエージェントが認証済み・アクセススコープ・監査可能なAPI境界で社内ナレッジにアクセスする制御レイヤーです。",
     whyAgentTitle: "人とエージェントのための制御されたナレッジレイヤー",
     features: [
       ["保護されたダッシュボードルート", "サーバー側セッションチェックにより、保護コンテンツの表示前に未認証訪問者をリダイレクトします。"],
       ["登録、OAuth、復旧", "Auth.jsがパスワードアカウント、設定済みGoogle/GitHub OAuth、1回限りのパスワード再設定リンクをサポートします。"],
       ["文書管理", "認証済みユーザーは検証済みの.txt、.md、.pdf文書をアップロード、処理、一覧、削除できます。"],
-      ["所有者スコープのデータアクセス", "文書読み取り、削除、チャンク、検索、ツール呼び出しは認証ユーザーのowner IDでフィルタリングされます。"],
+      ["アクセススコープのデータアクセス", "文書読み取り、チャンク、検索、ツール呼び出しは所有権またはチームメンバーシップでフィルタリングされ、削除は所有者だけが可能です。"],
       ["セマンティック検索", "OpenAI埋め込みとPostgreSQL pgvectorが認証済みサーバールートと検索UIで関連チャンクをランク付けします。"],
       ["引用付きの根拠回答", "取得チャンクが回答プロンプトを制限し、UIは出典タイトル、チャンク番号、スニペット、スコアを返します。"],
       ["監査ログとレビュー", "ログイン、アップロード、処理、削除、質問、ツールactionがユーザーと管理者向け監査記録を作成します。"],
@@ -1188,7 +1193,7 @@ const ja = {
       ["分割", "正規化テキストを制限されたインデックス付き検索単位に分けます。"],
       ["埋め込み", "サーバー側OpenAI clientで不足しているチャンクベクトルを生成します。"],
       ["保存", "文書、チャンク、状態、ベクトルをPostgreSQLに保存します。"],
-      ["検索", "現在のowner ID範囲でREADYチャンクをpgvectorでランク付けします。"],
+      ["検索", "所有者/チームフィルター後のアクセス可能なREADYチャンクをpgvectorでランク付けします。"],
       ["回答", "取得した文書コンテキストに制限したプロンプトを作成します。"],
       ["引用", "根拠タイトル、チャンク番号、一致スニペットを返します。"],
       ["監査", "セキュリティ関連のユーザーとツールactionを記録します。"],
@@ -1225,15 +1230,15 @@ const ja = {
     plannedOnly: "計画中",
     roadmapEyebrow: "MVPロードマップ",
     cards: [
-      ["文書管理", "自分の文書だけをアップロード、処理、一覧、削除します。", "文書を管理"],
+      ["文書管理", "個人文書をアップロード、処理、一覧、削除し、書き込み可能なチームにもアップロードできます。", "文書を管理"],
       ["セマンティック検索", "準備済みチャンクを直接検索し、類似度スコア付きスニペットを確認します。", "文書を検索"],
       ["根拠付き質問応答", "取得チャンクに対して質問し、出典引用を確認します。", "質問する"],
-      ["監査ログ確認", "アップロード、処理、質問、エージェントツール利用の記録を所有者スコープで確認します。", "監査ログを見る"],
+      ["監査ログ確認", "アップロード、処理、質問、エージェントツール利用の記録を自分の活動範囲で確認します。", "監査ログを見る"],
       ["組織監査", "オーナーと管理者は組織メンバーの最近の活動を確認できます。", "組織を確認"],
       ["チームRBAC", "オーナーと管理者はチームを作成し、既存ユーザーを組織ロールとチームロールに割り当てられます。", "チームを管理"],
     ],
     roadmap: [
-      ["チーム共有ワークフロー", "現在の管理者/監査基盤の上に、招待とチームスコープ文書共有を追加します。"],
+      ["チーム招待ワークフロー", "現在の管理者割り当て方式に加えて、メール招待とセルフサービス参加フローを追加します。"],
       ["バックグラウンド処理", "大規模デプロイ向けに長い文書処理と埋め込みを耐久性のあるキューへ移します。"],
     ],
   },
@@ -1412,13 +1417,13 @@ const ja = {
       "このビューはログインユーザーが作成した監査記録のみを表示します。他ユーザーのログを公開せずに、文書、検索、質問、ツール活動を確認できます。",
     countShown: "{count}件表示",
     emptyBody:
-      "文書アップロード、検索、質問、またはツールendpointの利用で所有者スコープの監査記録が作成されます。",
+      "文書アップロード、検索、質問、またはツールendpointの利用で自分の監査記録が作成されます。",
     emptyTitle: "まだ監査イベントはありません",
     latest: "最新アクティビティ",
     recentEvents: "直近の監査イベント",
     scopeBody:
       "監査記録を表示する前に、クエリは現在のセッションユーザーでフィルタリングされます。",
-    scopeTitle: "所有者スコープの可視性",
+    scopeTitle: "ユーザースコープの可視性",
     title: "アカウント活動を確認",
   },
   adminAudit: {
@@ -1456,7 +1461,7 @@ const ja = {
     addMemberTitle: "既存ユーザーを割り当て",
     addingMember: "割り当て中...",
     body:
-      "チームを作成し、既存ユーザーのロール割り当てを管理します。文書アクセスは所有者スコープのまま、チームRBACはワークスペース管理を制御します。",
+      "チームを作成し、既存ユーザーのロール割り当てを管理します。チームRBACはワークスペース管理とチームスコープ文書アクセスの両方を制御します。",
     createTeamBody:
       "この組織内にチームを作成します。現在の管理者はそのチームのマネージャーとして追加されます。",
     createTeamSubmit: "チームを作成",

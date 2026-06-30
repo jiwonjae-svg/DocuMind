@@ -99,7 +99,7 @@ export function jsonRpcError({
 export const mcpTools = [
   {
     description:
-      "Search the signed-in user's ready DocuMind document chunks with semantic retrieval.",
+      "Search ready DocuMind document chunks the signed-in user can access through ownership or team membership.",
     inputSchema: {
       additionalProperties: false,
       properties: {
@@ -122,7 +122,7 @@ export const mcpTools = [
   },
   {
     description:
-      "Ask a grounded question over the signed-in user's ready DocuMind documents and return citations.",
+      "Ask a grounded question over ready DocuMind documents the signed-in user can access and return citations.",
     inputSchema: {
       additionalProperties: false,
       properties: {
@@ -139,7 +139,7 @@ export const mcpTools = [
   },
   {
     description:
-      "Summarize one signed-in user-owned READY document from bounded stored chunks.",
+      "Summarize one READY document the signed-in user can access from bounded stored chunks.",
     inputSchema: {
       additionalProperties: false,
       properties: {
