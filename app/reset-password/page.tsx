@@ -85,8 +85,10 @@ export default async function ResetPasswordPage({
                 copy={{
                   apiErrors: copy.apiErrors,
                   error: copy.auth.resetError,
+                  hidePassword: copy.auth.hidePassword,
                   newPassword: copy.auth.newPassword,
                   passwordHelp: copy.auth.passwordHelp,
+                  showPassword: copy.auth.showPassword,
                   signIn: copy.common.login,
                   submit: copy.common.resetPassword,
                   submitting: copy.auth.resetPending,

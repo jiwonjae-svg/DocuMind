@@ -19,7 +19,8 @@ export type IconName =
   | "team"
   | "trash"
   | "upload"
-  | "view";
+  | "view"
+  | "viewOff";
 
 export const accentClasses: Record<
   "blue" | "emerald" | "violet" | "amber" | "red",
@@ -264,6 +265,15 @@ export function Icon({
         <svg {...common}>
           <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
           <circle cx="12" cy="12" r="2.5" />
+        </svg>
+      );
+    case "viewOff":
+      return (
+        <svg {...common}>
+          <path d="M3 3l18 18" />
+          <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+          <path d="M9.9 5.2A9.8 9.8 0 0 1 12 5c6 0 9.5 7 9.5 7a16.2 16.2 0 0 1-2.2 3.1" />
+          <path d="M6.4 6.5C3.9 8.2 2.5 12 2.5 12s3.5 7 9.5 7a9.5 9.5 0 0 0 4-.9" />
         </svg>
       );
   }

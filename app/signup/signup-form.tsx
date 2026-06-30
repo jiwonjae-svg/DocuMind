@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordField } from "@/components/auth/password-field";
 import { Icon, ui } from "@/components/ui";
 import { lookupApiError } from "@/lib/i18n/dictionaries";
 import { signIn } from "next-auth/react";
@@ -13,9 +14,11 @@ type SignupFormProps = {
     createAccountPending: string;
     apiErrors: Record<string, string>;
     email: string;
+    hidePassword: string;
     name: string;
     password: string;
     passwordHelp: string;
+    showPassword: string;
     signInExistingAccount: string;
     signupError: string;
   };
@@ -76,7 +79,12 @@ export function SignupForm({ callbackUrl, copy }: SignupFormProps) {
   }
 
   return (
-    <form method="post" onSubmit={handleSubmit} className="mt-7 space-y-5">
+    <form
+      method="post"
+      onSubmit={handleSubmit}
+      aria-busy={isSubmitting}
+      className="mt-7 space-y-5"
+    >
       <div>
         <label htmlFor="name" className={ui.label}>
           {copy.name}
@@ -103,25 +111,19 @@ export function SignupForm({ callbackUrl, copy }: SignupFormProps) {
           className={`mt-2 ${ui.input}`}
         />
       </div>
-      <div>
-        <label htmlFor="password" className={ui.label}>
-          {copy.password}
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          minLength={12}
-          required
-          className={`mt-2 ${ui.input}`}
-        />
-        <p className="mt-2 text-xs leading-5 text-slate-500">
-          {copy.passwordHelp}
-        </p>
-      </div>
+      <PasswordField
+        autoComplete="new-password"
+        help={copy.passwordHelp}
+        hideLabel={copy.hidePassword}
+        label={copy.password}
+        minLength={12}
+        showLabel={copy.showPassword}
+      />
       {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+        >
           {error}
         </p>
       ) : null}

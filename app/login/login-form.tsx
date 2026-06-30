@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordField } from "@/components/auth/password-field";
 import { Icon, ui } from "@/components/ui";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -12,7 +13,9 @@ type LoginFormProps = {
     email: string;
     error: string;
     forgotPassword: string;
+    hidePassword: string;
     password: string;
+    showPassword: string;
     submit: string;
     submitting: string;
   };
@@ -40,7 +43,7 @@ export function LoginForm({ callbackUrl, copy }: LoginFormProps) {
 
     setIsSubmitting(false);
 
-      if (!result || result.error) {
+    if (!result || result.error) {
       setError(copy.error);
       return;
     }
@@ -50,7 +53,12 @@ export function LoginForm({ callbackUrl, copy }: LoginFormProps) {
   }
 
   return (
-    <form method="post" onSubmit={handleSubmit} className="mt-7 space-y-5">
+    <form
+      method="post"
+      onSubmit={handleSubmit}
+      aria-busy={isSubmitting}
+      className="mt-7 space-y-5"
+    >
       <div>
         <label
           htmlFor="email"
@@ -67,32 +75,25 @@ export function LoginForm({ callbackUrl, copy }: LoginFormProps) {
           className={`mt-2 ${ui.input}`}
         />
       </div>
-      <div>
-        <div className="flex items-center justify-between gap-3">
-          <label
-            htmlFor="password"
-            className={ui.label}
-          >
-            {copy.password}
-          </label>
-          <Link
-            href="/forgot-password"
-            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
-          >
-            {copy.forgotPassword}
-          </Link>
-        </div>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className={`mt-2 ${ui.input}`}
-        />
+      <PasswordField
+        autoComplete="current-password"
+        hideLabel={copy.hidePassword}
+        label={copy.password}
+        showLabel={copy.showPassword}
+      />
+      <div className="-mt-2 text-right">
+        <Link
+          href="/forgot-password"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+        >
+          {copy.forgotPassword}
+        </Link>
       </div>
       {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+        >
           {error}
         </p>
       ) : null}

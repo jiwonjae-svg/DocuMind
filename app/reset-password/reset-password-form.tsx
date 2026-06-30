@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordField } from "@/components/auth/password-field";
 import { Icon, ui } from "@/components/ui";
 import { lookupApiError } from "@/lib/i18n/dictionaries";
 import Link from "next/link";
@@ -9,8 +10,10 @@ type ResetPasswordFormProps = {
   copy: {
     apiErrors: Record<string, string>;
     error: string;
+    hidePassword: string;
     newPassword: string;
     passwordHelp: string;
+    showPassword: string;
     signIn: string;
     submit: string;
     submitting: string;
@@ -63,31 +66,33 @@ export function ResetPasswordForm({ copy, token }: ResetPasswordFormProps) {
   }
 
   return (
-    <form method="post" onSubmit={handleSubmit} className="mt-7 space-y-5">
-      <div>
-        <label htmlFor="password" className={ui.label}>
-          {copy.newPassword}
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          minLength={12}
-          required
-          className={`mt-2 ${ui.input}`}
-        />
-        <p className="mt-2 text-xs leading-5 text-slate-500">
-          {copy.passwordHelp}
-        </p>
-      </div>
+    <form
+      method="post"
+      onSubmit={handleSubmit}
+      aria-busy={isSubmitting}
+      className="mt-7 space-y-5"
+    >
+      <PasswordField
+        autoComplete="new-password"
+        help={copy.passwordHelp}
+        hideLabel={copy.hidePassword}
+        label={copy.newPassword}
+        minLength={12}
+        showLabel={copy.showPassword}
+      />
       {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+        >
           {error}
         </p>
       ) : null}
       {message ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
+        <div
+          role="status"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800"
+        >
           <p className="font-semibold">{message}</p>
           <Link
             href="/login"

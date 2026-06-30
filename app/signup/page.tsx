@@ -101,9 +101,11 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 createAccountPending: copy.auth.createAccountPending,
                 apiErrors: copy.apiErrors,
                 email: copy.common.email,
+                hidePassword: copy.auth.hidePassword,
                 name: copy.common.name,
                 password: copy.common.password,
                 passwordHelp: copy.auth.passwordHelp,
+                showPassword: copy.auth.showPassword,
                 signInExistingAccount: copy.auth.signInExistingAccount,
                 signupError: copy.auth.signupError,
               }}

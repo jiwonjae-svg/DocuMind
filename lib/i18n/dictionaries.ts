@@ -101,6 +101,7 @@ const en = {
     forgotSuccess:
       "If an account exists, password reset instructions have been sent.",
     forgotError: "Unable to request a password reset.",
+    hidePassword: "Hide password",
     localResetLink: "Open local reset link",
     loginTitle: "Sign in to a secure knowledge workspace",
     loginBody:
@@ -136,6 +137,7 @@ const en = {
     serverSideUpdateBody: "The new password is hashed before it is stored.",
     signInExistingAccount: "If this account exists, sign in with its current password.",
     signupError: "Unable to create the account.",
+    showPassword: "Show password",
   },
   oauth: {
     continueWith: "Continue with {provider}",
@@ -499,6 +501,7 @@ const ko = {
     forgotSubmitPending: "안내 전송 중...",
     forgotSuccess: "계정이 존재하면 비밀번호 재설정 안내를 보냈습니다.",
     forgotError: "비밀번호 재설정을 요청할 수 없습니다.",
+    hidePassword: "비밀번호 숨기기",
     localResetLink: "로컬 재설정 링크 열기",
     loginTitle: "보안 지식 워크스페이스에 로그인",
     loginBody:
@@ -534,6 +537,7 @@ const ko = {
     serverSideUpdateBody: "새 비밀번호는 저장 전에 해시됩니다.",
     signInExistingAccount: "이 계정이 존재한다면 현재 비밀번호로 로그인하세요.",
     signupError: "계정을 만들 수 없습니다.",
+    showPassword: "비밀번호 표시",
   },
   apiErrors: {
     ...en.apiErrors,
@@ -940,6 +944,7 @@ const ja = {
     forgotSubmitPending: "送信中...",
     forgotSuccess: "アカウントが存在する場合、パスワード再設定手順を送信しました。",
     forgotError: "パスワード再設定をリクエストできません。",
+    hidePassword: "パスワードを隠す",
     localResetLink: "ローカル再設定リンクを開く",
     loginTitle: "安全なナレッジワークスペースにログイン",
     loginBody:
@@ -975,6 +980,7 @@ const ja = {
     serverSideUpdateBody: "新しいパスワードは保存前にハッシュ化されます。",
     signInExistingAccount: "このアカウントが存在する場合は現在のパスワードでログインしてください。",
     signupError: "アカウントを作成できません。",
+    showPassword: "パスワードを表示",
   },
   apiErrors: {
     ...en.apiErrors,

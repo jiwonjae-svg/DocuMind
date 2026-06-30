@@ -62,7 +62,12 @@ export function ForgotPasswordForm({
   }
 
   return (
-    <form method="post" onSubmit={handleSubmit} className="mt-7 space-y-5">
+    <form
+      method="post"
+      onSubmit={handleSubmit}
+      aria-busy={isSubmitting}
+      className="mt-7 space-y-5"
+    >
       <div>
         <label htmlFor="email" className={ui.label}>
           {copy.email}
@@ -77,12 +82,18 @@ export function ForgotPasswordForm({
         />
       </div>
       {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+        >
           {error}
         </p>
       ) : null}
       {message ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
+        <div
+          role="status"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800"
+        >
           <p className="font-semibold">{message}</p>
           {resetUrl ? (
             <Link

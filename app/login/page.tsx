@@ -100,7 +100,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 email: copy.common.email,
                 error: copy.auth.loginError,
                 forgotPassword: copy.common.forgotPassword,
+                hidePassword: copy.auth.hidePassword,
                 password: copy.common.password,
+                showPassword: copy.auth.showPassword,
                 submit: copy.common.login,
                 submitting: copy.auth.loginPending,
               }}

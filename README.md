@@ -41,6 +41,7 @@ DocuMind is a practical MVP rather than a throwaway demo. The distinction below 
 ### Implemented
 
 - Auth.js email/password signup, credentials sign-in, password reset, optional Google/GitHub OAuth sign-in, and protected dashboard routes.
+- Auth forms include localized password visibility controls, live status/error regions, and disabled submit states for a more production-like account flow.
 - OAuth sign-ins create or link a local Prisma user only after provider email verification; existing password accounts are not auto-linked, including a transaction-time recheck before linking.
 - OAuth provider account IDs are bounded and reject control/format characters before lookup or linking.
 - Auth.js redirect callbacks are bounded and constrained to the landing page, login/signup pages, and dashboard paths.
