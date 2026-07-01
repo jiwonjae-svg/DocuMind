@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   I18N_LOCALE_HEADER,
+  I18N_PATHNAME_HEADER,
+  I18N_SEARCH_HEADER,
   getLocaleCookieName,
   getLocaleCookieOptions,
   readLocalePrefixedPath,
@@ -8,15 +10,23 @@ import {
 
 export function proxy(request: NextRequest) {
   const localePath = readLocalePrefixedPath(request.nextUrl.pathname);
+  const headers = new Headers(request.headers);
+  headers.set(
+    I18N_PATHNAME_HEADER,
+    localePath?.pathname ?? request.nextUrl.pathname,
+  );
+  headers.set(I18N_SEARCH_HEADER, request.nextUrl.search);
 
   if (!localePath) {
-    return NextResponse.next();
+    return NextResponse.next({
+      request: {
+        headers,
+      },
+    });
   }
 
   const rewrittenUrl = request.nextUrl.clone();
   rewrittenUrl.pathname = localePath.pathname;
-
-  const headers = new Headers(request.headers);
   headers.set(I18N_LOCALE_HEADER, localePath.locale);
 
   const response = NextResponse.rewrite(rewrittenUrl, {

@@ -5,6 +5,8 @@ import {
 } from "./config";
 
 export const I18N_LOCALE_HEADER = "x-documind-locale";
+export const I18N_PATHNAME_HEADER = "x-documind-pathname";
+export const I18N_SEARCH_HEADER = "x-documind-search";
 
 type LocalePathMatch = {
   locale: SupportedLocale;

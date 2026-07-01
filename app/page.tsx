@@ -3,12 +3,6 @@ import { AppHeader, Icon, IconTile, ui } from "@/components/ui";
 import { getCurrentI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 
-const previewResultMeta = [
-  { icon: "document", accent: "blue" },
-  { icon: "chart", accent: "emerald" },
-  { icon: "shield", accent: "violet" },
-] as const;
-
 const implementedFeatureMeta = [
   { icon: "lock", accent: "blue" },
   { icon: "team", accent: "emerald" },
@@ -18,6 +12,12 @@ const implementedFeatureMeta = [
   { icon: "question", accent: "violet" },
   { icon: "check", accent: "blue" },
   { icon: "network", accent: "emerald" },
+] as const;
+
+const workspaceActionMeta = [
+  { href: "/dashboard/documents", icon: "document", accent: "blue" },
+  { href: "/dashboard/search", icon: "search", accent: "emerald" },
+  { href: "/dashboard/ask", icon: "question", accent: "violet" },
 ] as const;
 
 const repositoryUrl = "https://github.com/jiwonjae-svg/DocuMind";
@@ -96,54 +96,44 @@ export default async function Home() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  {copy.home.previewLabel}
+                  {copy.home.workspaceActionsLabel}
                 </p>
                 <h2 className="mt-2 text-lg font-semibold text-[#080f2f]">
-                  {copy.home.previewHeading}
+                  {copy.home.workspaceActionsTitle}
                 </h2>
+                <p className="mt-3 max-w-lg text-sm leading-6 text-slate-600">
+                  {copy.home.workspaceActionsBody}
+                </p>
               </div>
               <span className="rounded-md bg-emerald-100 px-3 py-2 text-sm font-semibold text-emerald-700">
                 {copy.home.mvp}
               </span>
             </div>
 
-            <div className="mt-8 flex h-14 items-center gap-4 rounded-lg border border-slate-300 bg-white px-5 text-slate-500 shadow-sm">
-              <Icon name="search" className="h-5 w-5 shrink-0 text-slate-600" />
-              <p className="min-w-0 flex-1 truncate text-base">
-                {copy.home.previewPlaceholder}
-              </p>
-              <Icon
-                name="settings"
-                className="h-5 w-5 shrink-0 text-slate-600"
-              />
-            </div>
-
-            <div className="mt-6 divide-y divide-slate-200 border-t border-slate-200">
-              {copy.home.previewResults.map(([title, updatedAt], index) => {
-                const result = previewResultMeta[index];
+            <div className="mt-8 divide-y divide-slate-200 border-y border-slate-200">
+              {copy.home.workspaceActions.map(([title, body, action], index) => {
+                const item = workspaceActionMeta[index];
 
                 return (
-                  <div
+                  <Link
                     key={title}
-                    className="grid grid-cols-[64px_1fr_auto_auto] items-center gap-4 py-6 max-sm:grid-cols-[56px_1fr] max-sm:gap-y-2"
+                    href={item.href}
+                    className="grid grid-cols-[64px_1fr_auto] items-center gap-4 py-6 transition hover:bg-slate-50/80 max-sm:grid-cols-[56px_1fr] max-sm:gap-y-2"
                   >
-                    <IconTile accent={result.accent} icon={result.icon} />
+                    <IconTile accent={item.accent} icon={item.icon} />
                     <div className="min-w-0">
                       <h3 className="truncate text-base font-semibold text-[#0b1535]">
                         {title}
                       </h3>
-                      <p className="mt-1 truncate text-sm text-slate-600">
-                        {copy.home.previewSubtext}
+                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                        {body}
                       </p>
                     </div>
-                    <p className="text-sm font-medium text-slate-500 max-sm:col-start-2">
-                      {updatedAt}
-                    </p>
-                    <Icon
-                      name="arrow"
-                      className="h-5 w-5 text-slate-600 max-sm:hidden"
-                    />
-                  </div>
+                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 max-sm:col-start-2">
+                      {action}
+                      <Icon name="arrow" className="h-4 w-4" />
+                    </span>
+                  </Link>
                 );
               })}
             </div>
@@ -214,9 +204,6 @@ export default async function Home() {
         <div className={`${ui.container} py-12 sm:py-14`}>
           <div className="max-w-3xl">
             <p className={ui.eyebrow}>{copy.home.architectureEyebrow}</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[#080f2f]">
-              {copy.home.architectureTitle}
-            </h2>
             <p className="mt-4 text-sm leading-6 text-slate-600">
               {copy.home.architectureBody}
             </p>

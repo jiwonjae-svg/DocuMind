@@ -3,6 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   I18N_LOCALE_HEADER,
+  I18N_PATHNAME_HEADER,
+  I18N_SEARCH_HEADER,
   buildLocalePrefixedPath,
   getLocaleCookieName,
   getLocaleCookieOptions,
@@ -47,6 +49,8 @@ describe("i18n locale-prefixed routing", () => {
 
   it("shares stable locale cookie settings between proxy and API route", () => {
     expect(I18N_LOCALE_HEADER).toBe("x-documind-locale");
+    expect(I18N_PATHNAME_HEADER).toBe("x-documind-pathname");
+    expect(I18N_SEARCH_HEADER).toBe("x-documind-search");
     expect(getLocaleCookieName()).toBe("documind_locale");
     expect(getLocaleCookieOptions()).toEqual({
       maxAge: 60 * 60 * 24 * 365,
@@ -62,12 +66,20 @@ describe("i18n locale-prefixed routing", () => {
     const switcherSource = readSource("components/language-switcher.tsx");
 
     expect(proxySource).toContain("readLocalePrefixedPath");
+    expect(proxySource).toContain("I18N_PATHNAME_HEADER");
+    expect(proxySource).toContain("I18N_SEARCH_HEADER");
     expect(proxySource).toContain("NextResponse.rewrite");
     expect(proxySource).toContain("headers.set(I18N_LOCALE_HEADER");
     expect(proxySource).toContain("response.cookies.set");
     expect(proxySource).toContain("api|_next/static|_next/image");
     expect(serverSource).toContain("headerStore.get(I18N_LOCALE_HEADER)");
     expect(switcherSource).toContain("buildLocalePrefixedPath");
-    expect(switcherSource).toContain("window.location.assign");
+    expect(switcherSource).toContain("I18N_PATHNAME_HEADER");
+    expect(switcherSource).toContain("I18N_SEARCH_HEADER");
+    expect(switcherSource).toContain("<a");
+    expect(switcherSource).toContain("w-12");
+    expect(switcherSource).not.toContain("window.location.assign");
+    expect(switcherSource).not.toContain("fetch(\"/api/locale\"");
+    expect(switcherSource).not.toContain("next/link");
   });
 });

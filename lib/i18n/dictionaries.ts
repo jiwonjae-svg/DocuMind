@@ -211,8 +211,7 @@ const en = {
     architectureBody:
       "Authorization stays in the backend before documents are processed, embedded, searched, summarized, or used for answers.",
     architectureEyebrow: "Architecture",
-    architectureTitle:
-      "Upload -> Parse -> Chunk -> Embed -> Store -> Search -> Answer -> Cite -> Audit",
+    architectureTitle: "Backend retrieval flow",
     builtWith:
       "Built with Next.js, TypeScript, PostgreSQL, Prisma, pgvector, Auth.js, OpenAI API, and Vercel.",
     builtWithAlt: "Next.js / TypeScript / PostgreSQL / pgvector / OpenAI API.",
@@ -232,10 +231,6 @@ const en = {
     plannedBody: "These items are planned for production hardening and are not implemented yet.",
     plannedEyebrow: "Future / Planned only",
     plannedTitle: "Intentionally outside the current MVP",
-    previewHeading: "Internal document index",
-    previewLabel: "Search preview",
-    previewPlaceholder: "Search policies, guides, and project notes...",
-    previewSubtext: "Access-scoped retrieval with source-aware AI responses.",
     productStepsLabel: "DocuMind workflow steps",
     startNow: "Start now",
     useProductEyebrow: "Use the product",
@@ -248,6 +243,10 @@ const en = {
     whyAgentLocalized:
       "DocuMind is a controlled layer for humans and future AI agents to access internal knowledge through authenticated, access-scoped, auditable API boundaries.",
     whyAgentTitle: "A controlled knowledge layer for humans and agents",
+    workspaceActionsBody:
+      "Open the actual authenticated workspace surfaces. If you are not signed in, DocuMind redirects you to login first.",
+    workspaceActionsLabel: "Workspace",
+    workspaceActionsTitle: "Use DocuMind",
     features: [
       ["Protected dashboard routes", "Server-side session checks redirect unauthenticated visitors before protected dashboard content is rendered."],
       ["Signup, OAuth, and recovery", "Auth.js supports password accounts, configured Google or GitHub OAuth providers, and one-time password reset links."],
@@ -275,10 +274,10 @@ const en = {
       "Richer MCP streaming/session transport",
       "Production-grade distributed rate limiting",
     ],
-    previewResults: [
-      ["Japan onboarding checklist", "Updated 2d ago"],
-      ["Korea sales enablement brief", "Updated 5d ago"],
-      ["Security policy for internal docs", "Updated 1w ago"],
+    workspaceActions: [
+      ["Manage documents", "Upload, process, list, download, and delete documents you own or can write to a team.", "Open"],
+      ["Search documents", "Run semantic search over accessible READY chunks and inspect snippets and scores.", "Search"],
+      ["Ask with citations", "Ask grounded questions and review returned citations from retrieved chunks.", "Ask"],
     ],
     productSteps: [
       "Create an account with email/password or continue with a configured OAuth provider.",
@@ -478,7 +477,7 @@ const en = {
       "Enter a natural-language query to retrieve the most relevant chunks from READY documents you can access. OpenAI calls stay inside the server route.",
     previewBody:
       "Results include document title, chunk index, snippet, and a similarity score for fast validation.",
-    previewTitle: "Retrieval preview",
+    previewTitle: "Retrieval readiness",
     title: "Search accessible ready document chunks",
   },
   searchForm: {
@@ -966,7 +965,7 @@ const ko = {
     architectureBody:
       "문서가 처리, 임베딩, 검색, 요약, 답변에 사용되기 전에 백엔드에서 권한을 확인합니다.",
     architectureEyebrow: "아키텍처",
-    architectureTitle: "업로드 -> 파싱 -> 청킹 -> 임베딩 -> 저장 -> 검색 -> 답변 -> 인용 -> 감사",
+    architectureTitle: "백엔드 검색 흐름",
     builtWith:
       "Next.js, TypeScript, PostgreSQL, Prisma, pgvector, Auth.js, OpenAI API, Vercel로 구축했습니다.",
     currentOnly:
@@ -984,10 +983,6 @@ const ko = {
     plannedBody: "이 항목들은 운영 강화를 위한 계획이며 아직 구현되지 않았습니다.",
     plannedEyebrow: "향후 / 계획",
     plannedTitle: "현재 MVP 밖의 범위",
-    previewHeading: "내부 문서 인덱스",
-    previewLabel: "검색 미리보기",
-    previewPlaceholder: "정책, 가이드, 프로젝트 노트 검색...",
-    previewSubtext: "접근 범위 검색과 출처 인식 AI 응답.",
     startNow: "지금 시작",
     useProductEyebrow: "제품 사용",
     useProductTitle: "워크스페이스 사용자가 할 수 있는 일",
@@ -999,6 +994,10 @@ const ko = {
     whyAgentLocalized:
       "DocuMind는 사람과 향후 AI 에이전트가 인증, 접근 범위, 감사 가능한 API 경계로 내부 지식에 접근하게 하는 제어 계층입니다.",
     whyAgentTitle: "사람과 에이전트를 위한 제어된 지식 계층",
+    workspaceActionsBody:
+      "실제 인증된 워크스페이스 화면으로 이동합니다. 로그인하지 않은 사용자는 먼저 로그인 화면으로 이동합니다.",
+    workspaceActionsLabel: "워크스페이스",
+    workspaceActionsTitle: "DocuMind 사용",
     features: [
       ["보호된 대시보드 라우트", "서버 측 세션 검사가 보호된 대시보드 콘텐츠 렌더링 전에 미인증 방문자를 리디렉션합니다."],
       ["회원가입, OAuth, 복구", "Auth.js가 비밀번호 계정, 설정된 Google/GitHub OAuth, 1회용 비밀번호 재설정 링크를 지원합니다."],
@@ -1026,10 +1025,10 @@ const ko = {
       "더 풍부한 MCP 스트리밍/세션 전송",
       "운영 등급 분산 rate limiting",
     ],
-    previewResults: [
-      ["일본 온보딩 체크리스트", "2일 전 업데이트"],
-      ["한국 영업 지원 브리프", "5일 전 업데이트"],
-      ["내부 문서 보안 정책", "1주 전 업데이트"],
+    workspaceActions: [
+      ["문서 관리", "소유하거나 팀에 쓸 수 있는 문서를 업로드, 처리, 조회, 다운로드, 삭제합니다.", "열기"],
+      ["문서 검색", "접근 가능한 READY 청크를 의미 검색하고 스니펫과 점수를 확인합니다.", "검색"],
+      ["인용으로 질문", "검색된 청크를 기반으로 질문하고 반환된 인용을 검토합니다.", "질문"],
     ],
     productSteps: [
       "이메일/비밀번호로 계정을 만들거나 설정된 OAuth 제공자로 계속합니다.",
@@ -1230,7 +1229,7 @@ const ko = {
       "자연어 쿼리를 입력하면 접근 가능한 READY 문서에서 가장 관련 높은 청크를 검색합니다. OpenAI 호출은 서버 라우트 안에서만 실행됩니다.",
     previewBody:
       "결과에는 빠른 검토를 위한 문서 제목, 청크 번호, 스니펫, 유사도 점수가 포함됩니다.",
-    previewTitle: "검색 미리보기",
+    previewTitle: "검색 준비 상태",
     title: "접근 가능한 준비된 문서 청크 검색",
   },
   searchForm: {
@@ -1721,7 +1720,7 @@ const ja = {
     architectureBody:
       "文書が処理、埋め込み、検索、要約、回答に使われる前に、バックエンドで認可を確認します。",
     architectureEyebrow: "アーキテクチャ",
-    architectureTitle: "アップロード -> 解析 -> 分割 -> 埋め込み -> 保存 -> 検索 -> 回答 -> 引用 -> 監査",
+    architectureTitle: "バックエンド検索フロー",
     builtWith:
       "Next.js、TypeScript、PostgreSQL、Prisma、pgvector、Auth.js、OpenAI API、Vercelで構築。",
     currentOnly:
@@ -1739,10 +1738,6 @@ const ja = {
     plannedBody: "これらは本番強化のための計画項目で、まだ実装されていません。",
     plannedEyebrow: "今後 / 計画",
     plannedTitle: "現在のMVP範囲外",
-    previewHeading: "社内文書インデックス",
-    previewLabel: "検索プレビュー",
-    previewPlaceholder: "ポリシー、ガイド、プロジェクトノートを検索...",
-    previewSubtext: "アクセススコープ検索と出典を意識したAI回答。",
     startNow: "今すぐ開始",
     useProductEyebrow: "製品を使う",
     useProductTitle: "ワークスペースユーザーができること",
@@ -1754,6 +1749,10 @@ const ja = {
     whyAgentLocalized:
       "DocuMindは、人と将来のAIエージェントが認証済み・アクセススコープ・監査可能なAPI境界で社内ナレッジにアクセスする制御レイヤーです。",
     whyAgentTitle: "人とエージェントのための制御されたナレッジレイヤー",
+    workspaceActionsBody:
+      "実際の認証済みワークスペース画面へ移動します。未ログインの場合は先にログイン画面へリダイレクトされます。",
+    workspaceActionsLabel: "ワークスペース",
+    workspaceActionsTitle: "DocuMindを使う",
     features: [
       ["保護されたダッシュボードルート", "サーバー側セッションチェックにより、保護コンテンツの表示前に未認証訪問者をリダイレクトします。"],
       ["登録、OAuth、復旧", "Auth.jsがパスワードアカウント、設定済みGoogle/GitHub OAuth、1回限りのパスワード再設定リンクをサポートします。"],
@@ -1781,10 +1780,10 @@ const ja = {
       "より豊富なMCPストリーミング/セッション転送",
       "本番レベルの分散レート制限",
     ],
-    previewResults: [
-      ["日本オンボーディングチェックリスト", "2日前に更新"],
-      ["韓国営業支援ブリーフ", "5日前に更新"],
-      ["社内文書セキュリティポリシー", "1週間前に更新"],
+    workspaceActions: [
+      ["文書管理", "所有またはチームに書き込み可能な文書をアップロード、処理、一覧、ダウンロード、削除します。", "開く"],
+      ["文書検索", "アクセス可能なREADYチャンクをセマンティック検索し、スニペットとスコアを確認します。", "検索"],
+      ["引用付きで質問", "取得チャンクをもとに質問し、返された引用を確認します。", "質問"],
     ],
     productSteps: [
       "メール/パスワードでアカウントを作成するか、設定済みOAuthプロバイダーで続行します。",
@@ -1985,7 +1984,7 @@ const ja = {
       "自然言語クエリを入力すると、アクセス可能なREADY文書から最も関連するチャンクを取得します。OpenAI呼び出しはサーバールート内に留まります。",
     previewBody:
       "結果には、素早く検証できるよう文書タイトル、チャンク番号、スニペット、類似度スコアが含まれます。",
-    previewTitle: "取得プレビュー",
+    previewTitle: "検索準備状況",
     title: "アクセス可能な準備済み文書チャンクを検索",
   },
   searchForm: {

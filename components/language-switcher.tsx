@@ -1,14 +1,15 @@
-"use client";
-
 import {
   DEFAULT_LOCALE,
-  I18N_COOKIE_NAME,
   SUPPORTED_LOCALES,
   type SupportedLocale,
 } from "@/lib/i18n/config";
 import { translate } from "@/lib/i18n/dictionaries";
-import { buildLocalePrefixedPath } from "@/lib/i18n/routing";
-import { useState } from "react";
+import {
+  I18N_PATHNAME_HEADER,
+  I18N_SEARCH_HEADER,
+  buildLocalePrefixedPath,
+} from "@/lib/i18n/routing";
+import { headers } from "next/headers";
 
 const localeLabels: Record<SupportedLocale, string> = {
   en: "EN",
@@ -16,63 +17,16 @@ const localeLabels: Record<SupportedLocale, string> = {
   ko: "KO",
 };
 
-function readLocaleCookie(): SupportedLocale {
-  if (typeof document === "undefined") {
-    return DEFAULT_LOCALE;
-  }
-
-  const value = document.cookie
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${I18N_COOKIE_NAME}=`))
-    ?.split("=")[1];
-
-  return SUPPORTED_LOCALES.includes(value as SupportedLocale)
-    ? (value as SupportedLocale)
-    : DEFAULT_LOCALE;
-}
-
-export function LanguageSwitcher({
+export async function LanguageSwitcher({
   initialLocale,
 }: {
   initialLocale: SupportedLocale;
 }) {
-  const [optimisticLocale, setOptimisticLocale] =
-    useState<SupportedLocale | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const currentLocale = optimisticLocale ?? initialLocale;
+  const headerStore = await headers();
+  const pathname = headerStore.get(I18N_PATHNAME_HEADER) ?? "/";
+  const search = headerStore.get(I18N_SEARCH_HEADER) ?? "";
+  const currentLocale = initialLocale ?? DEFAULT_LOCALE;
   const label = translate(currentLocale, "language");
-
-  async function updateLocale(locale: SupportedLocale) {
-    if (locale === currentLocale || isSubmitting) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const response = await fetch("/api/locale", {
-      body: JSON.stringify({ locale }),
-      credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
-
-    if (response.ok) {
-      setOptimisticLocale(locale);
-      window.location.assign(
-        `${buildLocalePrefixedPath({
-          locale,
-          pathname: window.location.pathname,
-        })}${window.location.search}${window.location.hash}`,
-      );
-      return;
-    }
-
-    setOptimisticLocale(readLocaleCookie());
-    setIsSubmitting(false);
-  }
 
   return (
     <div
@@ -82,23 +36,25 @@ export function LanguageSwitcher({
     >
       {SUPPORTED_LOCALES.map((locale) => {
         const isActive = currentLocale === locale;
+        const href = `${buildLocalePrefixedPath({
+          locale,
+          pathname,
+        })}${search}`;
 
         return (
-          <button
+          <a
             key={locale}
-            type="button"
-            aria-pressed={isActive}
-            disabled={isSubmitting}
-            onClick={() => void updateLocale(locale)}
-            className={`min-w-10 px-3 text-xs font-semibold transition ${
+            href={href}
+            aria-current={isActive ? "page" : undefined}
+            className={`grid h-10 w-12 place-items-center text-xs font-semibold transition ${
               isActive
                 ? "bg-[#080f2f] text-white"
                 : "text-slate-600 hover:bg-slate-50"
-            } disabled:cursor-not-allowed disabled:opacity-60`}
+            }`}
             title={locale}
           >
             {localeLabels[locale]}
-          </button>
+          </a>
         );
       })}
     </div>
