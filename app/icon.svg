@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>DocuMind icon</title>
+  <defs>
+    <linearGradient id="background" x1="72" y1="56" x2="440" y2="456" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f2463" />
+      <stop offset="0.48" stop-color="#081033" />
+      <stop offset="1" stop-color="#05091f" />
+    </linearGradient>
+    <linearGradient id="mark" x1="116" y1="102" x2="404" y2="412" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#27d3cf" />
+      <stop offset="0.52" stop-color="#2563eb" />
+      <stop offset="1" stop-color="#6d28d9" />
+    </linearGradient>
+    <linearGradient id="page" x1="184" y1="150" x2="322" y2="350" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="1" stop-color="#dff7ff" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#background)" />
+  <path
+    d="M118 126c0-23 18-41 41-41h86c108 0 184 71 184 171s-76 171-184 171h-86c-23 0-41-18-41-41V126Z"
+    fill="url(#mark)"
+  />
+  <path
+    d="M190 163h57c63 0 106 38 106 93s-43 93-106 93h-57V163Z"
+    fill="#081033"
+    opacity="0.96"
+  />
+  <path
+    d="M205 142h81l54 55v150c0 13-10 23-23 23H205c-13 0-23-10-23-23V165c0-13 10-23 23-23Z"
+    fill="url(#page)"
+  />
+  <path d="M286 143v54h54" fill="#bfefff" opacity="0.82" />
+  <path
+    d="M220 236h83M220 274h68M220 312h44"
+    fill="none"
+    stroke="#2563eb"
+    stroke-linecap="round"
+    stroke-width="18"
+  />
+  <circle cx="312" cy="317" r="34" fill="#ffffff" stroke="#10bfc9" stroke-width="18" />
+  <path d="M337 342l43 43" fill="none" stroke="#10bfc9" stroke-linecap="round" stroke-width="22" />
+</svg>

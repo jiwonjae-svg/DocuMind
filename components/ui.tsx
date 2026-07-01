@@ -290,13 +290,35 @@ export function Icon({
 
 export function LogoMark() {
   return (
-    <span
+    <svg
       aria-hidden="true"
-      className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-lg bg-[#0b1b4f] shadow-[0_12px_24px_rgba(9,28,78,0.18)] sm:h-10 sm:w-10"
+      className="h-9 w-9 shrink-0 drop-shadow-[0_12px_18px_rgba(9,28,78,0.18)] sm:h-10 sm:w-10"
+      viewBox="0 0 40 40"
     >
-      <span className="absolute inset-0 bg-[linear-gradient(135deg,#26c6d7_0%,#2563eb_58%,#0b1b4f_58%)]" />
-      <span className="relative h-5 w-5 rounded-r-full rounded-tl-sm bg-white/90" />
-    </span>
+      <defs>
+        <linearGradient id="logo-background" x1="6" y1="4" x2="34" y2="36">
+          <stop offset="0" stopColor="#0f2463" />
+          <stop offset="0.48" stopColor="#081033" />
+          <stop offset="1" stopColor="#05091f" />
+        </linearGradient>
+        <linearGradient id="logo-mark" x1="9" y1="7" x2="31" y2="33">
+          <stop offset="0" stopColor="#27d3cf" />
+          <stop offset="0.52" stopColor="#2563eb" />
+          <stop offset="1" stopColor="#6d28d9" />
+        </linearGradient>
+      </defs>
+      <rect width="40" height="40" rx="9" fill="url(#logo-background)" />
+      <path
+        d="M8.8 10.2c0-1.8 1.4-3.2 3.2-3.2h6.8c8.5 0 14.4 5.6 14.4 13s-5.9 13-14.4 13H12c-1.8 0-3.2-1.4-3.2-3.2V10.2Z"
+        fill="url(#logo-mark)"
+      />
+      <path d="M14.5 12.8h4.4c4.9 0 8.3 3 8.3 7.2s-3.4 7.2-8.3 7.2h-4.4V12.8Z" fill="#081033" />
+      <path d="M16 11h6.4l4.2 4.3v11.9c0 1-.8 1.8-1.8 1.8H16c-1 0-1.8-.8-1.8-1.8V12.8c0-1 .8-1.8 1.8-1.8Z" fill="#f8fdff" />
+      <path d="M22.4 11.1v4.2h4.2" fill="#c9f4ff" />
+      <path d="M17.2 18.4h6.4M17.2 21.4h5.2" fill="none" stroke="#2563eb" strokeLinecap="round" strokeWidth="1.8" />
+      <circle cx="24.2" cy="24.4" r="2.4" fill="#f8fdff" stroke="#10bfc9" strokeWidth="1.7" />
+      <path d="M26 26.2 29.1 29.3" fill="none" stroke="#10bfc9" strokeLinecap="round" strokeWidth="2" />
+    </svg>
   );
 }
 
